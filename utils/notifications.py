@@ -88,9 +88,9 @@ def notifications(mode):
         email = mode[1]
         html_message = f"""
         Your resume has been rejected.
-
+        <br><br>
         {f'Reason: {mode[2]}' if mode[2] is not None else ''}
-
+        <br><br>
         Please upload a corrected resume.
         """
         return send_email(
