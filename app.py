@@ -16,13 +16,18 @@ from Recruiter import Recruiter_bp
 from utils.notifications import notifications
 import socket
 
+import socket
+
 try:
-    print("Testing Gmail SMTP connection...")
-    sock = socket.create_connection(("smtp.gmail.com", 587), timeout=10)
-    print("SMTP connection successful")
+    ip = socket.gethostbyname("smtp.gmail.com")
+    print("Gmail IPv4:", ip)
+
+    sock = socket.create_connection((ip, 587), timeout=10)
+    print("IPv4 SMTP connection successful")
     sock.close()
+
 except Exception as e:
-    print("SMTP connection failed:", repr(e))
+    print("IPv4 SMTP connection failed:", repr(e))
 
 load_dotenv()
 
