@@ -102,14 +102,13 @@ def notifications(mode):
     elif mode[0] == 'Postjobdrive':
         email = mode[1]
         html_message = f"""
-        Dear Student, 
+        Dear Student, <br>
         Details of new job opportunity is given below. 
-
-        Company:{mode[2]}
-        Role:{mode[3]}
-        Package: {mode[4]} LPA
-        Deadline: {mode[5].strftime("%d-%m-%Y")}
-        name
+        <br><br>
+        Company:{mode[2]} <br>
+        Role:{mode[3]}<br>
+        Package: {mode[4]} LPA <br>
+        Deadline: {mode[5].strftime("%d-%m-%Y")} <br><br>
         Login to apply.
         """
         return send_email(
@@ -122,7 +121,7 @@ def notifications(mode):
         email = mode[1]
         html_message = f"""
         Congratulations!
-
+        <br><br>
         You have been shortlisted for the role of {mode[3]} in {mode[2]}.            
         """
         return send_email(
@@ -135,15 +134,15 @@ def notifications(mode):
         email = mode[1]
         date_obj = datetime.datetime.strptime(mode[5], "%Y-%m-%dT%H:%M")
         html_message = f"""
-        Dear student,
+        Dear student,<br>
         Details of scheduled interview is given below:
-
-        Company : {mode[2]}
-        Role : {mode[3]}
-        Round name : {mode[4]}
-        Date : {date_obj.strftime("%d-%m-%Y")}
-        Time : {date_obj.strftime("%I:%M %p")}
-
+        <br><br>
+        Company : {mode[2]} <br>
+        Role : {mode[3]} <br>
+        Round name : {mode[4]} <br>
+        Date : {date_obj.strftime("%d-%m-%Y")} <br>
+        Time : {date_obj.strftime("%I:%M %p")} <br>
+        <br><br>
         Login to get link.
         """
         return send_email(
@@ -156,7 +155,7 @@ def notifications(mode):
         email = mode[1]
         html_message= f"""
         Congratulations!
-
+        <br><br>
         You are selected for {mode[3]} role in {mode[2]}.
 """
         return send_email(
@@ -169,7 +168,7 @@ def notifications(mode):
         email = mode[1]
         html_message = f"""
         Thank you for participating.
-
+        <br><br>
         Unfortunately, you are not selected for {mode[3]} role in {mode[2]}.
         """
         return send_email(
@@ -182,7 +181,7 @@ def notifications(mode):
         email = mode[1]
         html_message = f"""
         Congratulations!
-
+        <br><br>
         You have cleared {mode[4]} {'round' if 'round' not in mode[4].lower() else ''} of {mode[3]} role in {mode[2]}.
         """
         return send_email(
@@ -196,15 +195,15 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+            <br><br>
             New Job Drive details are given below:
-
-            Company name: {mode[3]}
-            Role: {mode[2].title}
-            Package: {mode[2].package}
-            Location: {mode[2].location}
-            Vacancies: {mode[2].Vacancies}
-            Deadline: {mode[2].deadline.strftime("%d-%m-%Y %I:%M %p")}
+            <br><br>
+            Company name: {mode[3]} <br>
+            Role: {mode[2].title} <br>
+            Package: {mode[2].package} <br>
+            Location: {mode[2].location} <br>
+            Vacancies: {mode[2].Vacancies} <br>
+            Deadline: {mode[2].deadline.strftime("%d-%m-%Y %I:%M %p")} <br><br>
 
             Login to post this Job Drive.
             """
@@ -221,7 +220,7 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+            <br><br>
             {mode[2]} has applied for {mode[3].title} role in {mode[4]}.
             """
             send_email(
@@ -237,7 +236,7 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-                
+            <br><br>    
             {mode[2]} has opted out from {mode[3].title} role in {mode[4]}.
             """
             send_email(
@@ -252,7 +251,7 @@ def notifications(mode):
         for email in emails:
             html_message= f"""
             Dear Placement officer,
-
+            <br><br>
             {mode[2]} is shortlisted for the role of {mode[4]} in {mode[3]}.
             """
             send_email(
@@ -267,9 +266,9 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+            <br><br>
             Congratulations!
-
+            <br><br>
             {mode[2]} is selected for the role of {mode[4]} in {mode[3]}.
             """
             send_email(
@@ -283,7 +282,7 @@ def notifications(mode):
         emails = mode[1]
         for email in emails:
             html_message = f"""
-            Dear Placement officer,
+            Dear Placement officer, <br><br>
             {mode[2]} is rejected for the role of {mode[4]} in {mode[3]}.
             """
             send_email(
@@ -298,13 +297,13 @@ def notifications(mode):
         date_obj = datetime.datetime.strptime(mode[6], "%Y-%m-%dT%H:%M")
         for email in emails:
             html_message = f"""
-            Dear Placement officer,
+            Dear Placement officer,<br><br>
             Details of the scheduled interview are given below:
-
-            Student name: {mode[2]}
-            Comapny: {mode[3]}
-            Role: {mode[4]}
-            Round Name: {mode[5]}
+            <br><br>
+            Student name: {mode[2]} <br>
+            Comapny: {mode[3]} <br>
+            Role: {mode[4]} <br>
+            Round Name: {mode[5]} <br>
             Interview Date and time: {date_obj.strftime("%d-%m-%Y %I:%M %p")}
             """
             send_email(
@@ -319,7 +318,7 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+            <br><br>
             {mode[2]} has cleared {mode[5]} {'round' if 'round' not in mode[5].lower() else ''} of {mode[4]} role in {mode[3]}
             """
             send_email(
@@ -334,7 +333,7 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+            <br><br>
             {mode[2]} is rejected in {mode[5]} {'round' if 'round' not in mode[5].lower() else ''} of {mode[4]} role in {mode[3]}
             """
             send_email(
@@ -349,7 +348,7 @@ def notifications(mode):
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+            <br><br>
             {mode[2]} has reuploaded updated resume. Kindly verify.
             """
             send_email(
@@ -363,7 +362,7 @@ def notifications(mode):
         email = mode[1]
         email_html_template = """
                 5 New Applicants have applied for {{ mode[3] }} role in {{ mode[4] }}. Details of these applicants are given below.
-
+                <br><br>
                 <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; border: 1px solid black; font-family: Arial, sans-serif;">
                 <tr>
                 <th style="border: 1px solid black; background-color: #f2f2f2; text-align: left;">Student Name</th>
