@@ -1211,7 +1211,7 @@
 
                 <div class="action-row">
 
-                    <form method="post" action="{{url_for('Placement_officer_student')}}">
+                    <form method="post" action="{{url_for('Placement_officer.Placement_officer_student')}}">
 
                         <input type="hidden" name="Student_details" value="{{student.id}}">
                         <input type="hidden" name="mode" value="resume_status">
@@ -1240,7 +1240,7 @@
 
                 {% if mode == "remark" %}
 
-                <form method="post" action="{{url_for('Placement_officer_student')}}" class="remark-form">
+                <form method="post" action="{{url_for('Placement_officer.Placement_officer_student')}}" class="remark-form">
 
                     <input type="hidden" name="Student_details" value="{{student.id}}">
 
@@ -1257,7 +1257,7 @@
 
                 {% else %}
 
-                <form method="post" action="{{url_for('Placement_officer_student')}}" class="remark-form">
+                <form method="post" action="{{url_for('Placement_officer.Placement_officer_student')}}" class="remark-form">
 
                     <input type="hidden" name="Student_details" value="{{student.id}}">
 
@@ -1295,7 +1295,7 @@
 
         <div class="section-body">
 
-            <form action="{{url_for('Placement_officer_student')}}" method="post">
+            <form action="{{url_for('Placement_officer.Placement_officer_student')}}" method="post">
 
                 <input type="hidden" value="{{student.id}}" name="Student_details">
 
