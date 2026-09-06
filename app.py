@@ -9,37 +9,16 @@ import os
 from dotenv import load_dotenv
 import datetime
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from flask_mail import Mail, Message
 from student import student_bp
 from Placement_officer import officer_bp
 from Recruiter import Recruiter_bp
-from utils.notifications import notifications
-import socket
-
-import socket
-
-try:
-    print('testing new connection')
-    ip = socket.gethostbyname("smtp.gmail.com")
-    print("Gmail IPv4:", ip)
-
-    sock = socket.create_connection((ip, 587), timeout=10)
-    print("IPv4 SMTP connection successful")
-    sock.close()
-
-except Exception as e:
-    print("IPv4 SMTP connection failed:", repr(e))
-
+from utils.notifications import notifications, send_email
 load_dotenv()
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+
 app.config.from_object(Config)
 db.init_app(app)
 
@@ -48,7 +27,6 @@ app.register_blueprint(officer_bp)
 app.register_blueprint(Recruiter_bp)
 
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-mail = Mail(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'home'
@@ -64,25 +42,49 @@ with app.app_context():
 def home():
     return render_template('Home.html')
 ############################################ Reset password ###############################################33
-@app.route('/Reset_Password', methods = ['GET', 'POST'])
+@app.route('/Reset_Password', methods=['GET', 'POST'])
 def Reset_Password():
     if request.method == 'POST':
         email = request.form.get('Email')
         user = Users.query.filter_by(email=email).first()
         if user:
-            flash('Check your email to reset the password','reset_password')
-            token = s.dumps(email, salt='email-reset-salt')
-            link = url_for('reset_token', token=token, _external=True)
-            msg = Message('Password Reset Request', sender=app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f'Your link is {link}\n\nIf you did not request this, ignore this email.'
-            try:
-                mail.send(msg)
-                return redirect(url_for('Reset_Password'))
-            except Exception as e:
-                return str(e)
-        else:
-            flash('User does not exist', 'reset_password')
+            token = s.dumps(email,salt='email-reset-salt')
+            link = url_for('reset_token',token=token,_external=True)
+            html_content = f"""
+                <h2>Password Reset Request</h2>
+
+                <p>
+                    You requested to reset your password.
+                </p>
+
+                <p>
+                    Click the link below to reset your password:
+                </p>
+
+                <p>
+                    <a href="{link}">Reset Password</a>
+                </p>
+
+                <p>
+                    This link will expire in 1 hour.
+                </p>
+
+                <p>
+                    If you did not request this, please ignore this email.
+                </p>
+            """
+            email_sent = send_email(email,'Password Reset Request',html_content)
+            if email_sent:
+                flash('Check your email to reset the password','reset_password')
+            else:
+                flash('Unable to send reset email. Please try again later.','reset_password')
+
             return redirect(url_for('Reset_Password'))
+        else:
+            flash('User does not exist','reset_password')
+
+            return redirect(url_for('Reset_Password'))
+
     return render_template('password_reset.html')
 
 @app.route('/reset_password/', methods=['GET', 'POST'])

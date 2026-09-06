@@ -3,14 +3,44 @@ from flask import current_app, render_template_string
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import datetime
+import resend
+
+def send_email(to_email, subject, html_content):
+
+    resend.api_key = os.getenv("RESEND_API_KEY")
+
+    params = {
+        "from": "onboarding@resend.dev",
+        "to": [to_email],
+        "subject": subject,
+        "html": html_content
+    }
+
+    try:
+        email = resend.Emails.send(params)
+
+        current_app.logger.info(
+            "Email sent successfully: %s",
+            email
+        )
+
+        return True
+
+    except Exception as e:
+        current_app.logger.error(
+            "Email sending failed: %r",
+            e
+        )
+
+        return False
+
+
 
 def notifications(mode):
     if mode[0] == 'Registration':
         name = mode[1]
         email = mode[2]
-        msg = Message('Welcome to Smart Placement Management System', sender=current_app.config['MAIL_USERNAME'],
-                      recipients=[email])
-        msg.body = f"""
+        html_message= f"""
         Hello {name},
 
         Your account has been created successfully.
@@ -19,48 +49,45 @@ def notifications(mode):
 
         Regards,
         Placement Cell"""
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Welcome to Smart Placement Management System',
+            html_message
+        )
+
 
     elif mode[0] == 'resumeverified':
         email = mode[1]
-        msg = Message('Resume Verified', sender=current_app.config['MAIL_USERNAME'],
-                      recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Congratulations!
 
         Your resume has been verified.
 
         You are now eligible to apply for placement drives."""
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Resume Verified',
+            html_message
+        )
 
     elif mode[0] == 'resumerejected':
         email = mode[1]
-        msg = Message('Resume Requires Changes', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Your resume has been rejected.
 
         {f'Reason: {mode[2]}' if mode[2] is not None else ''}
 
         Please upload a corrected resume.
         """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Resume Requires Changes',
+            html_message
+        )
 
     elif mode[0] == 'Postjobdrive':
         email = mode[1]
-        msg = Message('New Placement Opportunity', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Dear Student, 
         Details of new job opportunity is given below. 
 
@@ -71,31 +98,29 @@ def notifications(mode):
         name
         Login to apply.
         """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'New Placement Opportunity',
+            html_message
+        )
 
     elif mode[0] == 'shortlisted':
         email = mode[1]
-        msg = Message('Shortlisted', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Congratulations!
 
         You have been shortlisted for the role of {mode[3]} in {mode[2]}.            
         """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Shortlisted',
+            html_message
+        )
 
     elif mode[0] == 'Schedule_interview':
         email = mode[1]
         date_obj = datetime.datetime.strptime(mode[5], "%Y-%m-%dT%H:%M")
-        msg = Message('Interview scheduled', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Dear student,
         Details of scheduled interview is given below:
 
@@ -107,59 +132,55 @@ def notifications(mode):
 
         Login to get link.
         """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Interview scheduled',
+            html_message
+        )
 
     elif mode[0] == 'selected':
         email = mode[1]
-        msg = Message('Selected', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message= f"""
         Congratulations!
 
         You are selected for {mode[3]} role in {mode[2]}.
 """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Selected',
+            html_message
+        )
 
     elif mode[0] == 'rejected':
         email = mode[1]
-        msg = Message('Rejected', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Thank you for participating.
 
         Unfortunately, you are not selected for {mode[3]} role in {mode[2]}.
         """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Rejected',
+            html_message
+        )
 
     elif mode[0] == 'Cleared':
         email = mode[1]
-        msg = Message('Interview round Cleared', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-        msg.body = f"""
+        html_message = f"""
         Congratulations!
 
         You have cleared {mode[4]} {'round' if 'round' not in mode[4].lower() else ''} of {mode[3]} role in {mode[2]}.
         """
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            'Interview round Cleared',
+            html_message
+        )
 
     elif mode[0] == 'recruiter_job_drive_create':
         emails = mode[1]
         for email in emails:
-            msg = Message('New Job Drive', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             New Job Drive details are given below:
@@ -174,92 +195,87 @@ def notifications(mode):
             Login to post this Job Drive.
             """
 
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'New Job Drive',
+                html_message
+            )
 
     elif mode[0] == 'Student_applied_Placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Student applied', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             {mode[2]} has applied for {mode[3].title} role in {mode[4]}.
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Student applied',
+                html_message
+            )
 
     elif mode[0] == 'Student_opted_out_Placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Student Opted out', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             {mode[2]} has opted out from {mode[3].title} role in {mode[4]}.
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Student Opted out',
+                html_message
+            )
 
     elif mode[0] == 'student_shortlisted_placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Student shortlisted', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message= f"""
             Dear Placement officer,
 
             {mode[2]} is shortlisted for the role of {mode[4]} in {mode[3]}.
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Student shortlisted',
+                html_message
+            )
     elif mode[0] == 'student_selected_placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Selected', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             Congratulations!
 
             {mode[2]} is selected for the role of {mode[4]} in {mode[3]}.
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Selected',
+                html_message
+            )
+
     elif mode[0] == 'student_rejected_placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Rejected', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
             {mode[2]} is rejected for the role of {mode[4]} in {mode[3]}.
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Rejected',
+                html_message
+            )
 
     elif mode[0] == 'student_interview_scheduled_placement_officer':
         emails = mode[1]
         date_obj = datetime.datetime.strptime(mode[6], "%Y-%m-%dT%H:%M")
         for email in emails:
-            msg = Message('Interview scheduled', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
             Details of the scheduled interview are given below:
 
@@ -269,57 +285,53 @@ def notifications(mode):
             Round Name: {mode[5]}
             Interview Date and time: {date_obj.strftime("%d-%m-%Y %I:%M %p")}
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Interview scheduled',
+                html_message
+            )
 
     elif mode[0] == 'student_cleared_placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Interview round cleared', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             {mode[2]} has cleared {mode[5]} {'round' if 'round' not in mode[5].lower() else ''} of {mode[4]} role in {mode[3]}
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Interview round cleared',
+                html_message
+            )
     elif mode[0] == 'student_rejected_round_placement_officer':
         emails = mode[1]
         for email in emails:
-            msg = Message('Rejected', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             {mode[2]} is rejected in {mode[5]} {'round' if 'round' not in mode[5].lower() else ''} of {mode[4]} role in {mode[3]}
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Rejected',
+                html_message
+            )
     elif mode[0] == 'Student_resume_reuploaded':
         emails = mode[1]
         for email in emails:
-            msg = Message('Resume reuploaded', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"""
+            html_message = f"""
             Dear Placement officer,
 
             {mode[2]} has reuploaded updated resume. Kindly verify.
             """
-            try:
-                current_app.extensions['mail'].send(msg)
-                return True
-            except Exception as e:
-                return False
+            return send_email(
+                email,
+                'Resume reuploaded',
+                html_message
+            )
     elif mode[0] == 'Student_applied_Recruiter':
         email = mode[1]
-        msg = Message('5 New Applicants', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
         email_html_template = """
                 5 New Applicants have applied for {{ mode[3] }} role in {{ mode[4] }}. Details of these applicants are given below.
 
@@ -343,12 +355,11 @@ def notifications(mode):
             students=mode[2],
             mode=mode
         )
-        msg.html = final_email_html
 
-        try:
-            current_app.extensions['mail'].send(msg)
-            return True
-        except Exception as e:
-            return False
+        return send_email(
+            email,
+            '5 New Applicants',
+            final_email_html
+        )
 
 
