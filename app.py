@@ -14,6 +14,15 @@ from student import student_bp
 from Placement_officer import officer_bp
 from Recruiter import Recruiter_bp
 from utils.notifications import notifications
+import socket
+
+try:
+    print("Testing Gmail SMTP connection...")
+    sock = socket.create_connection(("smtp.gmail.com", 587), timeout=10)
+    print("SMTP connection successful")
+    sock.close()
+except Exception as e:
+    print("SMTP connection failed:", repr(e))
 
 load_dotenv()
 
@@ -184,6 +193,7 @@ def Register():
             db.session.commit()
 
         flash("Registration successful!", "success")
+        notifications(['Registration',Username,Email,Role])
         return redirect(url_for('home'))
     return render_template('Register.html')
 
