@@ -1,3 +1,5 @@
+setuptools>=68.0.0
+wheel
 annotated-types==0.7.0
 anyio==4.14.1
 beautifulsoup4==4.15.0
