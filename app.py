@@ -19,6 +19,7 @@ import socket
 import socket
 
 try:
+    print('testing new connection')
     ip = socket.gethostbyname("smtp.gmail.com")
     print("Gmail IPv4:", ip)
 
