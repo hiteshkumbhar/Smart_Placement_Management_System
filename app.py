@@ -184,7 +184,6 @@ def Register():
             db.session.commit()
 
         flash("Registration successful!", "success")
-        notifications(['Registration',Username,Email,Role])
         return redirect(url_for('home'))
     return render_template('Register.html')
 
