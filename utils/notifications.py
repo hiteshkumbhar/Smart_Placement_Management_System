@@ -1,6 +1,5 @@
 import os
 from flask import current_app, render_template_string
-from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import datetime
 import resend
