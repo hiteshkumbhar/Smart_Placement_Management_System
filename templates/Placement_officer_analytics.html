@@ -1,0 +1,1558 @@
+{% extends "Placement_office_Base.html" %}
+
+{% block title %}Placement Officer Dashboard{% endblock %}
+
+{% block style %}
+{{ super() }}
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* =========================================================
+       GLOBAL DASHBOARD
+    ========================================================= */
+
+    :root {
+        --navy: #06284f;
+        --navy-dark: #031d3b;
+        --blue: #1769e0;
+        --blue-light: #3f8cff;
+        --green: #16b968;
+        --orange: #ff9d16;
+        --purple: #7447e8;
+        --red: #f04455;
+
+        --text-dark: #12213d;
+        --text-muted: #718096;
+
+        --background: #f5f8fc;
+        --card: #ffffff;
+        --border: #e6ebf2;
+    }
+
+
+    /* =========================================================
+       MAIN AREA
+       ========================================================= */
+
+    .dashboard-wrapper {
+        height: 100vh;
+        background: var(--background);
+        padding: 0px 28px 0px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    /* =========================================================
+       TOP HEADER
+       ========================================================= */
+
+    .dashboard-header {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border);
+
+        min-height: 72px;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        padding: 0 30px;
+
+        margin: -28px -28px 28px -28px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .menu-button {
+        width: 42px;
+        height: 42px;
+
+        border: none;
+        background: transparent;
+
+        font-size: 25px;
+        color: var(--navy);
+
+        cursor: pointer;
+    }
+
+    .dashboard-title {
+        margin: 0;
+
+        font-size: 26px;
+        font-weight: 700;
+
+        color: var(--navy);
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 25px;
+    }
+
+    .notification-button {
+        position: relative;
+
+        width: 42px;
+        height: 42px;
+
+        border: none;
+        background: transparent;
+
+        font-size: 23px;
+        color: var(--navy);
+
+        cursor: pointer;
+    }
+
+    .notification-badge {
+        position: absolute;
+
+        top: 2px;
+        right: 0;
+
+        min-width: 18px;
+        height: 18px;
+
+        padding: 0 5px;
+
+        border-radius: 20px;
+
+        background: #f04455;
+        color: white;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logout-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        padding: 9px 17px;
+
+        background: white;
+        color: var(--red);
+
+        border: 1px solid var(--red);
+        border-radius: 9px;
+
+        font-size: 14px;
+        font-weight: 600;
+
+        text-decoration: none;
+
+        transition: 0.2s ease;
+    }
+
+    .logout-button:hover {
+        background: var(--red);
+        color: white;
+    }
+
+
+    /* =========================================================
+       KPI CARDS
+       ========================================================= */
+
+    .kpi-grid {
+        display: grid;
+
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 18px;
+
+        margin-bottom: 20px;
+    }
+
+    .kpi-card {
+        background: var(--card);
+
+        border: 1px solid var(--border);
+
+        border-radius: 14px;
+
+        padding: 20px;
+
+        min-height: 138px;
+
+        box-shadow: 0 4px 15px rgba(15, 35, 70, 0.06);
+
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-top {
+        display: flex;
+        align-items: center;
+
+        gap: 13px;
+    }
+
+    .kpi-icon {
+        width: 50px;
+        height: 50px;
+
+        border-radius: 10px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: white;
+
+        font-size: 25px;
+    }
+
+    .kpi-icon.blue {
+        background: var(--blue);
+    }
+
+    .kpi-icon.green {
+        background: var(--green);
+    }
+
+    .kpi-icon.orange {
+        background: var(--orange);
+    }
+
+    .kpi-icon.purple {
+        background: var(--purple);
+    }
+
+    .kpi-title {
+        color: var(--text-dark);
+
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .kpi-value {
+        margin-top: 13px;
+
+        font-size: 30px;
+        line-height: 1;
+
+        font-weight: 700;
+
+        color: var(--navy);
+    }
+
+    .kpi-progress {
+        height: 4px;
+
+        background: #e8edf4;
+
+        border-radius: 10px;
+
+        margin-top: 13px;
+    }
+
+    .kpi-progress span {
+        display: block;
+
+        height: 100%;
+
+        border-radius: 10px;
+    }
+
+    .progress-blue {
+        width: 70%;
+        background: var(--blue);
+    }
+
+    .progress-green {
+        width: 72%;
+        background: var(--green);
+    }
+
+    .progress-orange {
+        width: 65%;
+        background: var(--orange);
+    }
+
+    .progress-purple {
+        width: 55%;
+        background: var(--purple);
+    }
+
+
+    /* =========================================================
+       PACKAGE / YEAR CARD
+       ========================================================= */
+
+    .summary-card {
+        background: white;
+
+        border: 1px solid var(--border);
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+
+        border-radius: 14px;
+
+        padding: 18px;
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr 1fr;
+
+        align-items: center;
+
+        margin-bottom: 20px;
+
+    }
+
+    .year-section {
+        padding-right: 30px;
+    }
+
+    .summary-label {
+        display: block;
+
+        color: var(--text-dark);
+
+        font-size: 13px;
+        font-weight: 600;
+
+        margin-bottom: 8px;
+    }
+
+    .year-select {
+        width: 195px;
+
+        height: 38px;
+
+        border: 1px solid #d7dfea;
+
+        border-radius: 8px;
+
+        padding: 0 12px;
+
+        color: var(--text-dark);
+
+        background: white;
+
+        outline: none;
+    }
+
+    .year-select:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.10);
+    }
+
+    .summary-divider {
+        border-left: 1px solid var(--border);
+
+        padding-left: 35px;
+    }
+
+    .package-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .package-icon {
+        width: 48px;
+        height: 48px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 21px;
+    }
+
+    .package-icon.green {
+        background: #e7f8ef;
+        color: var(--green);
+    }
+
+    .package-icon.blue {
+        background: #eaf2ff;
+        color: var(--blue);
+    }
+
+    .package-title {
+        color: var(--text-dark);
+
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .package-value {
+        margin-top: 5px;
+
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .package-value.green {
+        color: var(--green);
+    }
+
+    .package-value.blue {
+        color: var(--blue);
+    }
+
+
+    /* =========================================================
+       CHART CARDS
+       ========================================================= */
+
+    .chart-card {
+        background: white;
+
+        border: 1px solid var(--border);
+
+        border-radius: 14px;
+
+        padding: 20px;
+
+box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        margin-bottom: 20px;
+    }
+
+    .chart-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin-bottom: 15px;
+    }
+
+    .chart-title-area {
+        display: flex;
+        align-items: center;
+
+        gap: 12px;
+    }
+
+    .chart-icon {
+        width: 42px;
+        height: 42px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #eaf2ff;
+        color: var(--blue);
+
+        font-size: 19px;
+    }
+
+    .chart-title {
+        margin: 0;
+
+        color: var(--navy);
+
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .chart-subtitle {
+        margin-top: 3px;
+
+        color: var(--text-muted);
+
+        font-size: 12px;
+    }
+
+    .view-button {
+        border: 1px solid #d4dce8;
+
+        background: white;
+
+        color: var(--text-dark);
+
+        border-radius: 8px;
+
+        padding: 7px 14px;
+
+        font-size: 12px;
+
+        cursor: pointer;
+    }
+
+    .view-button:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+    }
+
+    .large-chart {
+        height: 330px;
+        position: relative;
+    }
+
+    .large-chart canvas {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* =========================================================
+       TWO COLUMN CHARTS
+       ========================================================= */
+
+    .two-column {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 20px;
+    }
+
+    .medium-chart {
+        height: 300px;
+        position: relative;
+    }
+
+
+    /* =========================================================
+       APPLICATION PIPELINE
+       ========================================================= */
+
+    .pipeline-chart {
+        height: 310px;
+        position: relative;
+    }
+
+    .pipeline-chart canvas {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+    }
+
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+.fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: 0px 5px 0px;
+    }
+
+    .dashboard-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 4px 5px;
+        color: #65748a;
+        font-size: 11px;
+    }
+
+    .overview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cardbox {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        height: 100px;
+        display: flex;
+        gap: 10px;
+        /* Space between icon and text */
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        /* Stacks the text vertically */
+        justify-content: center;
+        /* Centers the text inside its own block */
+        height: 55px;
+        margin-top: 7px;
+        align-items: center;
+        /* <-- This centers the text horizontally */
+        gap: 3px;
+
+    }
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+<div class="dashboard-wrapper">
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+             <div class="fixed-top-section">
+
+        <div class="header-right">
+            <header class="topbar">
+                <div class="top-actions">
+                    <details class="profile-menu">
+                        <summary>
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                            </div>
+                            <div>
+                                <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}
+                                </div>
+                                <div class="profile-role">Placement officer</div>
+                            </div>
+                            <span class="chevron">⌄</span>
+                        </summary>
+
+                        <div class="profile-dropdown">
+                            <div class="profile-summary">
+                                <div class="avatar">
+                                    {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                                </div>
+                                <div>
+                                    <strong>{{ current_user.name if current_user.name else 'Student' }}</strong>
+                                    <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
+                                </div>
+                            </div>
+
+                            <hr class="profile-divider">
+
+                            <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </details>
+                </div>
+            </header>
+        </div>
+        </div>
+            <div class="scrollable-bottom-section">
+
+    <!-- =====================================================
+         KPI CARDS
+         ===================================================== -->
+    <div class='overview'>
+
+        <div class='cardbox'>
+            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+                <div class="kpi-icon blue">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+
+            <!-- Dedicated block to force vertical stacking -->
+            <div class='content' style="margin-top: 20px;">
+                <div>
+                    Total Students
+                </div>
+                <div style="font-size: 20px; font-weight: 800;">
+                    {{total_students}}
+                </div>
+            </div>
+        </div>
+
+        <div class='cardbox'>
+            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+
+                <div class="kpi-icon green">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+            </div>
+            <div class='content' style="margin-top: 19px;">
+                <div>
+                    Placed Students
+                </div>
+                <div style="font-size: 16px; font-weight: 700;">
+                    {{placed_students}}
+                </div>
+            </div>
+
+        </div>
+
+        <div class='cardbox'>
+            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+
+                <div class="kpi-icon orange">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            <div class='content' style="margin-top: 22px;">
+                <div>
+                    Unplaced Students
+                </div>
+                <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                    {{unplaced_students}}
+                </div>
+            </div>
+        </div>
+
+        <div class='cardbox'>
+            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+
+                <div class="kpi-icon purple">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+            </div>
+            <div class='content' style="margin-top: 22px;">
+                <div>
+                    Placement Percentage
+                </div>
+                <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                    {{percentage | round(2)}} %
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- =====================================================
+         YEAR + PACKAGE SUMMARY
+         ===================================================== -->
+    <div class="summary-card">
+        <!-- YEAR -->
+        <div class="year-section">
+            <label class="summary-label">
+                Graduation Year
+            </label>
+            <form action="{{ url_for('Placement_officer.Placement_officer_analytics') }}">
+                <select name="year" class="year-select" onchange="this.form.submit()">
+                    {% for year in graduation_years %}
+                    <option value="{{ year }}" {% if request.args.get('year') | int==year %} selected {% endif %}>
+                        {{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <!-- HIGHEST PACKAGE -->
+        <div class="summary-divider">
+            <div class="package-item">
+                <div class="package-icon green">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <div class="package-title">
+                        Highest Package
+                    </div>
+                    <div class="package-value green">
+                        ₹ {{ highest_package }} LPA
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- AVERAGE PACKAGE -->
+        <div class="summary-divider">
+            <div class="package-item">
+                <div class="package-icon blue">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+                <div>
+                    <div class="package-title">
+                        Average Package
+                    </div>
+                    <div class="package-value blue">
+                        ₹ {{ average_package | round(2) }} LPA
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- =====================================================
+         COMPANY PARTICIPATION
+         ===================================================== -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div class="chart-title-area">
+                <div class="chart-icon">
+                    <i class="bi bi-person-workspace"></i>
+                </div>
+                <div>
+                    <h2 class="chart-title">
+                        Company Participation
+                    </h2>
+                    <div class="chart-subtitle">
+                        Job Drives per Company
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="large-chart">
+            <canvas id="companyParticipationChart"></canvas>
+        </div>
+    </div>
+    <!-- =====================================================
+         BRANCH + RESUME
+         ===================================================== -->
+    <div class="two-column">
+        <!-- BRANCH-WISE PLACEMENT -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-title-area">
+                    <div class="chart-icon" style="background:#e5f8f4;color:#17b897;">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <h2 class="chart-title">
+                            Branch-wise Placements
+                        </h2>
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="medium-chart">
+                <canvas id="branchPlacementChart"></canvas>
+            </div>
+        </div>
+        <!-- RESUME VERIFICATION -->
+
+        <div class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div class="chart-title-area">
+
+                    <div class="chart-icon" style="background:#f0eaff;color:#7447e8;">
+
+                        <i class="bi bi-file-earmark-person-fill"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="chart-title">
+                            Resume Verification Status
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="medium-chart">
+
+                <canvas id="resumeStatusChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         APPLICATION PIPELINE
+         ===================================================== -->
+
+    <div class="chart-card">
+
+        <div class="chart-card-header">
+
+            <div class="chart-title-area">
+
+                <div class="chart-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+
+                <div>
+
+                    <h2 class="chart-title">
+                        Overall Application Pipeline
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="pipeline-chart">
+
+            <canvas id="applicationStatusChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <div class="dashboard-footer">
+
+        <div>
+            © 2026 Smart Placement Management System.
+            All rights reserved.
+        </div>
+
+        <div>
+            Placement Cell &nbsp; | &nbsp; Empowering Careers
+        </div>
+
+    </div>
+
+
+</div>
+</div>
+
+<!-- =========================================================
+     CHART 1: COMPANY PARTICIPATION
+     ========================================================= -->
+
+<script>
+
+    const companyCtx =
+        document
+            .getElementById('companyParticipationChart')
+            .getContext('2d');
+
+
+    new Chart(companyCtx, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: {{labels | tojson }},
+
+        datasets: [{
+
+            label: 'Number of Job Drives Posted',
+
+            data: {{data | tojson }},
+
+        backgroundColor: 'rgba(23, 105, 224, 0.85)',
+
+        borderColor: '#1769e0',
+
+        borderWidth: 1,
+
+        borderRadius: 3,
+
+        barPercentage: 0.55
+
+        }]
+
+    },
+
+        options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                ticks: {
+                    stepSize: 1
+                },
+
+                grid: {
+                    color: '#e7ecf3'
+                },
+
+                title: {
+
+                    display: true,
+
+                    text: 'Number of Job Drives'
+
+                }
+
+            },
+
+            x: {
+
+                grid: {
+                    display: false
+                },
+
+                title: {
+
+                    display: true,
+
+                    text: 'Company'
+
+                }
+
+            }
+
+        },
+
+        plugins: {
+
+            legend: {
+                display: false
+            },
+
+            title: {
+                display: false
+            }
+
+        }
+
+    }
+
+});
+
+</script>
+
+
+<!-- =========================================================
+     CHART 2: BRANCH-WISE PLACEMENT
+     ========================================================= -->
+
+<script>
+
+    const branchCtx =
+        document
+            .getElementById('branchPlacementChart')
+            .getContext('2d');
+
+
+    new Chart(branchCtx, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: {{branch_labels | tojson }},
+
+        datasets: [{
+
+            label: 'Number of Placed Students',
+
+            data: {{branch_data | tojson }},
+
+        backgroundColor: 'rgba(23, 184, 151, 0.82)',
+
+        borderColor: '#17b897',
+
+        borderWidth: 1,
+
+        borderRadius: 3,
+
+        barPercentage: 0.55
+
+        }]
+
+    },
+
+        options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                ticks: {
+                    stepSize: 1
+                },
+
+                grid: {
+                    color: '#e7ecf3'
+                },
+
+                title: {
+
+                    display: true,
+
+                    text: 'Placed Students'
+
+                }
+
+            },
+
+            x: {
+
+                grid: {
+                    display: false
+                },
+
+                title: {
+
+                    display: true,
+
+                    text: 'Branch'
+
+                }
+
+            }
+
+        },
+
+        plugins: {
+
+            legend: {
+                display: false
+            }
+
+        }
+
+    }
+
+});
+
+</script>
+
+
+<!-- =========================================================
+     CHART 3: RESUME VERIFICATION
+     ========================================================= -->
+
+<script>
+
+    const resumeCtx =
+        document
+            .getElementById('resumeStatusChart')
+            .getContext('2d');
+
+
+    const rawLabels =
+        {{resume_labels | tojson }};
+
+
+    const rawData =
+        {{resume_counts | tojson }};
+
+
+    const backgroundColors = rawLabels.map(label => {
+
+        if (label === 'Verified')
+            return '#54c58a';
+
+        if (label === 'Pending')
+            return '#f5c542';
+
+        if (label === 'Reuploaded')
+            return '#ff9b3d';
+
+        if (label === 'Rejected')
+            return '#f04455';
+
+        return '#b9bec6';
+
+    });
+
+
+    new Chart(resumeCtx, {
+
+        type: 'doughnut',
+
+        data: {
+
+            labels: rawLabels,
+
+            datasets: [{
+
+                label: 'Number of Students',
+
+                data: rawData,
+
+                backgroundColor: backgroundColors,
+
+                borderColor: '#ffffff',
+
+                borderWidth: 2,
+
+                hoverOffset: 5
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            cutout: '62%',
+
+            plugins: {
+
+                legend: {
+
+                    position: 'right',
+
+                    labels: {
+
+                        usePointStyle: true,
+
+                        padding: 15
+
+                    }
+
+                },
+
+                title: {
+
+                    display: false
+
+                }
+
+            }
+
+        }
+
+    });
+
+</script>
+
+
+<!-- =========================================================
+     CHART 4: APPLICATION PIPELINE
+     ========================================================= -->
+
+<script>
+
+    const appCtx =
+        document
+            .getElementById('applicationStatusChart')
+            .getContext('2d');
+
+
+    const appLabels =
+        {{app_labels | tojson }};
+
+
+    const appData =
+        {{app_data | tojson }};
+
+
+    const appColors = appLabels.map(label => {
+
+        if (label === 'Applied')
+            return '#3989ee';
+
+        if (label === 'Shortlisted')
+            return '#7447e8';
+
+        if (label === 'Interview Scheduled')
+            return '#ff9d16';
+
+        if (label === 'Selected')
+            return '#18b96a';
+
+        if (label === 'Rejected')
+            return '#f04455';
+
+        return '#b9bec6';
+
+    });
+
+
+    new Chart(appCtx, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: appLabels,
+
+            datasets: [{
+
+                label: 'Number of Applications',
+
+                data: appData,
+
+                backgroundColor: appColors,
+
+                borderWidth: 0,
+
+                borderRadius: 3,
+
+                barPercentage: 0.55
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        stepSize: 1
+
+                    },
+
+                    grid: {
+
+                        color: '#e7ecf3'
+
+                    },
+
+                    title: {
+
+                        display: true,
+
+                        text: 'Number of Applications'
+
+                    }
+
+                },
+
+                x: {
+
+                    grid: {
+                        display: false
+                    },
+
+                    title: {
+
+                        display: true,
+
+                        text: 'Application Stage'
+
+                    }
+
+                }
+
+            },
+
+            plugins: {
+
+                legend: {
+                    display: false
+                },
+
+                title: {
+                    display: false
+                }
+
+            }
+
+        }
+
+    });
+
+</script>
+
+{% endblock %}

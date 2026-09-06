@@ -1,0 +1,919 @@
+{% if current_user.role == "Placement_Officer" %}
+{% extends "Placement_office_Base.html" %}
+{% else %}
+{% extends "Recruiter_Base.html" %}
+{% endif %}
+{% block style %}
+{{ super() }}
+
+<style>
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+    .student-profile-page {
+        margin: 0 auto;
+        height: 100vh;        
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; 
+    }
+
+    .profile-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #172554 0%, #1e3a8a 55%, #2563eb 100%);
+        color: #fff;
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 22px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+    }
+
+    .fixed-top-section {
+        padding: 0px 24px;
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 0px 24px 45px;
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        /* Ensures the flex child can scroll */
+    }
+
+    .profile-hero::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        right: -80px;
+        top: -100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+
+    .student-avatar {
+        width: 78px;
+        height: 78px;
+        flex: 0 0 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 30px;
+        font-weight: 700;
+        overflow: hidden;
+    }
+
+    .hero-title {
+        margin: 0 0 6px;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .hero-subtitle {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 14px;
+    }
+
+    .section-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #eef0f3;
+        background: #fafbfc;
+    }
+
+    .section-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #e8f0ff;
+        color: #1d4ed8;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .section-body {
+        padding: 22px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .info-item {
+        min-width: 0;
+        padding: 14px 16px;
+        border: 1px solid #edf0f4;
+        border-radius: 12px;
+        background: #fcfdff;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
+    }
+
+    .info-value {
+        display: block;
+        color: #1f2937;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .skills-value {
+        white-space: pre-wrap;
+    }
+
+    .academic-highlight {
+        color: #1d4ed8;
+        font-size: 17px;
+    }
+
+    .social-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .social-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 11px;
+        color: #374151;
+        text-decoration: none;
+        background: #fff;
+        transition: 0.2s ease;
+    }
+
+    .social-link:hover {
+        border-color: #93c5fd;
+        background: #eff6ff;
+        color: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .social-name {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .document-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .document-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 11px;
+        background: #fff;
+    }
+
+    .document-name {
+        min-width: 0;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .document-form {
+        margin: 0;
+    }
+
+    .document-button,
+    .resume-button {
+        border: 0;
+        border-radius: 9px;
+        padding: 9px 14px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .document-button:hover,
+    .resume-button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .resume-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px;
+        border: 1px solid #dbeafe;
+        border-radius: 13px;
+        background: #eff6ff;
+    }
+
+    .resume-name {
+        color: #1e3a8a;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .resume-form {
+        margin: 0;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .interview-table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+    }
+
+    .interview-table th {
+        padding: 13px 15px;
+        background: #f8fafc;
+        color: #64748b;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
+    }
+
+    .interview-table td {
+        padding: 15px;
+        border-bottom: 1px solid #eef0f3;
+        color: #374151;
+        font-size: 13px;
+        vertical-align: top;
+    }
+
+    .interview-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .interview-table tbody tr:hover {
+        background: #fafcff;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        padding: 30px 15px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .student-profile-page {
+            padding: 15px 5px 35px;
+        }
+
+        .profile-hero {
+            padding: 24px 20px;
+        }
+
+        .hero-content {
+            align-items: flex-start;
+        }
+
+        .hero-title {
+            font-size: 24px;
+        }
+
+        .info-grid,
+        .social-links {
+            grid-template-columns: 1fr;
+        }
+
+        .document-row,
+        .resume-box {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .document-button,
+        .resume-button {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+<div class="student-profile-page">
+    <div class="fixed-top-section">
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <!-- Profile Header -->
+        <div class="profile-hero">
+            <div class="hero-content">
+                <div class="student-avatar">
+                    {% if student[1].profile_pic %}
+                    <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student[1].profile_pic) }}"
+                        style="width: 78px; height: 78px;">
+                    {% else %}
+                    {{ (student[0] or 'S')[0]|upper }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h1 class="hero-title">{{ student[0] or 'Student Profile' }}</h1>
+                    <p class="hero-subtitle">
+                        {{ student[1].branch or 'Branch not specified' }}
+                        {% if student[1].graduation_year %}
+                        &nbsp;•&nbsp; {{ student[1].graduation_year }}
+                        {% endif %}
+                        {% if student[1].cgpa %}
+                        &nbsp;•&nbsp; CGPA:&nbsp;{{ student[1].cgpa }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Personal Information -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">01</div>
+                <h2>Personal Information</h2>
+            </div>
+
+            <div class="section-body">
+                <div class="info-grid">
+
+                    <div class="info-item">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value">{{ student[0] or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Mobile Number</span>
+                        <span class="info-value">{{ student[1].mobile_number or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Gender</span>
+                        <span class="info-value">{{ student[1].Gender or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Date of Birth</span>
+                        <span class="info-value">{{ student[1].DOB.strftime("%d-%m-%Y") if student[1].DOB else 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Address</span>
+                        <span class="info-value">{{ student[1].Address or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">City</span>
+                        <span class="info-value">{{ student[1].City or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">State</span>
+                        <span class="info-value">{{ student[1].State or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Pin Code</span>
+                        <span class="info-value">{{ student[1].pin_code or 'Not specified' }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Academic Information -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">02</div>
+                <h2>Academic Information</h2>
+            </div>
+
+            <div class="section-body">
+                <div class="info-grid">
+
+                    <div class="info-item">
+                        <span class="info-label">Branch</span>
+                        <span class="info-value">{{ student[1].branch or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Graduation Year</span>
+                        <span class="info-value">{{ student[1].graduation_year or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">CGPA</span>
+                        <span class="info-value academic-highlight">{{ student[1].cgpa or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">10th Percentage</span>
+                        <span class="info-value">{{ student[1].tenth_Percentage or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">12th Percentage</span>
+                        <span class="info-value">{{ student[1].twelth_Percentage or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Diploma Percentage</span>
+                        <span class="info-value">{{ student[1].Diploma_Percentage or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Total Backlogs</span>
+                        <span class="info-value">{{ student[1].Total_Backlogs or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Active Backlogs</span>
+                        <span class="info-value">{{ student[1].Active_Backlogs or 'Not specified' }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Skills & Professional Links -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">03</div>
+                <h2>Skills &amp; Professional Links</h2>
+            </div>
+
+            <div class="section-body">
+
+                <div class="info-item" style="margin-bottom: 16px;">
+                    <span class="info-label">Skills</span>
+                    <span class="info-value skills-value">{{ student[1].skills or 'Not specified' }}</span>
+                </div>
+
+                <div class="social-links">
+
+                    {% if student[1].LinkedIn %}
+
+                    <a class="social-link"
+                        href="{{ student[1].LinkedIn if 'https://' in student[1].LinkedIn else 'https://' + student[1].LinkedIn }}"
+                        target="_blank" rel="noopener noreferrer">
+                        <span class="social-name">LinkedIn</span>
+                    </a>
+                    {% endif %}
+
+                    {% if student[1].GitHub %}
+                    <a class="social-link"
+                        href="{{ student[1].GitHub if 'https://' in student[1].GitHub else 'https://' + student[1].GitHub }}"
+                        target="_blank" rel="noopener noreferrer">
+                        <span class="social-name">GitHub</span>
+                    </a>
+                    {% endif %}
+
+                    {% if student[1].Portfolio_Website %}
+                    <a class="social-link"
+                        href="{{ student[1].Portfolio_Website if 'https://' in student[1].Portfolio_Website else 'https://' + student[1].Portfolio_Website }}"
+                        target="_blank" rel="noopener noreferrer">
+                        <span class="social-name">Portfolio Website</span>
+                    </a>
+                    {% endif %}
+
+                    {% if student[1].LeetCode %}
+                    <a class="social-link"
+                        href="{{ student[1].LeetCode if 'https://' in student[1].LeetCode else 'https://' + student[1].LeetCode }}"
+                        target="_blank" rel="noopener noreferrer">
+                        <span class="social-name">LeetCode</span>
+                    </a>
+                    {% endif %}
+
+                    {% if student[1].HackerRank %}
+                    <a class="social-link"
+                        href="{{ student[1].HackerRank if 'https://' in student[1].HackerRank else 'https://' + student[1].HackerRank }}"
+                        target="_blank" rel="noopener noreferrer">
+                        <span class="social-name">HackerRank</span>
+                    </a>
+                    {% endif %}
+
+                </div>
+
+                {% if not student[1].LinkedIn and not student[1].GitHub and not student[1].Portfolio_Website and not
+                student[1].LeetCode and not student[1].HackerRank %}
+                <div class="empty-state">No professional links provided.</div>
+                {% endif %}
+
+            </div>
+        </div>
+
+
+        <!-- Certifications -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">04</div>
+                <h2>Certifications</h2>
+            </div>
+
+            <div class="section-body">
+
+                {% if certifications %}
+                <div class="document-list">
+                    {% for cert in certifications %}
+                    <div class="document-row">
+                        <span class="document-name">{{ cert }}</span>
+
+                        <form class="document-form" action="{{ url_for('Recruiter.download_certifications') }}" method="post">
+                            <input type="hidden" value="{{ cert }}" name="name">
+                            <input type="hidden" value="{{student[1].user_id}}" name="id">
+                            <button type="submit" class="document-button">
+                                Download
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">No certifications uploaded.</div>
+                {% endif %}
+
+            </div>
+        </div>
+
+
+        <!-- Resume -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">05</div>
+                <h2>Resume</h2>
+            </div>
+
+            <div class="section-body">
+
+                {% if student[1].resume_path %}
+                <div class="resume-box">
+                    <span class="resume-name">{{ student[1].resume_path }}</span>
+
+                    <form class="resume-form" action="{{ url_for('Recruiter.download_resume') }}" method="post">
+                        <input type="hidden" value="{{ student[1].id }}" name="id">
+                        <button type="submit" class="resume-button">
+                            Download Resume
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="empty-state">No resume uploaded.</div>
+                {% endif %}
+
+            </div>
+        </div>
+
+
+        <!-- Interview Progress -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">06</div>
+                <h2>Interview Progress</h2>
+            </div>
+
+            <div class="section-body">
+
+                {% if interview_rounds %}
+                <div class="table-wrapper">
+                    <table class="interview-table">
+                        <thead>
+                            <tr>
+                                <th>Round Name</th>
+                                <th>Date &amp; Time</th>
+                                <th>Feedback</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for interview in interview_rounds %}
+                            <tr>
+                                <td>
+                                    <strong>{{ interview.round_name }}</strong>
+                                </td>
+
+                                <td>
+                                    {{ interview.date.strftime("%d-%m-%Y %I:%M %p") or 'Not scheduled' }}
+                                </td>
+
+                                <td>
+                                    {% if interview.feedback is none %}
+                                    <span class="status-badge">Pending</span>
+                                    {% else %}
+                                    {{ interview.feedback }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if interview.result is none %}
+                                    <span class="status-badge">Pending</span>
+                                    {% else %}
+                                    <strong>{{ interview.result }}</strong>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">No interview rounds recorded yet.</div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,691 @@
+{% extends "Placement_office_Base.html" %}
+
+{% block title %}Placement Officer | Job Drive{% endblock %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+    .job-drive-page {
+        height: 100vh;
+        padding: 0px 20px 0px;
+        /* Removed the bottom 50px padding from here */
+        background: #f5f7fb;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .job-drive-wrapper {
+        max-width: 1050px;
+        margin: 0 auto;
+
+        /* ADD THESE LINES */
+        width: 100%;
+        flex: 1;
+        /* Takes up all remaining vertical space */
+        overflow-y: auto;
+        /* Makes this specific container scrollable */
+        padding-bottom: 50px;
+        /* Moved the bottom padding here so the scroll extends past the card */
+    }
+
+    /* Main Card */
+    .job-drive-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 24px 28px;
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+        color: #fff;
+    }
+
+    .card-header h2 {
+        margin: 0 0 5px;
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .card-header p {
+        margin: 0;
+        opacity: 0.88;
+        font-size: 13px;
+    }
+
+    .card-body {
+        padding: 28px;
+    }
+
+    /* Job Information */
+    .section-title {
+        margin: 0 0 18px;
+        color: #172033;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .job-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 30px;
+    }
+
+    .info-item {
+        padding: 16px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .info-value {
+        color: #172033;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .description-box {
+        grid-column: 1 / -1;
+    }
+
+    .description-value {
+        font-weight: 400;
+        color: #475569;
+        white-space: pre-line;
+    }
+
+    /* Student Selection */
+    .student-section {
+        padding-top: 5px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .student-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 15px;
+        margin: 25px 0 15px;
+    }
+
+    .student-section-header h3 {
+        margin: 0;
+        font-size: 17px;
+        color: #172033;
+    }
+
+    .student-section-header p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* Dropdown */
+    .dropdown-container {
+        min-width: 0px;
+        flex: 1;
+    }
+
+    .dropdown-container details, 
+    #dropdown details {
+        position: relative;
+        width: 100%;
+    }
+
+    .dropdown-container summary, 
+    #dropdown summary {
+        position: relative;
+        list-style: none;
+        padding: 13px 42px 13px 15px;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        cursor: pointer;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        user-select: none;
+        transition: 0.2s ease;
+    }
+
+    .dropdown-container summary::-webkit-details-marker {
+        display: none;
+    }
+
+   .dropdown-container summary::after,
+    #dropdown summary::after{
+        content: "";
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-55%);
+        font-size: 18px;
+        color: #64748b;
+    }
+
+    .dropdown-container details[open] summary,
+    #dropdown details[open] summary {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .dropdown-content {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        width: 100%;
+        max-height: 100px;
+        overflow-y: auto;
+        padding: 6px;
+        background: #fff;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+        z-index: 100;
+    }
+
+    .dropdown-content label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 11px;
+        border-radius: 7px;
+        cursor: pointer;
+        color: #334155;
+        font-size: 14px;
+        transition: background 0.15s ease;
+    }
+
+    .dropdown-content label:hover {
+        background: #f1f5f9;
+    }
+
+    .dropdown-content input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: #2563eb;
+        cursor: pointer;
+    }
+
+    /* Add Student */
+    .add-student-btn {
+        margin-top: 14px;
+        padding: 10px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .add-student-btn:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
+
+    #dropdown {
+        min-width: 0px;
+        flex: 1;
+    }
+
+    /* Flash Messages */
+    .flash-messages {
+        margin-top: 22px;
+    }
+
+    .flash-message {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: 13px;
+    }
+
+    /* Footer Actions */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 30px;
+        padding-top: 22px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .submit-btn {
+        padding: 12px 22px;
+        border: none;
+        border-radius: 9px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        transition: 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .fixed-top-section {
+        padding: 0px 24px;
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 0px 24px 45px;
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        /* Ensures the flex child can scroll */
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="job-drive-page">
+    <div class="fixed-top-section">
+
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <div class="job-drive-wrapper">
+
+            <!-- Job Drive Card -->
+            <form action="{{ url_for('Placement_officer.Post_Job_Drive', id=job_id) }}" method="POST">
+                <input type="hidden" name="drive_id" value="{{job_id}}">
+
+                <div class="job-drive-card">
+
+                    <div class="card-header">
+                        <h2>Post Job Drive</h2>
+                        <p>Review the opportunity details before posting it to selected students.</p>
+                    </div>
+
+                    <div class="card-body">
+
+                        <!-- Job Information -->
+                        <h3 class="section-title">Job Drive Details</h3>
+
+                        <div class="job-info-grid">
+
+                            <div class="info-item">
+                                <span class="info-label">Company</span>
+                                <div class="info-value">{{ job[0] }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Job Title</span>
+                                <div class="info-value">{{ job[1].title }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Package</span>
+                                <div class="info-value">{{ job[1].package }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Location</span>
+                                <div class="info-value">{{ job[1].location }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Application Deadline</span>
+                                <div class="info-value">{{ job[1].deadline }}</div>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Eligible Branches</span>
+                                <div class="info-value">{{ job[1].Eligible_Branches }}</div>
+                            </div>
+
+                            <div class="info-item description-box">
+                                <span class="info-label">Job Description</span>
+                                <div class="info-value description-value">
+                                    {{ job[1].description }}
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Student Selection -->
+                        <div class="student-section">
+
+                            <div class="student-section-header">
+                                <div>
+                                    <h3>Select Eligible Students</h3>
+                                    <p>Select students who should receive this placement opportunity.</p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                                <div class="dropdown-container">
+                                    <details>
+                                        <summary>Select eligible students</summary>
+                                        <div class="dropdown-content">
+                                            {% for student in eligible_students %}
+                                            <label>
+                                                <input type="checkbox" name="Students" value="{{ student[0] }}">
+                                                <span>{{ student[1] }}</span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                    </details>
+                                </div>
+                                <div id="dropdown">
+                                    <details>
+                                        <summary>Add More students</summary>
+                                        <div class="dropdown-content">
+                                            {% for student in All_Student %}
+                                            <label>
+                                                <input type="checkbox" name="All_Students" value="{{ student[0] }}">
+                                                <span>{{ student[1] }}</span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+
+
+                            <!-- Flash Messages -->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                            {% if messages %}
+
+                            <div class="flash-messages">
+
+                                {% for category, message in messages %}
+
+                                {% if category == "Duplicate_recommendation_error" %}
+                                <div class="flash-message">
+                                    {{ message }}
+                                </div>
+                                {% endif %}
+
+                                {% if category == "Duplicate_Application" %}
+                                <div class="flash-message">
+                                    {{ message }}
+                                </div>
+                                {% endif %}
+
+                                {% endfor %}
+
+                            </div>
+
+                            {% endif %}
+
+                            {% endwith %}
+
+
+                            <!-- Submit -->
+                            <div class="form-actions">
+
+                                <button type="submit" class="submit-btn">
+                                    Post Job Drive
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

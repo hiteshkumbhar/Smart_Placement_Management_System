@@ -1,0 +1,470 @@
+{% extends "Recruiter_Base.html" %}
+
+{% block title %}Schedule Interview{% endblock %}
+
+{% block style %}
+{{ super() }}
+<style>
+ .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+        
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+       .fixed-top-section {
+        padding: 0px 24px;
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 50px 24px 45px;
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+        /* Ensures the flex child can scroll */
+    }
+    
+
+
+    .schedule-page {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #f5f7fb;
+        overflow: hidden;
+    }
+
+    .schedule-card {
+        width: 100%;
+        max-width: 720px;
+        background: #fff;  
+        border: 1px solid #e7eaf0;
+        border-radius: 18px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, .08);
+        overflow: hidden
+    }
+
+    .schedule-header {
+        padding: 28px 32px;
+        background: linear-gradient(135deg, #172554, #2563eb);
+        color: #fff
+    }
+
+    .schedule-header .icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, .16);
+        font-size: 23px
+    }
+
+    .schedule-header h1 {
+        margin: 0 0 7px;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -.3px
+    }
+
+    .schedule-header p {
+        margin: 0;
+        color: rgba(255, 255, 255, .82);
+        font-size: 14px
+    }
+
+    .schedule-body {
+        padding: 32px
+    }
+
+    .form-group {
+        margin-bottom: 22px
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 600
+    }
+
+    .required {
+        color: #dc2626
+    }
+
+    .input-wrapper {
+        position: relative
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        font-size: 15px;
+        pointer-events: none
+    }
+
+    .form-control {
+        width: 100%;
+        min-height: 48px;
+        padding: 11px 14px;
+        border: 1px solid #d8dee9;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        color: #0f172a;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: border-color .2s ease, box-shadow .2s ease
+    }
+
+    .form-control.has-icon {
+        padding-left: 20px
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, .11)
+    }
+
+    .form-control::placeholder {
+        color: #94a3b8
+    }
+
+    .helper-text {
+        display: block;
+        margin-top: 7px;
+        color: #64748b;
+        font-size: 12px
+    }
+
+    .schedule-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 24px;
+        border-top: 1px solid #eef1f5
+    }
+
+    .btn-schedule {
+        min-height: 48px;
+        padding: 0 24px;
+        border: 0;
+        border-radius: 10px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 5px 14px rgba(37, 99, 235, .22);
+        transition: transform .18s ease, background .18s ease, box-shadow .18s ease
+    }
+
+    .btn-schedule:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .28)
+    }
+
+    .btn-schedule:active {
+        transform: translateY(0)
+    }
+
+    @media(max-width:600px) {
+        .schedule-page {
+            padding: 20px 12px 40px
+        }
+
+        .schedule-header,
+        .schedule-body {
+            padding: 24px 20px
+        }
+
+        .schedule-header h1 {
+            font-size: 22px
+        }
+
+        .schedule-actions {
+            flex-direction: column
+        }
+
+        .btn-schedule {
+            width: 100%
+        }
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="schedule-page">
+     <div class="fixed-top-section">
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+    <div class="scrollable-bottom-section">
+
+    <div class="schedule-card">
+        <div class="schedule-header">
+            <h1>Schedule Interview</h1>
+            <p>Set the interview round, date, time, and meeting link for the candidate.</p>
+        </div>
+
+        <div class="schedule-body">
+            <form method="post" action="{{ url_for('Recruiter.Recruiter_Application', mode='schedule_interview') }}">
+                <input type="hidden" name="student_id" value="{{ student_id }}">
+                <input type="hidden" name="drive_id" value="{{ drive_id }}">
+
+                <div class="form-group">
+                    <label for="Round_Name">Round Name <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <input id="Round_Name" class="form-control has-icon" type="text" name="Round_Name"
+                            placeholder="e.g. Technical Round, HR Round" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Interview_Date">Interview Date &amp; Time <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <input id="Interview_Date" class="form-control has-icon" type="datetime-local"
+                            name="Interview_Date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="link">Interview Link <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <input id="link" class="form-control has-icon" type="url" name="link"
+                            placeholder="https://meet.example.com/interview" required>
+                    </div>
+                </div>
+
+                <div class="schedule-actions">
+                    <button type="submit" class="btn-schedule">Schedule Interview</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

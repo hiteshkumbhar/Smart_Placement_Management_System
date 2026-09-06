@@ -1,0 +1,1444 @@
+{%extends "Student_Base.html" %}
+{% block style %}
+{{super()}}
+
+<style>
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+
+    /* ---------------- Search --------------- */
+
+    .search {
+        /* The search box container */
+        display: flex;
+        /* Use flex so icon + input sit in a row */
+        align-items: center;
+        /* Vertically center */
+        gap: 8px;
+        /* Space between icon and input */
+        background: #fff;
+        /* White background */
+        border: 1px solid #c5c2c2;
+        /* Light gray border */
+        border-radius: 8px;
+        /* Rounded corners */
+        padding: 8px 12px;
+        /* Inner spacing */
+        width: 260px;
+        /* Fixed width */
+    }
+
+    .search input {
+        border: none;
+        /* No border (the box already has one) */
+        outline: none;
+        /* Remove blue focus outline */
+        width: 100%;
+        /* Fill the search box */
+        font-size: 16px;
+        /* Readable text size */
+        background: transparent;
+        /* Show the parent's white background */
+    }
+
+    .search .icon {
+        color: #9ca3af;
+    }
+
+
+
+
+    /* ===== Student Interview Page ===== */
+    .interview-page {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0px 20px 0px;
+        box-sizing: border-box;
+        color: #17233f;
+        height: 100vh; 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden; 
+    }
+
+    .interview-page * {
+        box-sizing: border-box;
+
+    }
+
+    .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        padding: 5px;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .interview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .interview-header-icon {
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #6f52df, #8a68ee);
+        box-shadow: 0 10px 24px rgba(111, 82, 223, 0.20);
+    }
+
+    .interview-header h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.15;
+        font-weight: 750;
+        color: #17233f;
+    }
+
+    .interview-header p {
+        margin: 6px 0 0;
+        color: #7a849b;
+        font-size: 14px;
+    }
+
+    .interview-section {
+        background: #fff;
+        border: 1px solid #edf0f6;
+        border-radius: 16px;
+        padding: 22px 22px 18px;
+        margin-bottom: 22px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        overflow: hidden;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-icon {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .past-section .section-icon {
+        background: #eeeafd;
+        color: #6b4ddd;
+    }
+
+    .today-section .section-icon {
+        background: #fff0e8;
+        color: #f36c32;
+    }
+
+    .upcoming-section .section-icon {
+        background: #e9f8ee;
+        color: #2c9b58;
+    }
+
+    .section-title h2 {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 750;
+    }
+
+    .past-section .section-title h2 {
+        color: #6350d7;
+    }
+
+    .today-section .section-title h2 {
+        color: #ed6a35;
+    }
+
+    .upcoming-section .section-title h2 {
+        color: #2c9957;
+    }
+
+    .section-title h2::after {
+        content: "";
+        display: block;
+        width: 34px;
+        height: 3px;
+        border-radius: 5px;
+        margin-top: 7px;
+    }
+
+    .past-section .section-title h2::after {
+        background: #6b4ddd;
+    }
+
+    .today-section .section-title h2::after {
+        background: #f36c32;
+    }
+
+    .upcoming-section .section-title h2::after {
+        background: #2c9b58;
+    }
+
+    .count-badge {
+        padding: 7px 12px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .past-section .count-badge {
+        color: #5e4bc9;
+        background: #f0edff;
+    }
+
+    .today-section .count-badge {
+        color: #dc642e;
+        background: #fff0e9;
+    }
+
+    .upcoming-section .count-badge {
+        color: #23874b;
+        background: #eaf8ee;
+    }
+
+    .table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e9ecf3;
+        border-radius: 11px;
+    }
+
+    .interview-table {
+        width: 100%;
+        min-width: 920px;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+        text-align: left;
+    }
+
+    .interview-table th {
+        padding: 13px 12px;
+        background: #f7f7ff;
+        color: #27334d;
+        border-bottom: 1px solid #e5e8f0;
+        font-size: 12px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .today-section .interview-table th {
+        background: #fff7f2;
+    }
+
+    .upcoming-section .interview-table th {
+        background: #f3fbf6;
+    }
+
+    .interview-table td {
+        padding: 16px 12px;
+        color: #3f4a61;
+        font-size: 13px;
+        line-height: 1.45;
+        border-bottom: 1px solid #edf0f4;
+        vertical-align: middle;
+    }
+
+    .interview-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .interview-table tbody tr:hover {
+        background: #fafaff;
+    }
+
+    .company-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 145px;
+        font-weight: 700;
+        color: #202b45;
+    }
+
+    .company-icon {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: #f0efff;
+        color: #6651d6;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .today-section .company-icon {
+        background: #fff0e8;
+        color: #ed6a35;
+    }
+
+    .upcoming-section .company-icon {
+        background: #e9f8ee;
+        color: #2c9957;
+    }
+
+    .date-cell {
+        min-width: 150px;
+    }
+
+    .date-line {
+        display: block;
+        color: #37425a;
+        font-weight: 600;
+    }
+
+    .time-line {
+        display: block;
+        margin-top: 4px;
+        color: #7d879b;
+        font-size: 12px;
+    }
+
+    .join-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 11px;
+        border: 1px solid #8170ea;
+        border-radius: 8px;
+        color: #6653d8;
+        background: #fff;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: .2s ease;
+    }
+
+    .join-link:hover {
+        color: #fff;
+        background: #6d57dd;
+        border-color: #6d57dd;
+        transform: translateY(-1px);
+    }
+
+    .today-section .join-link {
+        color: #e86631;
+        border-color: #f28a5f;
+    }
+
+    .today-section .join-link:hover {
+        color: #fff;
+        background: #ed6a35;
+        border-color: #ed6a35;
+    }
+
+    .upcoming-section .join-link {
+        color: #299453;
+        border-color: #64bd82;
+    }
+
+    .upcoming-section .join-link:hover {
+        color: #fff;
+        background: #2c9b58;
+        border-color: #2c9b58;
+    }
+
+    .no-link {
+        color: #a0a7b5;
+        font-size: 12px;
+    }
+
+    .result-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 72px;
+        padding: 6px 10px;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .result-selected,
+    .result-passed {
+        color: #25854a;
+        background: #e8f7ed;
+    }
+
+    .result-rejected,
+    .result-failed,
+    .result-not-selected {
+        color: #d9544f;
+        background: #fdeceb;
+    }
+
+    .result-pending,
+    .result-none {
+        color: #9a7b19;
+        background: #fff7d9;
+    }
+
+    .result-default {
+        color: #5d6679;
+        background: #f0f2f6;
+    }
+
+    .feedback {
+        min-width: 80px;
+        color: #59647a;
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+	
+	
+    /* =========================
+   View JD Button
+   ========================= */
+
+    .view-jd-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 7px 10px;
+        border: 1px solid #c7d2fe;
+        border-radius: 7px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .view-jd-btn:hover {
+        background: #e0e7ff;
+        border-color: #818cf8;
+    }
+
+
+    /* =========================
+   JD Floating Window
+   ========================= */
+
+    .jd-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(3px);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+
+    /* Small floating window */
+
+    .jd-modal {
+        width: min(520px, 95vw);
+        max-height: 75vh;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+        overflow: hidden;
+        animation: jdModalOpen 0.18s ease-out;
+    }
+
+
+    @keyframes jdModalOpen {
+        from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.97);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+
+    /* Modal Header */
+
+    .jd-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 15px 18px;
+
+        border-bottom: 1px solid #e5e7eb;
+
+        background: #f8fafc;
+    }
+
+
+    .jd-modal-title {
+        margin: 0;
+        color: #172554;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+
+    .jd-close-btn {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: #64748b;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+
+    .jd-close-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    /* Full JD */
+
+    .jd-full-description {
+        padding: 20px;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.7;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        overflow-y: auto;
+    }
+
+    .empty-row {
+        text-align: center !important;
+        padding: 30px !important;
+        color: #929aac !important;
+    }
+
+    .interview-tip {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 22px;
+        margin-top: 6px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #f5f2ff, #faf9ff);
+        border: 1px solid #e9e3ff;
+    }
+
+    .tip-icon {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #7055dc;
+        color: #fff;
+        font-size: 20px;
+    }
+
+    .interview-tip strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #6250ca;
+        font-size: 15px;
+    }
+
+    .interview-tip span {
+        color: #68738a;
+        font-size: 13px;
+    }
+
+    .company-logo {
+        height: 42px;
+        min-width: 42px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+    }
+
+    @media (max-width: 768px) {
+        .interview-page {
+            padding: 20px 14px 35px;
+        }
+
+        .interview-header h1 {
+            font-size: 25px;
+        }
+
+        .interview-section {
+            padding: 16px;
+        }
+
+        .section-heading {
+            align-items: flex-start;
+        }
+
+        .interview-tip {
+            align-items: flex-start;
+        }
+    }
+</style>
+{%endblock%}
+
+{%block main%}
+
+<div class="interview-page">
+    <div class="fixed-top-section">
+
+        <div style="display: flex; justify-content: flex-end;">
+            <header class="topbar">
+
+                <div class="top-actions">
+
+                    <details class="profile-menu">
+                        <summary>
+                            {% if student.profile_pic is none %}
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                            </div>
+                            {% else %}
+                            <div class="profilepic">
+                                <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                    style="width: 36px; height: 36px; object-fit: cover;">
+                            </div>
+                            {% endif %}
+
+                            <div>
+                                <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}
+                                </div>
+                                <div class="profile-role">Student</div>
+                            </div>
+                            <span class="chevron">⌄</span>
+                        </summary>
+
+                        <div class="profile-dropdown">
+                            <div class="profile-summary">
+                                {% if student.profile_pic is none %}
+                                <div class="avatar">
+                                    {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                                </div>
+                                {% else %}
+                                <div class="profilepic">
+                                    <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                        style="width: 36px; height: 36px; object-fit: cover;">
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <strong>{{ current_user.name if current_user.name else 'Student' }}</strong>
+                                    <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
+                                </div>
+                            </div>
+
+                            <a class="profile-action" href="{{ url_for('student.Student_Profile') }}">
+                                <span class="action-icon">👤</span>
+                                <span>My Profile</span>
+                            </a>
+
+                            <hr class="profile-divider">
+
+                            <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </details>
+                </div>
+            </header>
+        </div>
+        <div class="interview-header">
+            <div>
+                <h1>My Interviews</h1>
+                <p>Track your interview journey and results</p>
+            </div>
+
+        </div>
+    </div>
+        <div class="scrollable-bottom-section">
+
+    <!-- Today's Interview -->
+    <section class="interview-section today-section">
+        <div class="section-heading">
+            <div class="section-title">
+                <div class="section-icon"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <g filter="url(#filter0_d_15_286)">
+                                <path
+                                    d="M3 8.26667V19C3 19.5523 3.44772 20 4 20H20C20.5523 20 21 19.5523 21 19V8.26667M3 8.26667V5C3 4.44772 3.44772 4 4 4H20C20.5523 4 21 4.44772 21 5V8.26667M3 8.26667H21"
+                                    stroke="#ff7800" stroke-linejoin="round"></path>
+                            </g>
+                            <g filter="url(#filter1_d_15_286)">
+                                <circle cx="12" cy="14" r="2" stroke="#ff7800" stroke-linejoin="round"></circle>
+                            </g>
+                            <g filter="url(#filter2_d_15_286)">
+                                <path d="M7 2V5" stroke="#ff7800" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                            <g filter="url(#filter3_d_15_286)">
+                                <path d="M17 2V5" stroke="#ff7800" stroke-linecap="round" stroke-linejoin="round">
+                                </path>
+                            </g>
+                            <defs>
+                                <filter id="filter0_d_15_286" x="1.5" y="3.5" width="21" height="19"
+                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                    <feColorMatrix in="SourceAlpha" type="matrix"
+                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                    </feColorMatrix>
+                                    <feOffset dy="1"></feOffset>
+                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                    </feColorMatrix>
+                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
+                                    </feBlend>
+                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                        result="shape"></feBlend>
+                                </filter>
+                                <filter id="filter1_d_15_286" x="8.5" y="11.5" width="7" height="7"
+                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                    <feColorMatrix in="SourceAlpha" type="matrix"
+                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                    </feColorMatrix>
+                                    <feOffset dy="1"></feOffset>
+                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                    </feColorMatrix>
+                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
+                                    </feBlend>
+                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                        result="shape"></feBlend>
+                                </filter>
+                                <filter id="filter2_d_15_286" x="5.5" y="1.5" width="3" height="6"
+                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                    <feColorMatrix in="SourceAlpha" type="matrix"
+                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                    </feColorMatrix>
+                                    <feOffset dy="1"></feOffset>
+                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                    </feColorMatrix>
+                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
+                                    </feBlend>
+                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                        result="shape"></feBlend>
+                                </filter>
+                                <filter id="filter3_d_15_286" x="15.5" y="1.5" width="3" height="6"
+                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                    <feColorMatrix in="SourceAlpha" type="matrix"
+                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                    </feColorMatrix>
+                                    <feOffset dy="1"></feOffset>
+                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                    </feColorMatrix>
+                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
+                                    </feBlend>
+                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                        result="shape"></feBlend>
+                                </filter>
+                            </defs>
+                        </g>
+                    </svg></div>
+                <h2>Today's Interview</h2>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <form method='POST' action="{{url_for('student.Student_interview')}}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" name="today_search" id="searchInput" placeholder="Search by comapny..." />
+                    </div>
+                </form>
+                <span class="count-badge">Total: {{ Todays_interview|length }}</span>
+            </div>
+        </div>
+
+        <div class="table-scroll">
+            <table class="interview-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Interview Round</th>
+                        <th>Interview Date and Time</th>
+                        <th>Link</th>
+                        <th>Result</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interview_round in Todays_interview %}
+                    <tr>
+                        <td>
+                            <div class="company-cell">
+                                <div class="company-logo">
+                                    {% if interview_round[7] %}
+                                    <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
+                                        alt="Company Logo" class="company-logo" style="height:45px;">
+                                    {% else %}
+                                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                        </g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path
+                                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                            </path>
+                                        </g>
+                                    </svg>
+                                    {% endif %}
+                                </div>
+                                <span>{{ interview_round[0] }}</span>
+                            </div>
+                        </td>
+                        <td>{{ interview_round[1] }}</td>
+                        <td>{{ interview_round[2] }}</td>
+                        <td class="date-cell">
+                            <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
+                        </td>
+                        <td>
+                            {% if interview_round[4] %}
+                            <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
+                                rel="noopener noreferrer">Join</a>
+                            {% else %}
+                            <span class="no-link">Not available</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set result = interview_round[5]|string|lower %}
+                            {% if result in ['selected', 'cleared'] %}
+                            <span class="result-badge result-selected">{{ interview_round[5] }}</span>
+                            {% elif result in ['rejected', 'failed', 'not selected'] %}
+                            <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
+                            {% elif result in ['', 'none', 'pending', 'not decided'] %}
+                            <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5] else
+                                '—' }}</span>
+                            {% else %}
+                            <span class="result-badge result-default">{{ interview_round[5] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+								<div class="feedback">{% if interview_round[6] %}
+                                    <button type="button" class="view-jd-btn"
+                                        onclick="openJD('{{ interview_round[8] }}')">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        View
+                                    </button>
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </div>                        
+							</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">No interview scheduled for today.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+		{% for interview_round in Todays_interview %}
+            {% if interview_round[6] %}
+            <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
+                onclick="closeJDOutside(event, '{{ interview_round[8] }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview_round[8] }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview_round[6] }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+    </section>
+
+    <!-- Upcoming Interviews -->
+    <section class="interview-section upcoming-section">
+        <div class="section-heading">
+            <div class="section-title">
+                <div class="section-icon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve"
+                        width="25px" height="25px" fill="#33d17a">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <g>
+                                <g>
+                                    <path style="fill:#33d17a;"
+                                        d="M3.73,3.771h0.708c0.26,0,0.471-0.166,0.471-0.374V0.373C4.909,0.166,4.7,0,4.438,0H3.73 C3.47,0,3.258,0.167,3.258,0.373v3.024C3.258,3.605,3.47,3.771,3.73,3.771z">
+                                    </path>
+                                    <path style="fill:#33d17a;"
+                                        d="M11.132,3.771h0.707c0.263,0,0.471-0.166,0.471-0.374V0.373C12.31,0.166,12.102,0,11.839,0h-0.707 c-0.26,0-0.471,0.167-0.471,0.373v3.024C10.662,3.605,10.872,3.771,11.132,3.771z">
+                                    </path>
+                                    <path style="fill:#33d17a;"
+                                        d="M14.751,1.443h-1.876v2.316c0,0.517-0.465,0.938-1.037,0.938h-0.707 c-0.572,0-1.038-0.421-1.038-0.938V1.443h-4.62v2.316c0,0.517-0.465,0.938-1.038,0.938H3.73c-0.57,0-1.037-0.421-1.037-0.938 V1.443H0.816c-0.312,0-0.566,0.255-0.566,0.568v12.994c0,0.313,0.254,0.566,0.347,0.566h13.938c0.53,0,0.786-0.253,0.786-0.566 V2.009C15.32,1.698,15.064,1.443,14.751,1.443z M14.447,14.287c0,0.564-0.486,0.515-0.486,0.515H8.88c0,0,3.107-1.557,5.567-3.768 C14.447,11.034,14.447,13.635,14.447,14.287z M14.554,9.474c-0.213,0.841-0.684,1.815-1.543,1.178 c-1.252-0.927-2.486-1.714-2.645,0.15c-0.131,1.57-3.033,3.705-3.665,4.151H1.193c-0.099,0-0.177-0.079-0.177-0.177v-8.01 c0-0.099,0.079-0.178,0.177-0.178h13.184c0.097,0,0.178,0.079,0.178,0.178L14.554,9.474L14.554,9.474z">
+                                    </path>
+                                    <rect x="3.258" y="7.97" style="fill:#33d17a;" width="2.202" height="2.201"></rect>
+                                    <rect x="6.88" y="7.97" style="fill:#33d17a;" width="2.2" height="2.201"></rect>
+                                    <rect x="3.258" y="11.309" style="fill:#33d17a;" width="2.202" height="2.201">
+                                    </rect>
+                                    <path style="fill:#33d17a;"
+                                        d="M6.88,13.51h0.637c0.465-0.436,1.168-1.157,1.563-1.652v-0.549h-2.2V13.51z">
+                                    </path>
+                                    <path style="fill:#33d17a;"
+                                        d="M10.386,9.008c0.222-0.217,0.489-0.283,0.729-0.283c0.453,0,0.952,0.253,1.471,0.596V7.97h-2.2 V9.008z">
+                                    </path>
+                                </g>
+                            </g>
+                        </g>
+                    </svg></div>
+                <h2>Upcoming Interviews</h2>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <form method='POST' action="{{url_for('student.Student_interview')}}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" name="upcoming_search" id="searchInput" placeholder="Search by comapny..." />
+                    </div>
+                </form>
+                <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
+            </div>
+        </div>
+
+        <div class="table-scroll">
+            <table class="interview-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Interview Round</th>
+                        <th>Interview Date and Time</th>
+                        <th>Link</th>
+                        <th>Result</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interview_round in upcoming_interviews %}
+                    <tr>
+                        <td>
+                            <div class="company-cell">
+                                <div class="company-logo">
+                                    {% if interview_round[7] %}
+                                    <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
+                                        alt="Company Logo" class="company-logo" style="height:45px;">
+                                    {% else %}
+                                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                        </g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path
+                                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                            </path>
+                                        </g>
+                                    </svg>
+                                    {% endif %}
+                                </div>
+                                <span>{{ interview_round[0]}}</span>
+                            </div>
+                        </td>
+                        <td>{{ interview_round[1] }}</td>
+                        <td>{{ interview_round[2] }}</td>
+                        <td class="date-cell">
+                            <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
+                        </td>
+                        <td>
+                            {% if interview_round[4] %}
+                            <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
+                                rel="noopener noreferrer">Join</a>
+                            {% else %}
+                            <span class="no-link">Not available</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set result = interview_round[5]|string|lower %}
+                            {% if result in ['selected', 'passed'] %}
+                            <span class="result-badge result-selected">{{ interview_round[5] }}</span>
+                            {% elif result in ['rejected', 'failed', 'not selected'] %}
+                            <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
+                            {% elif result in ['', 'none', 'pending', 'not decided'] %}
+                            <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5] else
+                                '—' }}</span>
+                            {% else %}
+                            <span class="result-badge result-default">{{ interview_round[5] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+								<div class="feedback">{% if interview_round[6] %}
+                                    <button type="button" class="view-jd-btn"
+                                        onclick="openJD('{{ interview_round[8] }}')">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        View
+                                    </button>
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </div>                         
+						</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">No upcoming interviews found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+		{% for interview_round in upcoming_interviews %}
+            {% if interview_round[6] %}
+            <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
+                onclick="closeJDOutside(event, '{{ interview_round[8] }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview_round[8] }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview_round[6] }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+    </section>
+
+
+    <!-- Past Interviews -->
+    <section class="interview-section past-section">
+        <div class="section-heading">
+            <div class="section-title">
+                <div class="section-icon"><svg width="25px" height="25px" viewBox="0 0 48 48"
+                        xmlns="http://www.w3.org/2000/svg" fill="#6b42f5">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <title>time-history</title>
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="invisible_box" data-name="invisible box">
+                                    <rect width="48" height="48" fill="none"></rect>
+                                </g>
+                                <g id="icons_Q2" data-name="icons Q2">
+                                    <path
+                                        d="M46,24A22,22,0,0,1,4.3,33.7a2,2,0,0,1,.5-2.6,2,2,0,0,1,3,.7A18,18,0,1,0,10.6,12h5.3A2.1,2.1,0,0,1,18,13.7,2,2,0,0,1,16,16H6a2,2,0,0,1-2-2V4.1A2.1,2.1,0,0,1,5.7,2,2,2,0,0,1,8,4V8.9A22,22,0,0,1,46,24Z">
+                                    </path>
+                                    <path
+                                        d="M34,32a1.7,1.7,0,0,1-1-.3L22,25.1V14a2,2,0,0,1,4,0v8.9l9,5.4a1.9,1.9,0,0,1,.7,2.7A1.9,1.9,0,0,1,34,32Z">
+                                    </path>
+                                </g>
+                            </g>
+                        </g>
+                    </svg></div>
+                <h2>Past Interviews</h2>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <form method='POST' action="{{url_for('student.Student_interview')}}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" name="past_search" id="searchInput" placeholder="Search by comapny..." />
+                    </div>
+                </form>
+                <span class="count-badge">Total: {{ Past_interviews|length }}</span>
+            </div>
+        </div>
+
+        <div class="table-scroll">
+            <table class="interview-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Interview Round</th>
+                        <th>Interview Date and Time</th>
+                        <th>Link</th>
+                        <th>Result</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interview_round in Past_interviews %}
+                    <tr>
+                        <td>
+                            <div class="company-cell">
+                                <div class="company-logo">
+                                    {% if interview_round[7] %}
+                                    <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
+                                        alt="Company Logo" class="company-logo" style="height:45px;">
+                                    {% else %}
+                                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                        </g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path
+                                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                            </path>
+                                        </g>
+                                    </svg>
+                                    {% endif %}
+                                </div>
+                                <span>{{ interview_round[0] }}</span>
+                            </div>
+                        </td>
+                        <td>{{ interview_round[1] }}</td>
+                        <td>{{ interview_round[2] }}</td>
+                        <td class="date-cell">
+                            <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
+                        </td>
+                        <td>
+                            {% if interview_round[4] %}
+                            <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
+                                rel="noopener noreferrer">Join</a>
+                            {% else %}
+                            <span class="no-link">Not available</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set result = interview_round[5]|string|lower %}
+                            {% if result in ['selected', 'passed'] %}
+                            <span class="result-badge result-selected">{{ interview_round[5] }}</span>
+                            {% elif result in 'rejected' %}
+                            <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
+                            {% elif result in ['', 'none', 'pending'] %}
+                            <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5] else
+                                '—' }}</span>
+                            {% else %}
+                            <span class="result-badge result-default">{{ interview_round[5] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="feedback">{% if interview_round[6] %}
+                                    <button type="button" class="view-jd-btn"
+                                        onclick="openJD('{{ interview_round[8] }}')">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        View
+                                    </button>
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </div> 
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">No past interviews found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+		{% for interview_round in Past_interviews %}
+            {% if interview_round[6] %}
+            <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
+                onclick="closeJDOutside(event, '{{ interview_round[8] }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview_round[8] }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview_round[6] }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+    </section>
+
+
+    <div class="interview-tip">
+        <div class="tip-icon">!</div>
+        <div>
+            <strong>Interview Tip</strong>
+            <span>Join your interview 5–10 minutes early and make sure your internet connection is working
+                properly.</span>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+
+    function openJD(jobId) {
+
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+
+    }
+
+
+    function closeJD(jobId) {
+
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "";
+        }
+
+    }
+
+
+    function closeJDOutside(event, jobId) {
+
+        if (event.target === event.currentTarget) {
+            closeJD(jobId);
+        }
+
+    }
+
+
+    /* Close using Escape key */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            document.querySelectorAll(".jd-overlay").forEach(function (modal) {
+
+                modal.style.display = "none";
+
+            });
+
+            document.body.style.overflow = "";
+
+        }
+
+    });
+
+</script>
+{%endblock%}

@@ -1,0 +1,1133 @@
+{% extends "Recruiter_Base.html" %}
+
+{% block title %}Job Drives{% endblock %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+aside {
+        flex-shrink: 0; /* Forces the nav bar to never shrink */
+    }
+
+    main {
+        min-width: 0; /* Allows the main flex container to shrink below its content size */
+    }
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+        
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+    /* =========================================================
+       PAGE
+    ========================================================= */
+
+    .job-drive-page {
+    height: 100vh;
+        background: #f8f9fd;
+        padding: 0px 38px 0px;
+        color: #17213a;
+          display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .job-drive-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+    }
+
+    .job-drive-heading h1 {
+        margin: 0;
+        font-weight: 700;
+        color: #17213a;
+        letter-spacing: -0.5px;
+    }
+
+    .job-drive-heading p {
+        margin: 6px 0 0;
+        color: #52627d;
+        font-size: 16px;
+    }
+
+    .logout-button {
+        height: 48px;
+        padding: 0 22px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #dce1eb;
+        background: white;
+        color: #17213a;
+        border-radius: 9px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 2px 6px rgba(20, 35, 70, 0.05);
+    }
+
+    .logout-button:hover {
+        background: #f7f8fb;
+        color: #17213a;
+    }
+
+    .add-job-button {
+        height: 48px;
+        padding: 0 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        background: linear-gradient(135deg, #5537ff, #6330f5);
+        color: white;
+        border-radius: 9px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 7px 17px rgba(83, 55, 255, 0.25);
+    }
+
+    .add-job-button:hover {
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .add-job-button .plus {
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 1;
+    }
+
+
+    /* =========================================================
+       SEARCH CARD
+    ========================================================= */
+
+    .search-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px 25px;
+        margin-bottom: 18px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: 255px minmax(260px, 1fr) 118px 1px 255px;
+        align-items: end;
+        gap: 20px;
+    }
+
+    .search-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-field label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #17213a;
+    }
+
+    .search-select,
+    .search-input {
+        height: 45px;
+        width: 100%;
+        border: 1px solid #d7dce6;
+        border-radius: 8px;
+        background: white;
+        color: #17213a;
+        font-size: 14px;
+        outline: none;
+        padding: 0 14px;
+    }
+
+    .search-select:focus,
+    .search-input:focus {
+        border-color: #6540ff;
+        box-shadow: 0 0 0 3px rgba(101, 64, 255, 0.08);
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+
+    .search-input-wrapper input {
+        padding-left: 20px;
+    }
+
+    .search-submit {
+        height: 45px;
+        border: none;
+        border-radius: 8px;
+        padding: 0 18px;
+        background: linear-gradient(135deg, #5337ff, #6535f5);
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 5px 12px rgba(83, 55, 255, 0.22);
+    }
+
+    .search-submit:hover {
+        transform: translateY(-1px);
+    }
+
+    .search-divider {
+        height: 45px;
+        width: 1px;
+        background: #e2e5eb;
+    }
+
+
+    /* =========================================================
+       JOB CARD
+    ========================================================= */
+
+    .job-card {
+        background: white;
+        border-radius: 12px;
+        min-height: 195px;
+        padding: 26px 25px;
+        margin-bottom: 16px;
+        display: grid;
+        grid-template-columns: 1.25fr 1.55fr 265px;
+        align-items: center;
+        box-shadow: 0px 0px 10px rgb(218, 217, 217);
+
+    }
+
+
+    /* =========================================================
+       LEFT SIDE - COMPANY
+    ========================================================= */
+
+    .job-company {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        min-width: 0;
+    }
+
+    .company-logo {
+        width: 98px;
+        height: 98px;
+        min-width: 98px;
+        background: white;
+        border: 1px solid #e1e5ec;
+        border-radius: 11px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        box-shadow: 0 3px 8px rgba(25, 35, 60, 0.08);
+    }
+
+
+    .company-initial {
+        width: 62px;
+        height: 62px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .company-details {
+        min-width: 0;
+    }
+
+    .job-title {
+        margin: 0 0 11px;
+        font-size: 21px;
+        line-height: 1.25;
+        font-weight: 700;
+        color: #111b32;
+    }
+
+    .company-name,
+    .job-location {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 14px;
+        color: #52627d;
+        margin-bottom: 9px;
+    }
+
+    .company-name-icon,
+    .location-icon {
+        font-size: 16px;
+    }
+
+
+    /* =========================================================
+       MIDDLE - DETAILS
+    ========================================================= */
+
+    .job-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
+        row-gap: 18px;
+        padding: 0 28px;
+    }
+
+    .job-detail {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+    }
+
+    .detail-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        background: #f1efff;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .detail-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #53627b;
+        line-height: 1;
+    }
+
+    .detail-value {
+        font-size: 13px;
+        color: #17213a;
+        font-weight: 500;
+        line-height: 1.35;
+        overflow-wrap: break-word; 
+    word-wrap: break-word;
+    word-break: break-word;
+    }
+
+
+    /* =========================================================
+       RIGHT - ACTIONS
+    ========================================================= */
+
+    .job-actions {
+        border-left: 1px solid #e1e4eb;
+        padding-left: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .status {
+        width: fit-content;
+        min-width: 91px;
+        height: 40px;
+        padding: 0 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .status-active {
+        color: #039855;
+        background: #dff8ed;
+    }
+
+    .status-expired {
+        color: #d97706;
+        background: #fff0d4;
+    }
+
+    .status-other {
+        color: #667085;
+        background: #eef0f4;
+    }
+
+    .edit-job-button,
+    .delete-job-button {
+        width: 100%;
+        height: 43px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        background: white;
+        cursor: pointer;
+    }
+
+    .edit-job-button {
+        color: #5b3cff;
+        border: 1px solid #6241ff;
+    }
+
+    .edit-job-button:hover {
+        color: #4e31e9;
+        background: #f8f6ff;
+    }
+
+    .delete-job-button {
+        color: #ef2f2f;
+        border: 1px solid #ff3b3b;
+    }
+
+    .delete-job-button:hover {
+        color: #d91f1f;
+        background: #fff5f5;
+    }
+
+
+    /* =========================================================
+       EMPTY STATE
+    ========================================================= */
+
+    .empty-state {
+        background: white;
+        border-radius: 12px;
+        padding: 65px 20px;
+        text-align: center;
+        box-shadow: 0 5px 22px rgba(27, 42, 72, 0.07);
+    }
+
+    .empty-state-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 7px;
+        font-size: 20px;
+        color: #17213a;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: #667085;
+        font-size: 14px;
+    }
+
+.job-drives-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 5px;
+}
+.fixed-top-section {
+        flex-shrink: 0; /* This prevents the header from shrinking */
+    }
+   
+</style>
+
+{% endblock %}
+
+
+{% block main %}
+
+<div class="job-drive-page">
+    <div class="fixed-top-section">
+    <header class="topbar">
+        <div class="top-actions">
+            <details class="profile-menu">
+                <summary>
+                    <div class="avatar">
+                        {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                    </div>
+                    <div>
+                        <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}</div>
+                        <div class="profile-role">Recruiter</div>
+                    </div>
+                    <span class="chevron">⌄</span>
+                </summary>
+
+                <div class="profile-dropdown">
+                    <div class="profile-summary">
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+
+                        <div>
+                            <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                            <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                        </div>
+                    </div>
+
+                    <hr class="profile-divider">
+
+                    <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                        <span class="action-icon">↪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </details>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <div class="job-drive-header">
+        <div class="job-drive-heading">
+            <h1>Job Drives</h1>
+            <p>Manage all your job drives here</p>
+        </div>
+        <div>
+            <a href="{{ url_for('Recruiter.add_Job_drive') }}" class="add-job-button">
+                <span class="plus">+</span> Add Job Drive
+            </a>
+        </div>
+    </div>
+    <!-- =====================================================
+         SEARCH / FILTER
+    ====================================================== -->
+    <div class="search-card">
+        <form method="GET" action="{{ url_for('Recruiter.Job_drive') }}" class="search-form">
+            <!-- Search By -->
+            <div class="search-field">
+                <label> Search By </label>
+                <select name="search_by" class="search-select">
+                    <option value="company_name" {% if request.args.get('search_by')=='company_name' %} selected {%
+                        endif %}>
+                        Company Name
+                    </option>
+                    <option value="title" {% if request.args.get('search_by')=='title' %} selected {% endif %}>
+                        Job Title
+                    </option>
+                    <option value="Location" {% if request.args.get('search_by')=='Location' %} selected {% endif %}>
+                        Location
+                    </option>
+                </select>
+            </div>
+            <!-- Search -->
+            <div class="search-field">
+                <label> Search </label>
+                <div class="search-input-wrapper">
+                    <input type="text" name="search" class="search-input" placeholder="Enter search value..."
+                        value="{{ request.args.get('search', '') }}">
+                </div>
+            </div>
+
+            <!-- Search Button -->
+            <div class="search-field">
+                <label style="visibility: hidden;"> Search </label>
+                <button type="submit" class="search-submit"> Search </button>
+            </div>
+            <!-- Divider -->
+            <div class="search-divider"></div>
+            <!-- Status -->
+            <div class="search-field">
+                <label> Filter by Status </label>
+                <select name="filter" class="search-select" onchange="this.form.submit()">
+                    <option value="Active" {% if request.args.get('filter') !='Expired' %} selected {% endif %}> Active
+                    </option>
+                    <option value="Expired" {% if request.args.get('filter')=='Expired' %} selected {% endif %}> Expired
+                    </option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+    <div class="job-drives-scroll">
+
+    <!-- =====================================================
+         JOB DRIVES
+    ====================================================== -->
+    {% if Jobs %}
+    {% for job in Jobs %}
+    <div class="job-card">
+        <!-- =================================================
+                 COMPANY INFORMATION
+            ================================================== -->
+        <div class="job-company">
+            <div class="company-logo">
+                <div class="company-initial">
+                    {% if job[2] %}
+                    <img src="{{ url_for('static', filename='Images/company/logo/' + job[2]) }}" alt="Company Logo"
+                        style="height:45px; max-width: 98px;">
+                    {% else %}
+                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                        style="background: #f1efff;">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                            </path>
+                        </g>
+                    </svg>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="company-details">
+                <h2 class="job-title"> {{ job[1].title }} </h2>
+
+
+                <div class="company-name">
+
+                    <span class="company-name-icon">
+                        <svg fill="#000000" width="18px" height="18px" viewBox="0 0 50 50"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                </path>
+                            </g>
+                        </svg>
+                    </span>
+
+                    <span>
+                        {{ job[0] }}
+                    </span>
+
+                </div>
+
+
+                <div class="job-location">
+
+                    <span class="location-icon">
+                        <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 64 64"
+                            enable-background="new 0 0 64 64" xml:space="preserve" fill="#3d3846" stroke="#3d3846">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path fill="#5e5c64"
+                                    d="M32,0C18.746,0,8,10.746,8,24c0,5.219,1.711,10.008,4.555,13.93c0.051,0.094,0.059,0.199,0.117,0.289l16,24 C29.414,63.332,30.664,64,32,64s2.586-0.668,3.328-1.781l16-24c0.059-0.09,0.066-0.195,0.117-0.289C54.289,34.008,56,29.219,56,24 C56,10.746,45.254,0,32,0z M32,32c-4.418,0-8-3.582-8-8s3.582-8,8-8s8,3.582,8,8S36.418,32,32,32z">
+                                </path>
+                            </g>
+                        </svg> </span>
+                    <span>
+                        {{ job[1].location }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+                 JOB DETAILS
+            ================================================== -->
+
+        <div class="job-details">
+
+
+            <!-- Package -->
+
+            <div class="job-detail">
+
+                <div class="detail-icon">
+                    <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 512 512"
+                        xml:space="preserve">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <g>
+                                <!-- Moved the fill color directly onto the paths and removed the st0 class -->
+                                <path fill="#1a5fb4"
+                                    d="M314.344,321.563c0.031-36.594,29.656-66.234,66.234-66.25H490v-78.719c0-32.781-25.25-59.656-57.375-62.297 v-0.25H78.031c-9.375,0-17-7.609-17-16.984c0-9.406,7.625-17,17-17h354.563c-0.484-34.141-28.281-61.688-62.531-61.688H100.094 c-53.781,0-97.531,42.453-99.859,95.672H0v4.422v72.813v202.25c0,55.281,44.813,100.094,100.094,100.094h327.359 C462,493.625,490,465.609,490,431.063v-43.281H380.578C344,387.781,314.375,358.125,314.344,321.563z">
+                                </path>
+                                <path fill="#1a5fb4"
+                                    d="M502.469,280.563H380.578c-11.359,0-21.531,4.563-28.984,12c-7.438,7.453-12.016,17.625-12.016,29 c0,11.344,4.578,21.531,12.016,28.984c7.453,7.453,17.625,12,28.984,12.016h121.891c5.266,0,9.531-4.281,9.531-9.547v-62.922 C512,284.813,507.734,280.563,502.469,280.563z M381.281,335.219c-7.547,0-13.656-6.125-13.656-13.656 c0-7.563,6.109-13.688,13.656-13.688s13.672,6.125,13.672,13.688C394.953,329.094,388.828,335.219,381.281,335.219z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="detail-text">
+
+                    <span class="detail-label">
+                        Package
+                    </span>
+
+                    <span class="detail-value">
+                        ₹{{ job[1].package }} LPA
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Eligible Branches -->
+
+            <div class="job-detail">
+
+                <div class="detail-icon">
+                    <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="#1a5fb4">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <title>branch</title>
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="invisible_box" data-name="invisible box">
+                                    <rect width="48" height="48" fill="none"></rect>
+                                </g>
+                                <g id="icons_Q2" data-name="icons Q2">
+                                    <path
+                                        d="M44,9a7,7,0,1,0-9,6.7V16a6,6,0,0,1-6,6H21a10.3,10.3,0,0,0-6,2V15.7a7,7,0,1,0-4,0V32.3a7,7,0,1,0,4,0V32a6,6,0,0,1,6-6h8A10,10,0,0,0,39,16v-.3A7,7,0,0,0,44,9ZM10,9a3,3,0,0,1,6,0,3,3,0,0,1-6,0Zm6,30a3,3,0,1,1-3-3A2.9,2.9,0,0,1,16,39ZM37,12a2.9,2.9,0,0,1-3-3,3,3,0,0,1,6,0A2.9,2.9,0,0,1,37,12Z">
+                                    </path>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                </div>
+
+                <div class="detail-text">
+
+                    <span class="detail-label">
+                        Eligible Branches
+                    </span>
+
+                    <span class="detail-value">
+                        {{ job[1].Eligible_Branches }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Minimum CGPA -->
+
+            <div class="job-detail">
+
+                <div class="detail-icon">
+                    <svg version="1.1" id="Icons" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xml:space="preserve" width="20px"
+                        height="20px" fill="#1a5fb4">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <style type="text/css">
+                                .st0 {
+                                    fill: none;
+                                    stroke: #000000;
+                                    stroke-width: 2;
+                                    stroke-linecap: round;
+                                    stroke-linejoin: round;
+                                    stroke-miterlimit: 10;
+                                }
+                            </style>
+                            <g>
+                                <path d="M16,20c4.4,0,8-3.6,8-8s-3.6-8-8-8s-8,3.6-8,8S11.6,20,16,20z"></path>
+                                <path
+                                    d="M29.4,26.1l-3.5-7.3c1.3-1.9,2.1-4.3,2.1-6.8c0-6.6-5.4-12-12-12S4,5.4,4,12c0,2.6,0.8,4.9,2.2,6.9l-3.4,7.2 c-0.1,0.3-0.1,0.7,0,0.9s0.5,0.5,0.8,0.5l4.7,0.3l3.2,3.5c0.2,0.2,0.5,0.3,0.7,0.3c0,0,0.1,0,0.2,0c0.3,0,0.6-0.3,0.8-0.6l2.9-6 l2.9,6c0.1,0.3,0.4,0.5,0.8,0.6c0,0,0.1,0,0.2,0c0.3,0,0.5-0.1,0.7-0.3l3.2-3.5l4.7-0.3c0.3,0,0.6-0.2,0.8-0.5S29.5,26.4,29.4,26.1 z M16,2c5.5,0,10,4.5,10,10c0,5.5-4.5,10-10,10S6,17.5,6,12C6,6.5,10.5,2,16,2z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+
+
+                </div>
+
+                <div class="detail-text">
+
+                    <span class="detail-label">
+                        Minimum CGPA
+                    </span>
+
+                    <span class="detail-value">
+                        {{ job[1].CGPA }} and above
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Graduation Year -->
+
+            <div class="job-detail">
+
+                <div class="detail-icon">
+                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.65 122.88"
+                        style="enable-background:new 0 0 122.65 122.88" xml:space="preserve">
+                        <g>
+                            <path fill="#1a5fb4"
+                                d="M35.84,113.9c-0.06-1.56-0.29-3.12-0.66-4.65c-1.49-6.03-5.27-11.54-9.93-15.54c-0.18-0.16-0.36-0.31-0.55-0.46l-4.2,4.1 c3.24,2.48,5.58,5.88,6.54,9.05c0.52,1.72,0.67,3.41,0.38,4.93c-0.33,1.74-1.19,3.23-2.66,4.31c-0.33,0.24-0.68,0.45-1.06,0.64 c1.88,0.93,3.65,1.51,5.18,1.63c1.54,0.13,2.89-0.15,4.03-0.84C34,116.41,34.97,115.36,35.84,113.9L35.84,113.9z M78.92,71.24 c-0.4-0.21-0.72-0.51-0.95-0.87l-0.79,0.78c0.29,0.19,0.54,0.44,0.73,0.74c4.08,6.44,6.43,12.99,6.65,19.67 c0.22,6.71-1.71,13.45-6.19,20.25c-0.75,1.14-2.27,1.45-3.41,0.7s-1.45-2.27-0.7-3.41c3.89-5.9,5.57-11.69,5.38-17.39 c-0.19-5.73-2.27-11.45-5.89-17.17l-6.27,6.18c-0.06-0.19-0.12-0.37-0.18-0.56l-0.48,0.47l-26.39,35.19 c-1.35,2.47-3.01,4.28-4.97,5.46c-2.07,1.24-4.39,1.75-6.95,1.54c-3.91-0.32-8.86-2.76-13.5-6.31c-0.15-0.09-0.3-0.2-0.42-0.33 c-1.6-1.25-3.15-2.62-4.61-4.08c-3.31-3.31-6.18-7.11-7.96-10.89c-1.92-4.07-2.61-8.18-1.35-11.83c0.81-2.34,2.39-4.42,4.91-6.08 l36.99-28.15l20.01-21.39L86.1,1.36c0.4-0.55,0.98-0.88,1.6-0.99c3.44-0.66,6.94-0.41,10.34,0.53c5.84,1.61,11.37,5.27,15.68,9.88 c4.32,4.62,7.46,10.24,8.53,15.74c0.58,2.98,0.55,5.94-0.22,8.72c-0.15,0.56-0.49,1.03-0.93,1.35l0,0.01L85.7,62.21l-1.42,1.39 c0,0.19-0.01,0.38-0.02,0.57l-2.85,2.81c5.22,2.73,9.45,6.16,12.54,10.41c3.16,4.35,5.11,9.5,5.66,15.56 c0.12,1.35-0.88,2.55-2.23,2.67c-1.35,0.12-2.55-0.88-2.67-2.23c-0.47-5.14-2.09-9.48-4.73-13.11 C87.31,76.63,83.58,73.64,78.92,71.24L78.92,71.24z M20.57,90.39c-3.36-1.94-6.88-3.05-10.14-3.03c-0.83,0.01-1.65,0.09-2.45,0.26 C6.59,88.6,5.73,89.75,5.29,91c-0.8,2.31-0.25,5.16,1.15,8.12c1.53,3.26,4.06,6.57,7,9.52c1.23,1.23,2.53,2.4,3.85,3.45 c2.27,0.38,3.74,0.16,4.55-0.44c0.39-0.29,0.63-0.72,0.73-1.24c0.14-0.74,0.05-1.63-0.25-2.59c-0.88-2.91-3.42-6.1-6.89-7.89 c-1.21-0.62-1.69-2.1-1.07-3.31c0.13-0.25,0.29-0.46,0.48-0.64L20.57,90.39L20.57,90.39z M65.02,75.5 c-3.92-6.44-11.06-13.32-17.98-17.96l-0.96,1.03c-0.12,0.15-0.27,0.29-0.43,0.42l-31.3,23.82c3.9,0.74,7.88,2.55,11.52,5.14 l0.09,0.07l0.01,0.01c0.84,0.6,1.66,1.25,2.46,1.93c5.39,4.62,9.77,11.03,11.51,18.1l0.03,0.12l22.92-30.56 c0.09-0.14,0.2-0.27,0.33-0.39L65.02,75.5L65.02,75.5z M64.12,39.29c8.91,4.41,16.34,11.56,19.05,18.66l34.3-24.82 c0.35-1.79,0.31-3.71-0.07-5.68c-0.89-4.58-3.58-9.34-7.29-13.31c-3.73-3.99-8.44-7.14-13.36-8.49c-2.4-0.66-4.84-0.89-7.25-0.57 L66.49,36.74l-0.01-0.01c-0.06,0.08-0.12,0.16-0.2,0.24L64.12,39.29L64.12,39.29z" />
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="detail-text">
+
+                    <span class="detail-label">
+                        Graduation Year
+                    </span>
+
+                    <span class="detail-value">
+                        {{ job[1].Graduation_Year }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Vacancies -->
+
+            <div class="job-detail">
+
+                <div class="detail-icon">
+                    <svg fill="#1a5fb4" version="1.1" id="_x31__4_" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 128 128" xml:space="preserve"
+                        width="18px" height="18px">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <polygon id="_x31_7"
+                                points="127.2,7.3 127.2,0.8 0.8,0.8 0.8,7.3 60.7,7.3 60.7,59.6 0.8,59.6 0.8,66.1 60.7,66.1 60.7,121.7 0.8,121.7 0.8,128.2 127.2,128.2 127.2,121.7 67.3,121.7 67.3,66.1 127.2,66.1 127.2,59.6 67.3,59.6 67.3,7.3 ">
+                            </polygon>
+                            <polygon id="_x31_4"
+                                points="49.8,37.8 9.5,37.8 9.5,41.1 12.4,41.1 12.4,57.4 14.6,57.4 45,57.4 47.2,57.4 47.2,41.1 49.8,41.1 ">
+                            </polygon>
+                            <g id="_x31_2">
+                                <circle cx="100.4" cy="20.4" r="4.4"></circle>
+                            </g>
+                            <g id="_x31_1">
+                                <path
+                                    d="M113.6,35.6c-0.4-1-1-2.1-1.5-2.9c-1.9-3.5-5.8-6.1-9.3-6c-3.4,0-6,2.6-6,6c0,0.8,0,1.9,0,2.9H113.6z">
+                                </path>
+                            </g>
+                            <polygon id="_x31_0"
+                                points="118.5,37.8 78.2,37.8 78.2,41.1 81,41.1 81,57.4 83.2,57.4 113.7,57.4 115.8,57.4 115.8,41.1 118.5,41.1 ">
+                            </polygon>
+                            <g id="_x38_">
+                                <circle cx="31.8" cy="82.5" r="4.4"></circle>
+                            </g>
+                            <g id="_x37_">
+                                <path
+                                    d="M44.9,97.7c-0.4-1-1-2.1-1.5-2.9c-1.9-3.5-5.8-6.1-9.3-6c-3.4,0-6,2.6-6,6c0,0.8,0,1.9,0,2.9H44.9z">
+                                </path>
+                            </g>
+                            <polygon id="_x36_"
+                                points="49.8,99.9 9.5,99.9 9.5,103.2 12.4,103.2 12.4,119.5 14.6,119.5 45,119.5 47.2,119.5 47.2,103.2 49.8,103.2 ">
+                            </polygon>
+                            <g id="_x34_">
+                                <circle cx="100.4" cy="82.5" r="4.4"></circle>
+                            </g>
+                            <g id="_x33_">
+                                <path
+                                    d="M113.6,97.7c-0.4-1-1-2.1-1.5-2.9c-1.9-3.5-5.8-6.1-9.3-6c-3.4,0-6,2.6-6,6c0,0.8,0,1.9,0,2.9H113.6z">
+                                </path>
+                            </g>
+                            <polygon id="_x32_"
+                                points="118.5,99.9 78.2,99.9 78.2,103.2 81,103.2 81,119.5 83.2,119.5 113.7,119.5 115.8,119.5 115.8,103.2 118.5,103.2 ">
+                            </polygon>
+                            <rect id="_x31__3_" x="14.2" y="16" width="3.3" height="17.4"></rect>
+                            <rect id="_x31__2_" x="14.2" y="78.1" width="3.3" height="17.4"></rect>
+                            <rect id="_x31__1_" x="82.8" y="16" width="3.3" height="17.4"></rect>
+                            <rect id="_x31_" x="82.8" y="78.1" width="3.3" height="17.4"></rect>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="detail-text">
+
+                    <span class="detail-label">
+                        Vacancies
+                    </span>
+
+                    <span class="detail-value">
+                        {{ job[1].Vacancies }}
+                    </span>
+                </div>
+            </div>
+            <!-- Deadline -->
+            <div class="job-detail">
+                <div class="detail-icon">
+                    <svg fill="#1a5fb4" width="18px" height="18px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"> <g id="SVGRepo_bgCarrier" stroke-width="0"></g> <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g> <g id="SVGRepo_iconCarrier"> <path d="M960 95.888l-256.224.001V32.113c0-17.68-14.32-32-32-32s-32 14.32-32 32v63.76h-256v-63.76c0-17.68-14.32-32-32-32s-32 14.32-32 32v63.76H64c-35.344 0-64 28.656-64 64v800c0 35.343 28.656 64 64 64h896c35.344 0 64-28.657 64-64v-800c0-35.329-28.656-63.985-64-63.985zm0 863.985H64v-800h255.776v32.24c0 17.679 14.32 32 32 32s32-14.321 32-32v-32.224h256v32.24c0 17.68 14.32 32 32 32s32-14.32 32-32v-32.24H960v799.984zM736 511.888h64c17.664 0 32-14.336 32-32v-64c0-17.664-14.336-32-32-32h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32zm0 255.984h64c17.664 0 32-14.32 32-32v-64c0-17.664-14.336-32-32-32h-64c-17.664 0-32 14.336-32 32v64c0 17.696 14.336 32 32 32zm-192-128h-64c-17.664 0-32 14.336-32 32v64c0 17.68 14.336 32 32 32h64c17.664 0 32-14.32 32-32v-64c0-17.648-14.336-32-32-32zm0-255.984h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32h64c17.664 0 32-14.336 32-32v-64c0-17.68-14.336-32-32-32zm-256 0h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32h64c17.664 0 32-14.336 32-32v-64c0-17.68-14.336-32-32-32zm0 255.984h-64c-17.664 0-32 14.336-32 32v64c0 17.68 14.336 32 32 32h64c17.664 0 32-14.32 32-32v-64c0-17.648-14.336-32-32-32z"> </path> </g> </svg>
+                </div>
+
+                <div class="detail-text">
+                    <span class="detail-label"> Deadline </span>
+                    <span class="detail-value"> {{ job[1].deadline.strftime("%d-%m-%Y") }} </span>
+                </div>
+            </div>
+        </div>
+        <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
+        <div class="job-actions">
+
+
+            <!-- Status -->
+
+            {% if job[1].status|string|lower == 'active' %}
+
+            <div class="status status-active">
+                Active
+            </div>
+
+            {% elif job[1].status|string|lower == 'expired' %}
+
+            <div class="status status-expired">
+                Expired
+            </div>
+
+            {% else %}
+
+            <div class="status status-other">
+                {{ job[1].status }}
+            </div>
+
+            {% endif %}
+
+
+            <!-- Edit -->
+
+            <a href="{{ url_for('Recruiter.edit_Job_drive', id=job[1].id) }}" class="edit-job-button">
+                Edit Job Drive
+            </a>
+
+
+            <!-- Delete -->
+
+            <a href="{{ url_for('Recruiter.delete_Job_drive', id=job[1].id) }}" class="delete-job-button"
+                onclick="return confirm('Are you sure you want to delete this job drive?');">
+                Delete Job Drive
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+    {% else %}
+
+    <!-- =================================================
+             EMPTY STATE
+        ================================================== -->
+
+    <div class="empty-state">
+
+        <div class="empty-state-icon">
+            💼
+        </div>
+
+        <h3>
+            No Job Drives Found
+        </h3>
+
+        <p>
+            There are no job drives matching your search.
+        </p>
+
+    </div>
+
+    {% endif %}
+</div> <!-- job-drives-scroll -->
+</div>
+
+{% endblock %}

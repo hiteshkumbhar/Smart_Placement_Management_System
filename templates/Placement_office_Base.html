@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {% block title %} {% endblock %}</title>
+</head>
+{% block style %}
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0%;
+        padding: 0%;
+    }
+
+    body {
+        display: flex;
+    }
+
+    aside {
+        background-image: linear-gradient(180deg, #4a0970 9%, #1667ff 50%, #1667ff 100%);
+        width: 20%;
+        height: 100vh;
+    }
+
+    main {
+        flex: 1;
+        background-color: rgb(241, 241, 241);
+    }
+
+    .nav-tite {
+        display: flex;
+        justify-content: center;
+        gap: 0px;
+        height: 100px;
+        width: 100%;
+        align-items: center;
+        padding-left: 10px;
+    }
+
+    .nav-item:hover {
+        background: rgba(255, 255, 255, 0.10);
+        color: #ffffff;
+    }
+
+    .nav-item.active {
+        background: linear-gradient(135deg, #5471f1,
+                #4089e8);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 12px rgba(166, 102, 255, 0.75), inset 0 0 10px rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+<body>
+    <aside>
+        <div class="nav-tite">
+            <svg width="90" height="75" viewBox="0 0 200 185" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="1.5" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs> <!-- Shield -->
+                <path
+                    d=" M42 42 C62 42 82 38 100 24 C118 38 138 42 158 42 C164 42 166 46 164 52 C162 58 162 66 162 76 V112 C162 138 144 150 100 176 C56 150 38 138 38 112 V76 C38 66 38 58 36 52 C34 46 36 42 42 42 Z "
+                    fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Graduation cap top -->
+                <polygon points="58,79 100,61 142,79 100,97" fill="white" /> <!-- Cap base -->
+                <path d=" M76 93 V109 C76 121 124 121 124 109 V93 L100 103 Z" fill="white" /> <!-- Tassel -->
+                <path d=" M65 83 V109 " stroke="white" stroke-width="4" stroke-linecap="round" />
+                <rect x="61" y="107" width="8" height="14" rx="4" fill="white" />
+            </svg>
+            <div style="color: rgb(255, 255, 255); font-size: 23px;"> Placement officer Portal </div>
+        </div>
+
+        <div class="nav-section">
+
+            <a href="{{ url_for('Placement_officer.Placement_officer_dashboard') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Placement_officer_dashboard' %}active{% endif %}"
+                    data-target="Dashboard"
+                    style="margin-top: 18%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-left: 5%;">
+                        <svg width="23" height="23" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Top Left (Outline) -->
+                            <rect x="1.5" y="1.5" width="5" height="5" rx="1" fill="none" stroke="white"
+                                stroke-width="1" /> <!-- Top Right (Filled) -->
+                            <rect x="8" y="1" width="6" height="6" rx="1" fill="white" /> <!-- Bottom Left (Filled) -->
+                            <rect x="1" y="8" width="6" height="6" rx="1" fill="white" />
+                            <!-- Bottom Right (Outline) -->
+                            <rect x="8.5" y="8.5" width="5" height="5" rx="1" fill="none" stroke="white"
+                                stroke-width="1" />
+                        </svg>
+                        <span class="label" style=" font-size: 22px; color: white;">Dashboard</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('Placement_officer.Companies_info') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Companies_info' %}active{% endif %}"
+                    data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-left: 5%;">
+                        <svg fill="#ffffff" width="23px" height="23px" viewBox="0 0 50 50"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    d="M8 2L8 6L4 6L4 48L15 48L15 39L19 39L19 48L30 48L30 6L26 6L26 2 Z M 10 10L12 10L12 12L10 12 Z M 14 10L16 10L16 12L14 12 Z M 18 10L20 10L20 12L18 12 Z M 22 10L24 10L24 12L22 12 Z M 32 14L32 18L34 18L34 20L32 20L32 22L34 22L34 24L32 24L32 26L34 26L34 28L32 28L32 30L34 30L34 32L32 32L32 34L34 34L34 36L32 36L32 38L34 38L34 40L32 40L32 42L34 42L34 44L32 44L32 48L46 48L46 14 Z M 10 15L12 15L12 19L10 19 Z M 14 15L16 15L16 19L14 19 Z M 18 15L20 15L20 19L18 19 Z M 22 15L24 15L24 19L22 19 Z M 36 18L38 18L38 20L36 20 Z M 40 18L42 18L42 20L40 20 Z M 10 21L12 21L12 25L10 25 Z M 14 21L16 21L16 25L14 25 Z M 18 21L20 21L20 25L18 25 Z M 22 21L24 21L24 25L22 25 Z M 36 22L38 22L38 24L36 24 Z M 40 22L42 22L42 24L40 24 Z M 36 26L38 26L38 28L36 28 Z M 40 26L42 26L42 28L40 28 Z M 10 27L12 27L12 31L10 31 Z M 14 27L16 27L16 31L14 31 Z M 18 27L20 27L20 31L18 31 Z M 22 27L24 27L24 31L22 31 Z M 36 30L38 30L38 32L36 32 Z M 40 30L42 30L42 32L40 32 Z M 10 33L12 33L12 37L10 37 Z M 14 33L16 33L16 37L14 37 Z M 18 33L20 33L20 37L18 37 Z M 22 33L24 33L24 37L22 37 Z M 36 34L38 34L38 36L36 36 Z M 40 34L42 34L42 36L40 36 Z M 36 38L38 38L38 40L36 40 Z M 40 38L42 38L42 40L40 40 Z M 10 39L12 39L12 44L10 44 Z M 22 39L24 39L24 44L22 44 Z M 36 42L38 42L38 44L36 44 Z M 40 42L42 42L42 44L40 44Z">
+                                </path>
+                            </g>
+                        </svg> <span class="label" style=" font-size: 22px; color: white;">Companies</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('Placement_officer.Placement_officer_Recruiter_Job_drive') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Placement_officer_Recruiter_Job_drive' %}active{% endif %}"
+                    data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-left: 4%;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="27" height="27">
+                            <defs> <!-- Smooth gradient matching the blue-purple tone of the icon -->
+                                <linearGradient id="briefcaseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="white" />
+                                    <stop offset="100%" stop-color="white" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Handle & Upper Body Combined: The handle is now solid/filled in with the gradient -->
+                            <path
+                                d="M 38,25 C 38,18 42,14 48,14 L 52,14 C 58,14 62,18 62,25 L 62,28 L 80,28 C 85,28 89,32 89,37 L 89,45 L 58,45 C 57,45 56,46 55,47 L 53,50 C 52,51 48,51 47,50 L 45,47 C 44,46 43,45 42,45 L 11,45 L 11,37 C 11,32 15,28 20,28 L 38,28 Z"
+                                fill="url(#briefcaseGradient)" />
+                            <!-- Lower Body Half: Separated by the white, transparent horizontal U-shaped gap -->
+                            <path d="M 11,52 L 89,52 L 89,74 C 89,79 85,83 80,83 L 20,83 C 15,83 11,79 11,74 Z"
+                                fill="url(#briefcaseGradient)" />
+                        </svg>
+                        <span class="label" style=" font-size: 22px; color: white;">Job Drives</span>
+                    </div>
+                </div>
+            </a>
+            <a href="{{ url_for('Placement_officer.Placement_officer_Job_drive') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Placement_officer_Job_drive' %}active{% endif %}"
+                    data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-left: 4%;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="27" height="27">
+                            <defs> <!-- Smooth gradient matching the blue-purple tone of the icon -->
+                                <linearGradient id="briefcaseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="white" />
+                                    <stop offset="100%" stop-color="white" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Handle & Upper Body Combined: The handle is now solid/filled in with the gradient -->
+                            <path
+                                d="M 38,25 C 38,18 42,14 48,14 L 52,14 C 58,14 62,18 62,25 L 62,28 L 80,28 C 85,28 89,32 89,37 L 89,45 L 58,45 C 57,45 56,46 55,47 L 53,50 C 52,51 48,51 47,50 L 45,47 C 44,46 43,45 42,45 L 11,45 L 11,37 C 11,32 15,28 20,28 L 38,28 Z"
+                                fill="url(#briefcaseGradient)" />
+                            <!-- Lower Body Half: Separated by the white, transparent horizontal U-shaped gap -->
+                            <path d="M 11,52 L 89,52 L 89,74 C 89,79 85,83 80,83 L 20,83 C 15,83 11,79 11,74 Z"
+                                fill="url(#briefcaseGradient)" />
+                        </svg>
+                        <span class="label" style=" font-size: 22px; color: white;">My job drives</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('Placement_officer.Placement_Officer_Interview') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Placement_Officer_Interview' %}active{% endif %}"
+                    data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-left: 4%;">
+                        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve" width="25px" height="25px" fill="white"> <g id="SVGRepo_bgCarrier" stroke-width="0"></g> <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g> <g id="SVGRepo_iconCarrier"> <g> <g> <path style="fill:white;" d="M3.73,3.771h0.708c0.26,0,0.471-0.166,0.471-0.374V0.373C4.909,0.166,4.7,0,4.438,0H3.73 C3.47,0,3.258,0.167,3.258,0.373v3.024C3.258,3.605,3.47,3.771,3.73,3.771z"> </path> <path style="fill:white;" d="M11.132,3.771h0.707c0.263,0,0.471-0.166,0.471-0.374V0.373C12.31,0.166,12.102,0,11.839,0h-0.707 c-0.26,0-0.471,0.167-0.471,0.373v3.024C10.662,3.605,10.872,3.771,11.132,3.771z"> </path> <path style="fill:white;" d="M14.751,1.443h-1.876v2.316c0,0.517-0.465,0.938-1.037,0.938h-0.707 c-0.572,0-1.038-0.421-1.038-0.938V1.443h-4.62v2.316c0,0.517-0.465,0.938-1.038,0.938H3.73c-0.57,0-1.037-0.421-1.037-0.938 V1.443H0.816c-0.312,0-0.566,0.255-0.566,0.568v12.994c0,0.313,0.254,0.566,0.347,0.566h13.938c0.53,0,0.786-0.253,0.786-0.566 V2.009C15.32,1.698,15.064,1.443,14.751,1.443z M14.447,14.287c0,0.564-0.486,0.515-0.486,0.515H8.88c0,0,3.107-1.557,5.567-3.768 C14.447,11.034,14.447,13.635,14.447,14.287z M14.554,9.474c-0.213,0.841-0.684,1.815-1.543,1.178 c-1.252-0.927-2.486-1.714-2.645,0.15c-0.131,1.57-3.033,3.705-3.665,4.151H1.193c-0.099,0-0.177-0.079-0.177-0.177v-8.01 c0-0.099,0.079-0.178,0.177-0.178h13.184c0.097,0,0.178,0.079,0.178,0.178L14.554,9.474L14.554,9.474z"> </path> <rect x="3.258" y="7.97" style="fill:white;" width="2.202" height="2.201"> </rect> <rect x="6.88" y="7.97" style="fill:white;" width="2.2" height="2.201"></rect> <rect x="3.258" y="11.309" style="fill:white;" width="2.202" height="2.201"> </rect> <path style="fill:white;" d="M6.88,13.51h0.637c0.465-0.436,1.168-1.157,1.563-1.652v-0.549h-2.2V13.51z"> </path> <path style="fill:white;" d="M10.386,9.008c0.222-0.217,0.489-0.283,0.729-0.283c0.453,0,0.952,0.253,1.471,0.596V7.97h-2.2 V9.008z"> </path> </g> </g> </g> </svg>
+                        <span class="label" style=" font-size: 22px; color: white;">Interviews</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('Placement_officer.Placement_officer_student') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Placement_officer_student' %}active{% endif %}"
+                    data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-left: 4%;">
+                        <svg height="30px" width="30px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#ffffff"> <g id="SVGRepo_bgCarrier" stroke-width="0"></g> <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g> <g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0 { fill: #ffffff; } </style> <g> <path class="st0" d="M116.738,231.551c0,23.245,14.15,43.315,34.513,49.107c15.262,42.368,55.574,70.776,100.582,70.776 s85.32-28.408,100.58-70.776c20.365-5.792,34.515-25.854,34.515-49.107c0-15.691-6.734-30.652-18.061-40.248l1.661-8.921 c0-3.323-0.229-6.568-0.491-9.821l-0.212-2.593l-2.213,1.374c-30.871,19.146-80.885,27.71-116.754,27.71 c-34.85,0-83.895-8.214-114.902-26.568l-2.259-0.59l-0.188,2.554c-0.192,2.632-0.384,5.256-0.357,8.23l1.632,8.649 C123.466,200.923,116.738,215.876,116.738,231.551z"> </path> <path class="st0" d="M356.151,381.077c-9.635-5.97-18.734-11.607-26.102-17.43l-0.937-0.738l-0.972,0.691 c-6.887,4.914-31.204,30.17-51.023,51.172l-10.945-21.273l5.697-4.076v-20.854h-40.07v20.854l5.697,4.076l-10.949,21.281 c-19.825-21.009-44.154-46.265-51.034-51.18l-0.973-0.691l-0.937,0.738c-7.368,5.823-16.469,11.46-26.102,17.43 c-30.029,18.61-64.062,39.697-64.062,77.344c0,22.244,52.241,53.579,168.388,53.579c116.146,0,168.388-31.335,168.388-53.579 C420.213,420.774,386.178,399.687,356.151,381.077z"> </path> <path class="st0" d="M131.67,131.824c0,18.649,56.118,42.306,119.188,42.306s119.188-23.656,119.188-42.306v-25.706l43.503-17.702 v55.962c-5.068,0.792-8.964,5.186-8.964,10.45c0,4.503,2.966,8.432,7.242,9.852l-8.653,57.111h40.704l-8.651-57.111 c4.27-1.421,7.232-5.35,7.232-9.852c0-5.295-3.919-9.697-9.014-10.466l-0.21-67.197c0.357-0.621,0.357-1.266,0.357-1.607 c0-0.342,0-0.978-0.149-0.978h-0.002c-0.262-2.446-2.011-4.612-4.56-5.652l-11.526-4.72L267.551,3.238 C262.361,1.118,256.59,0,250.858,0s-11.502,1.118-16.69,3.238L72.834,68.936c-2.863,1.172-4.713,3.773-4.713,6.622 c0,2.842,1.848,5.443,4.716,6.63l58.833,23.928V131.824z"> </path> </g> </g> </svg> 
+                        <span class="label" style=" font-size: 22px; color: white;">Students</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('Placement_officer.Placement_officer_analytics') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Placement_officer_analytics' %}active{% endif %}"
+                    data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-left: 4%;">
+                        <svg fill="#ffffff" width="25px" height="25px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M746.667 106.667H1173.33V1493.33H746.667V106.667ZM533.333 533.333H106.667V1493.33H533.333V533.333ZM1920 1706.67H0V1824H1920V1706.67ZM1813.33 746.667H1386.67V1493.33H1813.33V746.667Z"></path> </g></svg>
+                        <span class="label" style=" font-size: 22px; color: white;">Analytics</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('Placement_officer.Reports') }}" style="text-decoration: none;">
+                <div class="nav-item {% if request.endpoint == 'Placement_officer.Reports' %}active{% endif %}" data-target="Profile"
+                    style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                    <div style="display: flex; align-items: center; gap: 4px; margin-left: 0%;">
+                        <svg width="50px" height="50px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round"
+                                stroke-linejoin="round"> <!-- Document -->
+                                <path
+                                    d=" M176 96 H300 L368 164 V336 C368 354 354 368 336 368 H176 C158 368 144 354 144 336 V128 C144 110 158 96 176 96 Z " />
+                                <!-- Larger folded corner -->
+                                <path d=" M300 96 V164 H368 " /> <!-- Text lines -->
+                                <line x1="198" y1="220" x2="302" y2="220" />
+                                <line x1="198" y1="252" x2="302" y2="252" />
+                                <line x1="198" y1="284" x2="262" y2="284" />
+                            </g>
+                        </svg>
+                        <span class="label" style=" font-size: 22px; color: white;">Reports</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </aside>
+
+    <main>
+        {%block main%}
+        {%endblock%}
+    </main>
+</body>
+
+</html>

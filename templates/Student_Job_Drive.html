@@ -1,0 +1,1007 @@
+{% extends "Student_Base.html" %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    .topbar {
+        height: 82px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+    /* =========================================================
+       Student Job Drives - UI matching the supplied design
+       ========================================================= */
+    .job-drives-page {
+        height: 100vh;
+        padding: 0px 20px 0px;
+        background: #f5f8fe;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .job-drives-wrap {
+        margin: 0 auto;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Page heading */
+    .job-drives-heading {
+        flex-shrink: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 10px 20px;
+    }
+
+    .job-drives-heading::after {
+        content: "";
+        position: absolute;
+        width: 270px;
+        height: 270px;
+        right: 30px;
+        top: -155px;
+        border-radius: 50%;
+        background: rgba(37, 99, 235, .06);
+        pointer-events: none;
+    }
+
+    .job-drives-heading h1 {
+        position: relative;
+        z-index: 2;
+        margin: 0 0 8px;
+        color: #102957;
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: -.7px;
+    }
+
+    .job-drives-heading p {
+        position: relative;
+        z-index: 2;
+        max-width: 620px;
+        margin: 0;
+        color: #5d6d89;
+        font-size: 15px;
+        line-height: 1.55;
+    }
+
+    .job-drives-breadcrumb {
+        position: absolute;
+        z-index: 3;
+        right: 40px;
+        bottom: 3px;
+        /* Adjusted slightly to sit on the bottom edge */
+        height: 120px;
+        /* STRICT HEIGHT so it doesn't collapse to 0 */
+        margin-right: 30px;
+    }
+
+    .job-drives-breadcrumb img {
+        height: 100%;
+        width: auto;
+        display: block;
+    }
+
+    /* Filter */
+    .job-filter {
+
+        flex-shrink: 0;
+        /* NEW: Prevent filter from squishing */
+    }
+
+
+    .job-filter select {
+        width: 190px;
+        height: 42px;
+        padding: 0 38px 0 14px;
+        border: 1px solid #8bb0f5;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        color: #23385e;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .job-filter select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    /* Portrait card grid */
+    .job-drive-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+        overflow-y: auto;
+        padding-right: 10px;
+        padding-bottom: 20px;
+        padding: 5px;
+    }
+
+    .job-drive-card {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        height: 400px;
+        padding: 15px;
+        background: #fff;
+        border: 1px solid #e2e8f2;
+        border-radius: 13px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .job-drive-card:hover {
+        transform: translateY(-3px);
+        border-color: #c7d2fe;
+        box-shadow: 0 11px 26px rgba(15, 23, 42, .09);
+    }
+
+
+    .company-logo-box {
+        width: 100%;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .job-drive-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .job-drive-title {
+        margin: 0 0 5px;
+        color: #1e3a8a;
+        font-size: 16px;
+        line-height: 1.3;
+        font-weight: 800;
+        margin-bottom: 15px;
+        overflow-wrap: anywhere;
+    }
+
+    .job-drive-company {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 7px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .job-drive-company i {
+        color: #6366f1;
+        font-size: 11px;
+    }
+
+    .job-drive-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-bottom: 11px;
+    }
+
+    .job-drive-meta-item {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 8px;
+        border-radius: 7px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 10px;
+        font-weight: 650;
+        overflow: hidden;
+    }
+
+    .job-drive-meta-item:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .job-drive-meta-item i {
+        flex: 0 0 auto;
+        color: #4f46e5;
+        font-size: 11px;
+    }
+
+    .job-drive-description {
+        display: -webkit-box;
+        margin: 0;
+        color: #64748b;
+        font-size: 10.5px;
+        line-height: 1.55;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+
+    /* Card footer */
+    .job-drive-actions {
+        margin-top: 13px;
+        padding-top: 11px;
+        border-top: 1px solid #edf0f5;
+    }
+
+    .job-status {
+        display: inline-flex;
+        align-items: center;
+        width: max-content;
+        gap: 5px;
+        padding: 4px 8px;
+        margin-bottom: 8px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .job-status::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+    }
+
+    .job-status.active {
+        color: #15803d;
+        background: #dcfce7;
+    }
+
+    .job-status.active::before {
+        background: #16a34a;
+    }
+
+    .job-status.expired {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .job-status.expired::before {
+        background: #dc2626;
+    }
+
+
+    .job-action-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .job-action-btn {
+        width: 100%;
+        min-height: 31px;
+        padding: 6px 5px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 750;
+        cursor: pointer;
+        transition: all .15s ease;
+    }
+
+    .job-apply-btn {
+        border: 1px solid #4f46e5;
+        background: #4f46e5;
+        color: #fff;
+        box-shadow: 0 3px 7px rgba(79, 70, 229, .17);
+    }
+
+    .job-apply-btn:hover {
+        background: #4338ca;
+        transform: translateY(-1px);
+    }
+
+    .job-optout-btn {
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #475569;
+    }
+
+    .job-optout-btn:hover {
+        background: #f8fafc;
+    }
+
+    .job-drive-message {
+        grid-column: 1 / -1;
+        margin-top: 5px;
+        padding: 6px 7px;
+        border-radius: 6px;
+        font-size: 9px;
+        line-height: 1.4;
+    }
+
+    .job-drive-message.duplicate {
+        color: #92400e;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+    }
+
+    .job-drive-message.resume-error {
+        color: #b91c1c;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+    }
+
+    .job-drive-empty {
+        grid-column: 1 / -1;
+        padding: 50px 20px;
+        text-align: center;
+        background: #fff;
+        border: 1px solid #e2e8f2;
+        border-radius: 13px;
+    }
+
+    .job-drive-empty i {
+        display: block;
+        margin-bottom: 10px;
+        color: #6366f1;
+        font-size: 28px;
+    }
+
+    .job-drive-empty h3 {
+        margin: 0 0 5px;
+        color: #172554;
+        font-size: 17px;
+    }
+
+    .job-drive-empty p {
+        margin: 0;
+        color: #71809a;
+        font-size: 12px;
+    }
+
+
+    /* =========================
+   View JD Button
+   ========================= */
+
+    .view-jd-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 7px 10px;
+        border: 1px solid #c7d2fe;
+        border-radius: 7px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .view-jd-btn:hover {
+        background: #e0e7ff;
+        border-color: #818cf8;
+    }
+
+
+    /* =========================
+   JD Floating Window
+   ========================= */
+
+    .jd-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(3px);
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 20px;
+    }
+
+
+    /* Small floating window */
+
+    .jd-modal {
+        width: min(520px, 95vw);
+        max-height: 75vh;
+
+        background: #ffffff;
+        border-radius: 14px;
+
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+
+        overflow: hidden;
+
+        animation: jdModalOpen 0.18s ease-out;
+    }
+
+
+    @keyframes jdModalOpen {
+        from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.97);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+
+    /* Modal Header */
+
+    .jd-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 15px 18px;
+
+        border-bottom: 1px solid #e5e7eb;
+
+        background: #f8fafc;
+    }
+
+
+    .jd-modal-title {
+        margin: 0;
+
+        color: #172554;
+
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+
+    .jd-close-btn {
+        width: 30px;
+        height: 30px;
+
+        display: grid;
+        place-items: center;
+
+        border: none;
+        border-radius: 7px;
+
+        background: transparent;
+
+        color: #64748b;
+
+        font-size: 20px;
+
+        cursor: pointer;
+    }
+
+
+    .jd-close-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+
+  .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+    /* Full JD */
+
+    .jd-full-description {
+        margin: 20px;
+        color: #475569;
+        font-size: 13px;
+
+        line-height: 1.7;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="job-drives-page">
+    <div class="job-drives-wrap">
+        <div class="fixed-top-section">
+
+            <section class="topbar">
+
+                <div class="top-actions">
+
+                    <details class="profile-menu">
+                        <summary>
+                            {% if student.profile_pic is none %}
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                            </div>
+                            {% else %}
+                            <div class="profilepic">
+                                <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                    style="width: 36px; height: 36px; object-fit: cover;">
+                            </div>
+                            {% endif %}
+
+                            <div>
+                                <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}
+                                </div>
+                                <div class="profile-role">Student</div>
+                            </div>
+                            <span class="chevron">⌄</span>
+                        </summary>
+
+                        <div class="profile-dropdown">
+                            <div class="profile-summary">
+                                {% if student.profile_pic is none %}
+                                <div class="avatar">
+                                    {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                                </div>
+                                {% else %}
+                                <div class="profilepic">
+                                    <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                        style="width: 36px; height: 36px; object-fit: cover;">
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <strong>{{ current_user.name if current_user.name else 'Student' }}</strong>
+                                    <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
+                                </div>
+                            </div>
+
+                            <a class="profile-action" href="{{ url_for('student.Student_Profile') }}">
+                                <span class="action-icon">👤</span>
+                                <span>My Profile</span>
+                            </a>
+
+                            <hr class="profile-divider">
+
+                            <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </details>
+                </div>
+            </section>
+            <section class="job-drives-heading">
+                <h1>Job Drives</h1>
+                <form class="job-filter" method="GET" action="{{ url_for('student.Student_Job_Drive') }}">
+                    <select id="job-drive-status" name="filter" onchange="this.form.submit()">
+                        <option value="Active" {% if request.args.get('filter') !='Expired' %}selected{% endif %}>Active
+                        </option>
+                        <option value="Expired" {% if request.args.get('filter')=='Expired' %}selected{% endif %}>
+                            Expired
+                        </option>
+                    </select>
+                </form>
+            </section>
+        </div>
+        <div class="scrollable-bottom-section">
+            <div class="job-drive-list">
+                {% for i in job %}
+                <article class="job-drive-card {% if i[7] == 'Expired' %}expired{% endif %}">
+                    {% if i[7] != 'Expired' %}
+                    <span class="job-status active">Active</span>
+                    {% else %}
+                    <span class="job-status expired">Expired</span>
+                    {% endif %}
+
+                    <div class="company-logo-box" aria-label="{{ i[1] }}">
+                        <div style="width:52px; height:52px;">
+                            {% if i[8] %}
+                            <img src="{{ url_for('static', filename='Images/company/logo/' + i[8]) }}"
+                                alt="Company Logo" style="max-width:52px; max-height:52px;">
+                            {% else %}
+                            <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path
+                                        d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                    </path>
+                                </g>
+                            </svg>
+
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="job-drive-main">
+                        <h2 class="job-drive-title">{{ i[2] }}</h2>
+
+                        <div class="job-drive-company">
+                            <svg fill="#000000" width="20px" height="20px" viewBox="0 0 50 50"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path
+                                        d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                    </path>
+                                </g>
+                            </svg>
+                            <span>{{ i[1] }}</span>
+                        </div>
+
+                        <div class="job-drive-meta">
+                            <div
+                                style="color: #475569; font-size: 11px; font-weight: 700; display: flex; gap: 11px; align-items: center;">
+                                <svg fill="#000000" height="15px" width="15px" version="1.1" id="Layer_1"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    viewBox="0 0 512 512" xml:space="preserve">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <g>
+                                            <g>
+                                                <path
+                                                    d="M310.511,325.188c-8.883-7.39-22.912-13.764-42.82-19.465v-70.298c7.074,0.879,12.954,3.004,17.485,6.298 c6.946,5.171,10.573,12.774,11.076,22.997c0,4.147,1.297,7.552,3.891,10.146c4.89,4.847,12.962,4.403,16.964-0.026 c2.551-2.603,3.849-5.999,3.849-10.129c0-15.326-5.316-27.921-15.838-37.453c-9.6-8.499-22.178-13.449-37.427-14.729V201.31 c0-6.699-4.096-10.726-10.974-10.726c-6.699,0-10.701,4.028-10.701,10.726v11.204c-15.3,1.126-28.134,6.076-38.212,14.729 c-11.989,10.428-18.065,24.422-18.065,41.6c0,14.848,5.436,26.999,16.162,36.096c9.003,7.748,22.153,13.722,40.115,18.253v75.554 c-10.351-1.527-18.56-4.727-24.422-9.574c-8.678-7.347-12.809-18.048-12.638-32.751c0-4.147-1.212-7.475-3.439-9.702 c-4.378-4.898-12.51-4.753-16.589-0.154c-2.372,2.372-3.575,5.7-3.575,9.847c0,23.279,7.049,40.627,21.009,51.652 c9.387,7.049,22.716,11.597,39.646,13.577v16.572c0,6.878,4.002,10.974,10.701,10.974c6.878,0,10.974-4.096,10.974-10.974v-16.273 c15.872-1.826,29.449-7.45,40.388-16.802c12.74-10.948,19.191-25.148,19.191-42.146 C327.262,347.017,321.621,334.293,310.511,325.188z M246.016,299.75c-10.837-3.302-18.765-7.475-23.612-12.45 c-5.171-5.325-7.689-11.998-7.689-20.378c0-10.172,3.814-17.971,11.622-23.825c5.521-4.096,12.126-6.724,19.678-7.851V299.75z M289.024,389.828c-6.05,4.471-13.21,7.45-21.333,8.849v-69.103c12.638,3.524,21.376,7.398,26.01,11.597 c5.513,4.873,8.311,12.774,8.311,23.475C302.012,375.322,297.779,383.548,289.024,389.828z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                        <g>
+                                            <g>
+                                                <path
+                                                    d="M414.242,224.862c-18.526-25.259-48.094-62.473-74.923-82.628l42.24-105.6c1.604-3.337,2.509-7.083,2.509-11.034 c0-14.131-11.383-25.591-25.515-25.6c-0.051,0-0.102,0-0.154,0c-0.538,0-1.075,0.017-1.621,0.051 c-3.618,0.23-7.031,1.203-10.086,2.782C342.647,4.779,298.428,25.6,256,25.6c-44.288,0-90.522-22.69-90.982-22.912 c-3.618-1.792-7.518-2.671-11.392-2.671c-6.306,0-12.535,2.321-17.374,6.784c-7.799,7.202-10.368,18.458-6.426,28.314 l42.846,107.127c-26.829,20.156-56.397,57.37-74.923,82.628C70.81,261.606,25.6,331.145,25.6,384c0,70.579,57.421,128,128,128 h204.8c70.579,0,128-57.421,128-128C486.4,331.145,441.19,261.606,414.242,224.862z M153.6,25.6c0,0,51.2,25.6,102.4,25.6 s102.4-25.6,102.4-25.6L317.44,128H194.56L153.6,25.6z M358.4,486.4H153.6c-56.559,0-102.4-45.85-102.4-102.4 c0-76.8,128-230.4,153.6-230.4h102.4c25.6,0,153.6,153.6,153.6,230.4C460.8,440.55,414.959,486.4,358.4,486.4z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg>
+                                ₹ {{ i[3] }} LPA
+                            </div>
+                            <br>
+                            <div
+                                style="color: #475569; font-size: 11px; font-weight: 700; display: flex; gap: 11px; align-items: center;">
+                                <svg width="15px" height="15px" viewBox="-4 0 32 32" version="1.1"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <title>location</title>
+                                        <desc>Created with Sketch Beta.</desc>
+                                        <defs> </defs>
+                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
+                                            sketch:type="MSPage">
+                                            <g id="Icon-Set" sketch:type="MSLayerGroup"
+                                                transform="translate(-104.000000, -411.000000)" fill="#000000">
+                                                <path
+                                                    d="M116,426 C114.343,426 113,424.657 113,423 C113,421.343 114.343,420 116,420 C117.657,420 119,421.343 119,423 C119,424.657 117.657,426 116,426 L116,426 Z M116,418 C113.239,418 111,420.238 111,423 C111,425.762 113.239,428 116,428 C118.761,428 121,425.762 121,423 C121,420.238 118.761,418 116,418 L116,418 Z M116,440 C114.337,440.009 106,427.181 106,423 C106,417.478 110.477,413 116,413 C121.523,413 126,417.478 126,423 C126,427.125 117.637,440.009 116,440 L116,440 Z M116,411 C109.373,411 104,416.373 104,423 C104,428.018 114.005,443.011 116,443 C117.964,443.011 128,427.95 128,423 C128,416.373 122.627,411 116,411 L116,411 Z"
+                                                    id="location" sketch:type="MSShapeGroup"> </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg>
+                                {{ i[4] }}
+                            </div>
+                            <br>
+                            <span
+                                style=" color: #475569; font-size: 11px; font-weight: 700; display: flex; gap: 11px; align-items: center;  white-space: nowrap;">
+                                <svg fill="#000000" width="15px" height="15px" viewBox="0 0 1024 1024"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M960 95.888l-256.224.001V32.113c0-17.68-14.32-32-32-32s-32 14.32-32 32v63.76h-256v-63.76c0-17.68-14.32-32-32-32s-32 14.32-32 32v63.76H64c-35.344 0-64 28.656-64 64v800c0 35.343 28.656 64 64 64h896c35.344 0 64-28.657 64-64v-800c0-35.329-28.656-63.985-64-63.985zm0 863.985H64v-800h255.776v32.24c0 17.679 14.32 32 32 32s32-14.321 32-32v-32.224h256v32.24c0 17.68 14.32 32 32 32s32-14.32 32-32v-32.24H960v799.984zM736 511.888h64c17.664 0 32-14.336 32-32v-64c0-17.664-14.336-32-32-32h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32zm0 255.984h64c17.664 0 32-14.32 32-32v-64c0-17.664-14.336-32-32-32h-64c-17.664 0-32 14.336-32 32v64c0 17.696 14.336 32 32 32zm-192-128h-64c-17.664 0-32 14.336-32 32v64c0 17.68 14.336 32 32 32h64c17.664 0 32-14.32 32-32v-64c0-17.648-14.336-32-32-32zm0-255.984h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32h64c17.664 0 32-14.336 32-32v-64c0-17.68-14.336-32-32-32zm-256 0h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32h64c17.664 0 32-14.336 32-32v-64c0-17.68-14.336-32-32-32zm0 255.984h-64c-17.664 0-32 14.336-32 32v64c0 17.68 14.336 32 32 32h64c17.664 0 32-14.32 32-32v-64c0-17.648-14.336-32-32-32z">
+                                        </path>
+                                    </g>
+                                </svg>
+                                {{ i[5].strftime('%d %B %Y') }}
+                            </span>
+                            <br>
+
+                        </div>
+                    </div>
+
+                    <div
+                        style="font-size: 11px; font-weight: 600;  display: flex; align-items: center; justify-content: center; white-space: nowrap; ">
+
+                        <button type="button" class="view-jd-btn" onclick="openJD('{{ i[0] }}')">
+                            <i class="fa-solid fa-file-lines"></i>
+                            View Job Description
+                        </button>
+                    </div>
+
+                    <div class="job-drive-actions">
+
+                        {% if i[7] != 'Expired' %}
+                        <form class="job-action-form" method="POST"
+                            action="{{ url_for('student.Student_Job_Drive', id=i[0]) }}">
+                            <button class="job-action-btn job-apply-btn" type="submit" name="action" value="apply">
+                                <i class="fa-solid fa-paper-plane"></i>&nbsp; Apply
+                            </button>
+
+                            <button class="job-action-btn job-optout-btn" type="submit" name="action" value="opt_out">
+                                <i class="fa-solid fa-xmark"></i>&nbsp; Opt out
+                            </button>
+
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category == "Duplicate_Application_Error" %}
+                            <div class="job-drive-message duplicate">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                {{ message }}
+                            </div>
+                            {% endif %}
+
+                            {% if category == 'Resume_verification_Error' and i[0]|string == job_id|string %}
+                            <div class="job-drive-message resume-error">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                {{ message }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </form>
+                        {% endif %}
+                    </div>
+                </article>
+
+                <div class="jd-overlay" id="jdModal{{ i[0] }}" onclick="closeJDOutside(event, '{{ i[0] }}')">
+                    <div class="jd-modal">
+                        <!-- Header -->
+                        <div class="jd-modal-header">
+                            <h3 class="jd-modal-title">
+                                Job Description
+                            </h3>
+                            <button type="button" class="jd-close-btn" onclick="closeJD('{{ i[0] }}')">
+                                &times;
+                            </button>
+                        </div>
+                        <!-- Body -->
+
+                        <div class="jd-full-description">
+                            {{ i[6] }}
+                        </div>
+                    </div>
+
+                </div>
+
+                {% else %}
+                <div class="job-drive-empty">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <h3>No job drives available</h3>
+                    <p>New placement opportunities will appear here when they are posted.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function openJD(jobId) {
+
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+
+    }
+
+
+    function closeJD(jobId) {
+
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "";
+        }
+
+    }
+
+
+    function closeJDOutside(event, jobId) {
+
+        if (event.target === event.currentTarget) {
+            closeJD(jobId);
+        }
+
+    }
+
+
+    /* Close using Escape key */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            document.querySelectorAll(".jd-overlay").forEach(function (modal) {
+
+                modal.style.display = "none";
+
+            });
+
+            document.body.style.overflow = "";
+
+        }
+
+    });
+
+</script>
+{% endblock %}

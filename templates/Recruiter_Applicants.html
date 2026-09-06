@@ -1,0 +1,658 @@
+{%extends "Recruiter_Base.html" %}
+{% block title %} Recruiter Dashboard {% endblock %}
+{% block style %}
+{{ super() }}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #16a34a;
+        --danger: #dc2626;
+        --warning: #d97706;
+        --text: #172033;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --surface: #fff;
+        --bg: #f8fafc
+    }
+
+.topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+ 
+   .applicants-page {
+        /* Remove the old padding properties and add flexbox */
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Prevent the entire page from scrolling */
+        flex: 1;
+    min-width: 0;
+    }
+    .fixed-top-section {
+        padding: 0px 28px; /* Horizontal padding for the top section */
+        flex-shrink: 0; /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 0px 28px 28px; /* Horizontal and bottom padding */
+        flex: 1; /* Take up the remaining space */
+        overflow-y: auto; /* Allow scrolling inside this section */
+        min-height: 0; /* Ensures the flex child can scroll properly */
+    }
+
+    .page-header {
+        margin-bottom: 22px
+    }
+
+    .page-header h1 {
+        margin: 0 0 6px;
+        font-size: 2rem;
+        font-weight: 750;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: var(--muted)
+    }
+
+    .job-card,
+    .applications-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, .06);
+        max-width: 100%;
+
+    }
+
+    .job-card {
+        padding: 22px;
+        margin-bottom: 24px
+    }
+
+    .job-card-header {
+        margin-bottom: 18px
+    }
+
+    .job-card-header h2 {
+        margin: 4px 0 0;
+        font-size: 1.2rem
+    }
+
+    .company-name {
+        color: var(--primary);
+        font-weight: 700
+    }
+
+    .job-details {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px
+    }
+
+    .job-detail {
+        padding: 13px 15px;
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+        border-radius: 12px
+    }
+
+    .job-detail.full {
+        grid-column: 1/-1
+    }
+
+    .detail-label {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: .76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em
+    }
+
+    .detail-value {
+        font-size: .95rem;
+        font-weight: 600;
+        line-height: 1.45;
+        word-break: break-word
+    }
+
+    .applications-card {
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .applications-header {
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--border)
+    }
+
+    .applications-header h2 {
+        margin: 0;
+        font-size: 1.15rem
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto
+    }
+
+    .applicants-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0
+    }
+
+    .applicants-table th {
+        padding: 14px 13px;
+        background: #f8fafc;
+        color: #475569;
+        border-bottom: 1px solid var(--border);
+        font-size: .74rem;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        white-space: nowrap
+    }
+
+    .applicants-table td {
+        padding: 15px 13px;
+        border-bottom: 1px solid #eef2f7;
+        vertical-align: middle;
+        font-size: .88rem;
+        white-space: nowrap;
+    }
+
+    .applicants-table tbody tr:hover {
+        background: #f8fbff
+    }
+
+    .student-name {
+        font-weight: 700
+    }
+
+    .resume-link {
+        color: var(--primary);
+        font-weight: 650;
+        text-decoration: none;
+        white-space: nowrap
+    }
+
+    .resume-link:hover {
+        color: var(--primary-dark);
+        text-decoration: underline
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 750;
+        white-space: nowrap
+    }
+
+    .status-applied {
+        color: #1d4ed8;
+        background: #dbeafe
+    }
+
+    .status-shortlisted {
+        color: #92400e;
+        background: #fef3c7
+    }
+
+    .status-interview {
+        color: #6d28d9;
+        background: #ede9fe
+    }
+
+    .status-selected {
+        color: #166534;
+        background: #dcfce7
+    }
+
+    .status-rejected {
+        color: #991b1b;
+        background: #fee2e2
+    }
+
+    .status-pending {
+        color: #475569;
+        background: #f1f5f9
+    }
+
+    .action-form {
+        margin: 0
+    }
+
+    .action-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 11px;
+        font: inherit;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .15s;
+        white-space: nowrap
+    }
+
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, .12)
+    }
+
+    .btn-view {
+        color: #334155;
+        background: #e2e8f0
+    }
+
+    .btn-shortlist {
+        color: #fff;
+        background: var(--primary)
+    }
+
+    .btn-shortlist:hover {
+        background: var(--primary-dark)
+    }
+
+    .btn-interview {
+        color: #fff;
+        background: #7c3aed
+    }
+
+    .btn-select {
+        color: #fff;
+        background: var(--success)
+    }
+
+    .btn-reject {
+        color: #fff;
+        background: var(--danger);
+        margin-left: 5px
+    }
+
+    .result-text {
+        font-weight: 700
+    }
+
+    .empty-state {
+        padding: 55px 20px;
+        text-align: center;
+        color: var(--muted)
+    }
+
+    .empty-state-title {
+        margin: 0 0 5px;
+        color: var(--text);
+        font-weight: 700
+    }
+</style>
+{% endblock %}
+
+{%block main%}
+
+
+<div class="applicants-page">
+    
+    <div class="fixed-top-section">
+    <header class="topbar">
+        <div class="top-actions">
+            <details class="profile-menu">
+                <summary>
+                    <div class="avatar">
+                        {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                    </div>
+                    <div>
+                        <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                        </div>
+                        <div class="profile-role">Recruiter</div>
+                    </div>
+                    <span class="chevron">⌄</span>
+                </summary>
+
+                <div class="profile-dropdown">
+                    <div class="profile-summary">
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+
+                        <div>
+                            <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                            <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                        </div>
+                    </div>
+
+                    <hr class="profile-divider">
+
+                    <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                        <span class="action-icon">↪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </details>
+        </div>
+    </header>
+    </div>
+
+    <div class="scrollable-bottom-section">
+    <div class="page-header">
+        <h1>Applicants</h1>
+        <p>Review candidates, manage applications and track recruitment progress.</p>
+    </div>
+
+    <section class="job-card">
+        <div class="job-card-header">
+            <span class="company-name">{{ job[0] }}</span>
+            <h2>{{ job[1].title }}</h2>
+        </div>
+
+        <div class="job-details">
+            <div class="job-detail"><span class="detail-label">Package</span><span class="detail-value">{{
+                    job[1].package }}</span></div>
+            <div class="job-detail"><span class="detail-label">Location</span><span class="detail-value">{{
+                    job[1].location }}</span></div>
+            <div class="job-detail"><span class="detail-label">Minimum CGPA</span><span class="detail-value">{{
+                    job[1].CGPA }}</span></div>
+            <div class="job-detail"><span class="detail-label">Graduation Year</span><span class="detail-value">{{
+                    job[1].Graduation_Year }}</span></div>
+            <div class="job-detail"><span class="detail-label">Eligible Branches</span><span class="detail-value">{{
+                    job[1].Eligible_Branches }}</span></div>
+            <div class="job-detail"><span class="detail-label">Vacancies</span><span class="detail-value">{{
+                    job[1].Vacancies }}</span></div>
+            <div class="job-detail"><span class="detail-label">Deadline</span><span class="detail-value">{{
+                    job[1].deadline }}</span></div>
+            <div class="job-detail full"><span class="detail-label">Job Description</span><span class="detail-value">{{
+                    job[1].description }}</span></div>
+        </div>
+    </section>
+
+    <section class="applications-card">
+        <div class="applications-header">
+            <h2>Candidate Applications</h2>
+        </div>
+        <div class="table-wrapper">
+            <table class="applicants-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Graduation</th>
+                        <th>Branch</th>
+                        <th>Eligibility</th>
+                        <th>Profile</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for applicant in applicants %}
+                    {% set status = applicant[0].status.value %}
+                    <tr>
+                        <td><span class="student-name">{{ applicant[1] }}</span></td>
+                        <td>{{ applicant[2].graduation_year }}</td>
+                        <td>{{ applicant[2].branch }}</td>
+                        <td>{{ applicant[3] }}</td>
+                        <td>
+                            <form class="action-form" method="POST" action="{{url_for('Recruiter.Student_Profile_Recruiter')}}">
+                                <input type="hidden" value="{{applicant[2].id}}" name="id">
+                                <input type="hidden" value="{{applicant[0].id}}" name="application_id">
+                                <button class="action-btn btn-view" type="submit">View</button>
+                            </form>
+                        </td>
+
+                        <td>
+                            {% if status == 'Applied' %}<span class="status-badge status-applied">Applied</span>
+                            {% elif status == 'Shortlisted' %}<span
+                                class="status-badge status-shortlisted">Shortlisted</span>
+                            {% elif status == 'Interview Scheduled' %}<span
+                                class="status-badge status-interview">Interview Scheduled</span>
+                            {% elif status == 'Selected' %}<span class="status-badge status-selected">Selected</span>
+                            {% elif status == 'Rejected' %}<span class="status-badge status-rejected">Rejected</span>
+                            {% else %}<span class="status-badge status-pending">{{ status }}</span>{% endif %}
+                        </td>
+
+
+                        {% if status == 'Applied' %}
+                        <td>
+                            <form class="action-form" method="post"
+                                action="{{url_for('Recruiter.Recruiter_Application',mode='update')}}">
+                                <input type="hidden" value="{{applicant[2].id}}" name="student_id"><input type="hidden"
+                                    value="{{applicant[0].drive_id}}" name="drive_id">
+                                <button class="action-btn btn-shortlist" type="submit">Shortlist</button>
+                            </form>
+                        </td>
+                        {% elif status == 'Shortlisted' or status == 'Interview Scheduled' %}
+                        <td>
+                            <form class="action-form" method="post" action="{{url_for('Recruiter.Schedule_Interview')}}">
+                                <input type="hidden" name="student_id" value="{{applicant[2].id}}"><input type="hidden"
+                                    name="drive_id" value="{{applicant[0].drive_id}}"><input type="hidden"
+                                    name="application_id" value="{{applicant[0].id}}">
+                                <button class="action-btn btn-interview" type="submit">Schedule Interview</button>
+                            </form>
+                        </td>
+                        {% elif status == 'Selected' %}<td><span class="result-text">Selected</span></td>
+                        {% elif status == 'Rejected' %}<td><span class="result-text">Rejected</span></td>{% endif %}
+
+                        {% if status == 'Applied' or status == 'Shortlisted' %}
+                        <td><span class="status-badge status-pending">Pending</span></td>
+                        {% elif status == 'Interview Scheduled' %}
+                        <td>
+                            <form class="action-form" method="post"
+                                action="{{url_for('Recruiter.Recruiter_Application',mode='update')}}">
+                                <input type="hidden" value="{{applicant[2].id}}" name="student_id"><input type="hidden"
+                                    name="drive_id" value="{{applicant[0].drive_id}}">
+                                <button class="action-btn btn-select" name="result" value="Select"
+                                    type="submit">Select</button>
+                                <button class="action-btn btn-reject" name="result" value="Reject"
+                                    type="submit">Reject</button>
+                            </form>
+                        </td>
+                        {% elif status == 'Selected' %}<td><span class="result-text">Selected</span></td>
+                        {% elif status == 'Rejected' %}<td><span class="result-text">Rejected</span></td>{% endif %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="11">
+                            <div class="empty-state">
+                                <p class="empty-state-title">No applicants yet</p>Applications for this job drive will
+                                appear here.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    </div>
+</div>
+
+{%endblock%}

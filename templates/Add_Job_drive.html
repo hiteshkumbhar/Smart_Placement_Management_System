@@ -1,0 +1,742 @@
+{%extends "Recruiter_Base.html" %}
+{% block title %} Recruiter Dashboard {% endblock %}
+{% block style %}
+{{super()}}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --text: #172033;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --bg: #f6f7fb;
+    --danger: #dc2626;
+    --shadow: 0 18px 50px rgba(15, 23, 42, .08);
+  }
+
+
+  .job-drive-shell {
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    padding: 15px 20px 60px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0 auto;
+  }
+
+  .job-drive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .job-drive-title h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+  }
+
+  .job-drive-title p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .fixed-top-section {
+    flex-shrink: 0;
+  }
+
+  .scrollable-bottom-section {
+    padding: 5px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .job-drive-card {
+    background: var(--surface);
+    border: 1px solid rgba(226, 232, 240, .9);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .job-drive-form {
+    padding: 30px;
+  }
+
+  .form-section {
+    margin-bottom: 30px;
+  }
+
+  .form-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    margin-bottom: 18px;
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: #eef2ff;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex: 0 0 auto;
+  }
+
+  .section-heading h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 750;
+  }
+
+  .section-heading p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .form-group {
+    min-width: 0;
+  }
+
+  .form-group.full {
+    grid-column: 1/-1;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .required {
+    color: var(--danger);
+  }
+
+  .form-control,
+  .form-select,
+  .branch-selector {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: #fff;
+    color: var(--text);
+    min-height: 46px;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+
+  .form-control:focus,
+  .form-select:focus,
+  .branch-selector:focus-within {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, .11);
+  }
+
+  textarea.form-control {
+    min-height: 135px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  .input-hint {
+    margin: 6px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+
+  .error {
+    display: block;
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 6px;
+    min-height: 16px;
+  }
+
+  .branch-selector {
+    padding: 0;
+    min-height: 46px;
+    overflow: visible;
+  }
+
+  .branch-selector details {
+    position: relative;
+  }
+
+  .branch-selector summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 13px;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  .branch-selector summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .branch-selector summary:after {
+    content: "⌄";
+    font-size: 17px;
+    color: #64748b;
+  }
+
+  .branch-selector details[open] summary:after {
+    content: "⌃";
+  }
+
+  .dropdown-content {
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    top: 100%;
+    z-index: 30;
+    margin-top: 6px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 16px 35px rgba(15, 23, 42, .13);
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 7px;
+  }
+
+  .dropdown-content label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #334155;
+    font-size: 13px;
+  }
+
+  .dropdown-content label:hover {
+    background: #f8fafc;
+  }
+
+  .dropdown-content input {
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-submit {
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #fff;
+    padding: 12px 21px;
+    font-size: 14px;
+    font-weight: 750;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, .22);
+    transition: transform .15s, box-shadow .15s;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 11px 24px rgba(79, 70, 229, .28);
+  }
+
+  .flash-error {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 11px 13px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+</style>
+{%endblock%}
+
+{%block main%}
+  <div class="job-drive-shell">
+    <div class="fixed-top-section">
+
+      <div class="job-drive-header">
+        <div class="job-drive-title">
+          <h1>{% if mode == 'edit' %}Edit Job Drive{% else %}Create Job Drive{% endif %}</h1>
+          <p>{% if mode == 'edit' %}Update the recruitment drive details below.{% else %}Create a professional
+            recruitment
+            drive for eligible students.{% endif %}</p>
+        </div>
+      </div>
+    </div>
+    <div class="scrollable-bottom-section">
+      <div class="job-drive-card">
+        {% if mode == 'edit' %}
+        <form id="addjobdrive" class="job-drive-form" method="POST" enctype="multipart/form-data"
+          action="{{url_for('Recruiter.edit_Job_drive', id = job_drive.id)}}">
+          <section class="form-section">
+            <div class="section-heading">
+              <div class="section-icon"><svg fill="#000000" width="40px" height="40px" viewBox="0 0 50 50"
+                  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                    </path>
+                  </g>
+                </svg></div>
+              <div>
+                <h2>Company &amp; Role</h2>
+                <p>Choose the company and specify the position being offered.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="company_id">Company <span class="required">*</span></label>
+                <select class="form-select" id="company_id" name="company_id">
+                  {% for company in companies %}
+                  <option value="{{company[0]}}" {% if company[0]==job_drive.company_id %}selected{% endif %}>
+                    {{company[1]}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Title">Job Title <span class="required">*</span></label>
+                <input class="form-control" id="Title" type="text" value="{{job_drive.title or ''}}" name="Title"
+                  placeholder="e.g. Software Engineer">
+                <small class="error" id="TitleError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Package">Package <span class="required">*</span></label>
+                <input class="form-control" id="Package" type="text" value="{{job_drive.package or ''}}" name="Package"
+                  placeholder="e.g. 8">
+                <small class="error" id="PackageError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Location">Location <span class="required">*</span></label>
+                <input class="form-control" id="Location" type="text" value="{{job_drive.location or ''}}"
+                  name="Location" placeholder="e.g. Mumbai / Remote">
+                <small class="error" id="LocationError"></small>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">
+              <div class="section-icon"><span style="font-size: 26px;">🎓</span></div>
+              <div>
+                <h2>Eligibility Criteria</h2>
+                <p>Define the academic requirements for this recruitment drive.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="CGPA">Minimum CGPA <span class="required">*</span></label>
+                <input class="form-control" id="CGPA" type="text" value="{{job_drive.CGPA or ''}}" name="CGPA"
+                  placeholder="e.g. 7.5">
+                <small class="error" id="CGPAError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Year">Graduation Year <span class="required">*</span></label>
+                <input class="form-control" id="Year" type="text" value="{{job_drive.Graduation_Year or ''}}"
+                  name="Graduation_Year" placeholder="e.g. 2025,2026,2027">
+                <small class="error" id="YearError"></small>
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label">Eligible Branches <span class="required">*</span></label>
+                <div id="Branch" class="branch-selector">
+                  <details>
+                    <summary>Select eligible branches</summary>
+                    <div class="dropdown-content">
+                      <label><input type="checkbox" name="Branches" value="Electrical" {% if 'Electrical' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> Electrical</label>
+                      <label><input type="checkbox" name="Branches" value="IT" {% if 'IT' in job_drive.Eligible_Branches
+                          %}checked{% endif %}> IT</label>
+                      <label><input type="checkbox" name="Branches" value="CSE" {% if 'CSE' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> CSE</label>
+                      <label><input type="checkbox" name="Branches" value="Mechanical" {% if 'Mechanical' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> Mechanical</label>
+                      <label><input type="checkbox" name="Branches" value="Chemical" {% if 'Chemical' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> Chemical</label>
+                      <label><input type="checkbox" name="Branches" value="Electronics" {% if 'Electronics' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> Electronics</label>
+                      <label><input type="checkbox" name="Branches" value="Petrochemical" {% if 'Petrochemical' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> Petrochemical</label>
+                      <label><input type="checkbox" name="Branches" value="Civil" {% if 'Civil' in
+                          job_drive.Eligible_Branches %}checked{% endif %}> Civil</label>
+                    </div>
+                  </details>
+                </div>
+                <small class="error" id="BranchesError"></small>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">
+              <div class="section-icon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve"
+                  width="30px" height="30px" fill="#33d17a">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <g>
+                      <g>
+                        <path style="fill:#33d17a;"
+                          d="M3.73,3.771h0.708c0.26,0,0.471-0.166,0.471-0.374V0.373C4.909,0.166,4.7,0,4.438,0H3.73 C3.47,0,3.258,0.167,3.258,0.373v3.024C3.258,3.605,3.47,3.771,3.73,3.771z">
+                        </path>
+                        <path style="fill:#33d17a;"
+                          d="M11.132,3.771h0.707c0.263,0,0.471-0.166,0.471-0.374V0.373C12.31,0.166,12.102,0,11.839,0h-0.707 c-0.26,0-0.471,0.167-0.471,0.373v3.024C10.662,3.605,10.872,3.771,11.132,3.771z">
+                        </path>
+                        <path style="fill:#33d17a;"
+                          d="M14.751,1.443h-1.876v2.316c0,0.517-0.465,0.938-1.037,0.938h-0.707 c-0.572,0-1.038-0.421-1.038-0.938V1.443h-4.62v2.316c0,0.517-0.465,0.938-1.038,0.938H3.73c-0.57,0-1.037-0.421-1.037-0.938 V1.443H0.816c-0.312,0-0.566,0.255-0.566,0.568v12.994c0,0.313,0.254,0.566,0.347,0.566h13.938c0.53,0,0.786-0.253,0.786-0.566 V2.009C15.32,1.698,15.064,1.443,14.751,1.443z M14.447,14.287c0,0.564-0.486,0.515-0.486,0.515H8.88c0,0,3.107-1.557,5.567-3.768 C14.447,11.034,14.447,13.635,14.447,14.287z M14.554,9.474c-0.213,0.841-0.684,1.815-1.543,1.178 c-1.252-0.927-2.486-1.714-2.645,0.15c-0.131,1.57-3.033,3.705-3.665,4.151H1.193c-0.099,0-0.177-0.079-0.177-0.177v-8.01 c0-0.099,0.079-0.178,0.177-0.178h13.184c0.097,0,0.178,0.079,0.178,0.178L14.554,9.474L14.554,9.474z">
+                        </path>
+                        <rect x="3.258" y="7.97" style="fill:#33d17a;" width="2.202" height="2.201"></rect>
+                        <rect x="6.88" y="7.97" style="fill:#33d17a;" width="2.2" height="2.201"></rect>
+                        <rect x="3.258" y="11.309" style="fill:#33d17a;" width="2.202" height="2.201"></rect>
+                        <path style="fill:#33d17a;"
+                          d="M6.88,13.51h0.637c0.465-0.436,1.168-1.157,1.563-1.652v-0.549h-2.2V13.51z"></path>
+                        <path style="fill:#33d17a;"
+                          d="M10.386,9.008c0.222-0.217,0.489-0.283,0.729-0.283c0.453,0,0.952,0.253,1.471,0.596V7.97h-2.2 V9.008z">
+                        </path>
+                      </g>
+                    </g>
+                  </g>
+                </svg></div>
+              <div>
+                <h2>Drive Schedule</h2>
+                <p>Set the number of openings and final application deadline.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="Vacancy">Vacancies <span class="required">*</span></label>
+                <input class="form-control" id="Vacancy" type="text" value="{{job_drive.Vacancies or ''}}"
+                  name="Vacancies" placeholder="e.g. 10">
+                <small class="error" id="VacanciesError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Deadline">Application Deadline <span class="required">*</span></label>
+                <input class="form-control" id="Deadline" type="date"
+                  value="{{job_drive.deadline.strftime('%Y-%m-%d') if job_drive.deadline else ''}}" name="Deadline">
+                <small class="error" id="DeadlineError"></small>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                {% if category == "deadline" %}
+                <div class="flash-error">⚠ {{ message }}</div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label" for="Description">Job Description <span class="required">*</span></label>
+                <textarea class="form-control" id="Description" name="Description"
+                  placeholder="Describe the role, responsibilities, required skills and other important details...">{{job_drive.description or ''}}</textarea>
+                <small class="error" id="DescriptionError"></small>
+              </div>
+            </div>
+
+            
+          </section>
+
+          <div class="form-footer">
+            <button class="btn-submit" type="submit">Save Changes</button>
+          </div>
+        </form>
+
+        {% else %}
+        <form id="addjobdrive" class="job-drive-form" action="{{url_for('Recruiter.add_Job_drive')}}" method="POST"
+          enctype="multipart/form-data">
+
+          <section class="form-section">
+            <div class="section-heading">
+              <div class="section-icon"><svg fill="#000000" width="40px" height="40px" viewBox="0 0 50 50"
+                  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                    </path>
+                  </g>
+                </svg></div>
+              <div>
+                <h2>Company &amp; Role</h2>
+                <p>Choose the company and specify the position being offered.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="company_id">Company <span class="required">*</span></label>
+                <select class="form-select" id="company_id" name="company_id">
+                  {% for company in companies %}
+                  <option value="{{company[0]}}">{{company[1]}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Title">Job Title <span class="required">*</span></label>
+                <input class="form-control" id="Title" type="text" placeholder="e.g. Software Engineer" name="Title">
+                <small class="error" id="TitleError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Package">Package <span class="required">*</span></label>
+                <input class="form-control" id="Package" type="text" placeholder="e.g. 8" name="Package">
+                <small class="error" id="PackageError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Location">Location <span class="required">*</span></label>
+                <input class="form-control" id="Location" type="text" placeholder="e.g. Mumbai / Remote"
+                  name="Location">
+                <small class="error" id="LocationError"></small>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">
+              <div class="section-icon"><span style="font-size: 26px;"> 🎓 </span></div>
+              <div>
+                <h2>Eligibility Criteria</h2>
+                <p>Define the academic requirements for this recruitment drive.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="CGPA">Minimum CGPA <span class="required">*</span></label>
+                <input class="form-control" id="CGPA" type="text" placeholder="e.g. 7.5" name="CGPA">
+                <small class="error" id="CGPAError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Year">Graduation Year <span class="required">*</span></label>
+                <input class="form-control" id="Year" type="text" placeholder="e.g. 2025,2026,2027"
+                  name="Graduation_Year">
+                <small class="error" id="YearError"></small>
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label">Eligible Branches <span class="required">*</span></label>
+                <div id="Branch" class="branch-selector">
+                  <details>
+                    <summary>Select eligible branches</summary>
+                    <div class="dropdown-content">
+                      <label><input type="checkbox" name="Branches" value="Electrical"> Electrical</label>
+                      <label><input type="checkbox" name="Branches" value="IT"> IT</label>
+                      <label><input type="checkbox" name="Branches" value="CSE"> CSE</label>
+                      <label><input type="checkbox" name="Branches" value="Mechanical"> Mechanical</label>
+                      <label><input type="checkbox" name="Branches" value="Chemical"> Chemical</label>
+                      <label><input type="checkbox" name="Branches" value="Electronics"> Electronics</label>
+                      <label><input type="checkbox" name="Branches" value="Petrochemical"> Petrochemical</label>
+                      <label><input type="checkbox" name="Branches" value="Civil"> Civil</label>
+                    </div>
+                  </details>
+                </div>
+                <small class="error" id="BranchesError"></small>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">
+              <div class="section-icon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve"
+                  width="30px" height="30px" fill="#33d17a">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <g>
+                      <g>
+                        <path style="fill:#33d17a;"
+                          d="M3.73,3.771h0.708c0.26,0,0.471-0.166,0.471-0.374V0.373C4.909,0.166,4.7,0,4.438,0H3.73 C3.47,0,3.258,0.167,3.258,0.373v3.024C3.258,3.605,3.47,3.771,3.73,3.771z">
+                        </path>
+                        <path style="fill:#33d17a;"
+                          d="M11.132,3.771h0.707c0.263,0,0.471-0.166,0.471-0.374V0.373C12.31,0.166,12.102,0,11.839,0h-0.707 c-0.26,0-0.471,0.167-0.471,0.373v3.024C10.662,3.605,10.872,3.771,11.132,3.771z">
+                        </path>
+                        <path style="fill:#33d17a;"
+                          d="M14.751,1.443h-1.876v2.316c0,0.517-0.465,0.938-1.037,0.938h-0.707 c-0.572,0-1.038-0.421-1.038-0.938V1.443h-4.62v2.316c0,0.517-0.465,0.938-1.038,0.938H3.73c-0.57,0-1.037-0.421-1.037-0.938 V1.443H0.816c-0.312,0-0.566,0.255-0.566,0.568v12.994c0,0.313,0.254,0.566,0.347,0.566h13.938c0.53,0,0.786-0.253,0.786-0.566 V2.009C15.32,1.698,15.064,1.443,14.751,1.443z M14.447,14.287c0,0.564-0.486,0.515-0.486,0.515H8.88c0,0,3.107-1.557,5.567-3.768 C14.447,11.034,14.447,13.635,14.447,14.287z M14.554,9.474c-0.213,0.841-0.684,1.815-1.543,1.178 c-1.252-0.927-2.486-1.714-2.645,0.15c-0.131,1.57-3.033,3.705-3.665,4.151H1.193c-0.099,0-0.177-0.079-0.177-0.177v-8.01 c0-0.099,0.079-0.178,0.177-0.178h13.184c0.097,0,0.178,0.079,0.178,0.178L14.554,9.474L14.554,9.474z">
+                        </path>
+                        <rect x="3.258" y="7.97" style="fill:#33d17a;" width="2.202" height="2.201"></rect>
+                        <rect x="6.88" y="7.97" style="fill:#33d17a;" width="2.2" height="2.201"></rect>
+                        <rect x="3.258" y="11.309" style="fill:#33d17a;" width="2.202" height="2.201"></rect>
+                        <path style="fill:#33d17a;"
+                          d="M6.88,13.51h0.637c0.465-0.436,1.168-1.157,1.563-1.652v-0.549h-2.2V13.51z"></path>
+                        <path style="fill:#33d17a;"
+                          d="M10.386,9.008c0.222-0.217,0.489-0.283,0.729-0.283c0.453,0,0.952,0.253,1.471,0.596V7.97h-2.2 V9.008z">
+                        </path>
+                      </g>
+                    </g>
+                  </g>
+                </svg></div>
+              <div>
+                <h2>Drive Schedule</h2>
+                <p>Set the number of openings and final application deadline.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="Vacancy">Vacancies <span class="required">*</span></label>
+                <input class="form-control" id="Vacancy" type="text" placeholder="e.g. 10" name="Vacancies">
+                <small class="error" id="VacanciesError"></small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Deadline">Application Deadline <span class="required">*</span></label>
+                <input class="form-control" id="Deadline" type="date" name="Deadline">
+                <small class="error" id="DeadlineError"></small>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                {% if category == "deadline" %}
+                <div class="flash-error">⚠ {{ message }}</div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label" for="Description">Job Description <span class="required">*</span></label>
+                <textarea class="form-control" id="Description" name="Description"
+                  placeholder="Describe the role, responsibilities, required skills and other important details..."></textarea>
+                <small class="error" id="DescriptionError"></small>
+              </div>
+            </div>
+
+            
+          </section>
+
+          <div class="form-footer">
+            <button class="btn-submit" type="submit">Create Job Drive</button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("addjobdrive");
+    if (!form) return;
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      document.querySelectorAll(".error").forEach(error => error.textContent = "");
+
+      let valid = true;
+      const title = document.getElementById("Title").value.trim();
+      const Package = document.getElementById("Package").value.trim();
+      const Location = document.getElementById("Location").value.trim();
+      const CGPA = document.getElementById("CGPA").value.trim();
+      const selectedBranches = document.querySelectorAll('input[name="Branches"]:checked');
+      const branchValues = Array.from(selectedBranches).map(checkbox => checkbox.value);
+      const Year = document.getElementById("Year").value.trim();
+      const Vacancy = document.getElementById("Vacancy").value.trim();
+      const Deadline = document.getElementById("Deadline").value;
+      const Description = document.getElementById("Description").value.trim();
+
+      if (title === "") {
+        document.getElementById("TitleError").textContent = "Please enter Job title.";
+        valid = false;
+      }
+      if (Package === "") {
+        document.getElementById("PackageError").textContent = "Please enter Package.";
+        valid = false;
+      }
+      if (Location === "") {
+        document.getElementById("LocationError").textContent = "Please enter Location.";
+        valid = false;
+      }
+      if (CGPA === "") {
+        document.getElementById("CGPAError").textContent = "Please enter Minimum CGPA.";
+        valid = false;
+      }
+      if (Year === "") {
+        document.getElementById("YearError").textContent = "Please enter Graduation year.";
+        valid = false;
+      }
+      if (Vacancy === "") {
+        document.getElementById("VacanciesError").textContent = "Please enter Vacancy.";
+        valid = false;
+      }
+      if (Deadline === "") {
+        document.getElementById("DeadlineError").textContent = "Please Enter Deadline.";
+        valid = false;
+      }
+      if (Description === "") {
+        document.getElementById("DescriptionError").textContent = "Please Enter Job Description.";
+        valid = false;
+      }
+      if (branchValues.length === 0) {
+        document.getElementById("BranchesError").textContent = "Please select at least one branch.";
+        valid = false;
+      }
+
+      if (valid) {
+        form.submit();
+      }
+    });
+  });
+</script>
+{%endblock%}

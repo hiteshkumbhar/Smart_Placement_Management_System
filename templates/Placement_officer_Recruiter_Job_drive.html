@@ -1,0 +1,900 @@
+{% extends "Placement_office_Base.html" %}
+
+{% block title %}Placement Officer | Job Drives{% endblock %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+    .job-drive-page {
+        max-width: 1400px;
+        margin: auto;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #f5f7fb;
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .page-title-section h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .page-title-section p {
+        margin: 7px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .logout-btn {
+        text-decoration: none;
+    }
+
+    .logout-btn button {
+        border: none;
+        background: #fff;
+        color: #374151;
+        padding: 10px 17px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #e5e7eb;
+        transition: 0.2s ease;
+    }
+
+    .logout-btn button:hover {
+        background: #fee2e2;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    /* Filter */
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e8ebf1;
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    box-shadow: 0px 0px 5px rgb(224, 224, 224);    
+    }
+
+    .filter-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .filter-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .filter-select {
+        min-width: 150px;
+        padding: 9px 34px 9px 12px;
+        border: 1px solid #d9dee8;
+        border-radius: 8px;
+        background: #fff;
+        color: #374151;
+        font-size: 14px;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .filter-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .drive-count {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+
+    .drive-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(310px, 1fr));
+        gap: 20px
+    }
+
+    /* Card */
+    .job-card {
+        background: #fff;
+        border: 1px solid #e8ebf1;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 5px 18px rgba(31, 41, 55, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .job-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(31, 41, 55, 0.10);
+    }
+
+    .job-card-header {
+        padding: 18px 19px;
+        border-bottom: 1px solid #eef0f4;
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .company-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4f46e5;
+        font-size: 18px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .company-info {
+        min-width: 0;
+    }
+
+    .company-name {
+        margin: 0;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 700
+    }
+
+    .job-title {
+        margin: 3px 0 0;
+        color: #101828;
+        font-size: 19px;
+        line-height: 1.3;
+        font-weight: 800
+    }
+
+    .job-card-body {
+        padding: 18px 19px;
+        flex: 1;
+    }
+
+    .job-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px 12px;
+        margin-bottom: 18px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px
+    }
+
+    .info-item {
+        padding: 12px;
+        background: #f8fafc;
+        border: 1px solid #eef2f6;
+        border-radius: 11px;
+        margin-bottom: 10px;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #667085;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em
+    }
+
+    .info-value {
+        display: block;
+        overflow: hidden;
+        color: #1d2939;
+        font-size: 13px;
+        font-weight: 700;
+        overflow-wrap: break-word;
+        word-break: break-word;    
+        white-space: pre-wrap;     
+        overflow-y: auto;
+    }
+    
+
+    .package-value {
+        color: #15803d;
+    }
+
+    .deadline-value {
+        color: #b45309;
+    }
+
+    .description-box {
+        background: #f8f9fc;
+        border-radius: 10px;
+        padding: 12px;
+        margin-top: 5px;
+    }
+
+    .description-box .info-label {
+        margin-bottom: 6px;
+    }
+
+    .description {
+        margin: 0;
+        color: #5f6878;
+        font-size: 13px;
+        line-height: 1.55;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .job-card-footer {
+        padding: 14px 19px;
+        border-top: 1px solid #eef0f4;
+        background: #fcfcfd;
+    }
+
+    .post-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        text-decoration: none;
+        border: none;
+        background: #4f46e5;
+        color: #fff;
+        padding: 11px 15px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .post-btn:hover {
+        background: #4338ca;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .expired-badge {
+        display: inline-block;
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 5px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 65px 25px;
+        text-align: center;
+        background: #fff;
+        border: 1px dashed #d0d5dd;
+        border-radius: 18px
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        margin: 0 auto 14px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background: #eef4ff;
+        font-size: 25px
+    }
+
+    .empty-state h2 {
+        margin: 0 0 7px;
+        color: #1d2939;
+        font-size: 19px
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: #667085;
+        font-size: 14px
+    }
+
+    .fixed-top-section {
+        padding: 0px 24px;
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 5px 24px 45px;
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        /* Ensures the flex child can scroll */
+    }
+
+    .drive-card {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #eaecf0;
+        border-radius: 18px;
+box-shadow: 0px 0px 5px rgb(209, 209, 209);
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease
+    }
+
+    .drive-card:hover {
+        transform: translateY(-4px);
+        border-color: #d0d5dd;
+        box-shadow: 0 16px 38px rgba(16, 24, 40, .11)
+    }
+
+    .drive-top {
+        padding: 21px 21px 17px;
+        background: linear-gradient(135deg, #f8faff 0%, #eef4ff 100%);
+        border-bottom: 1px solid #edf0f5
+    }
+
+    .company-row {
+        display: flex;
+        align-items: center;
+        gap: 13px
+    }
+
+    .company-avatar {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #315bea, #6848d8);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 800;
+        box-shadow: 0 7px 17px rgba(49, 91, 234, .22)
+    }
+
+    .drive-body {
+        padding: 20px 21px 21px
+    }
+
+    /* =========================
+   View JD Button
+   ========================= */
+
+    .view-jd-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 7px 10px;
+        border: 1px solid #c7d2fe;
+        border-radius: 7px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .view-jd-btn:hover {
+        background: #e0e7ff;
+        border-color: #818cf8;
+    }
+
+    .view-btn {
+        width: 100%;
+        min-height: 43px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #315bea, #5746d8);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 7px 16px rgba(49, 91, 234, .18);
+        transition: transform .18s ease, box-shadow .18s ease
+    }
+
+    .view-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(49, 91, 234, .25)
+    }
+
+    .view-btn:active {
+        transform: translateY(0)
+    }
+
+    .jd-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(3px);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .jd-modal {
+        width: min(520px, 95vw);
+        max-height: 75vh;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+        overflow: hidden;
+        animation: jdModalOpen 0.18s ease-out;
+    }
+
+    .jd-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 18px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+    }
+
+    .jd-modal-title {
+        margin: 0;
+        color: #172554;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .jd-close-btn {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: #64748b;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .jd-close-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .jd-full-description {
+        margin: 20px;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.7;
+        overflow-wrap: break-word;
+        word-break: break-word;    
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="job-drive-page">
+    
+    <div class="fixed-top-section">
+
+        <header class="topbar">
+
+            <div class="top-actions">
+
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                        </div>
+
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Placement officer'
+                                }}
+                            </div>
+                            <div class="profile-role">Placement officer</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Placement officer' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'PlacemStudentent officer
+                                    account'
+                                    }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+
+        <div class="page-header">
+
+            <div class="page-title-section">
+                <h1>Job Drives</h1>
+                <p>Manage and review recruitment opportunities before posting them to students.</p>
+            </div>
+
+        </div>
+
+
+        <!-- Filter -->
+        <form method="GET" action="{{ url_for('Placement_officer.Placement_officer_Recruiter_Job_drive') }}">
+
+            <div class="filter-card">
+
+                <div class="filter-left">
+
+                    <span class="filter-label">Filter by Status</span>
+
+                    <select class="filter-select" name="filter" onchange="this.form.submit()">
+
+                        <option value="Active" {% if request.args.get('filter') !='Expired' %} selected {% endif %}>
+                            Active
+                        </option>
+
+                        <option value="Expired" {% if request.args.get('filter')=='Expired' %} selected {% endif %}>
+                            Expired
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <span class="drive-count">
+                    {{ Jobs|length }} drive{% if Jobs|length != 1 %}s{% endif %}
+                </span>
+            </div>
+        </form>
+    </div>
+    <div class="scrollable-bottom-section">
+        {% if Jobs %}
+        <div class="drive-grid">
+            {% for job in Jobs %}
+            <article class="drive-card">
+                <div class="drive-top">
+                    <div class="company-row">
+                        {% if job[2] %}
+                        <img src="{{ url_for('static', filename='Images/company/logo/' + job[2]) }}" alt="Company Logo"
+                            style="max-height: 46px; max-width: 46px;">
+                        {% else %}
+                        <div class="company-avatar">{{ job[0][0]|upper if job[0] else 'C' }}</div>
+                        {% endif %}
+                        <div>
+                            <p class="company-name">{{ job[0] }}</p>
+                            <h2 class="job-title">{{ job[1].title }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drive-body">
+                    <div class="info-grid">
+                        <div class="info-item"><span class="info-label">Package</span><span class="info-value">{{
+                                job[1].package }}</span></div>
+                        <div class="info-item"><span class="info-label">Location</span><span class="info-value">{{
+                                job[1].location }}</span></div>
+                        <div class="info-item"><span class="info-label">Minimum CGPA</span><span class="info-value">{{
+                                job[1].CGPA }}</span></div>
+                        <div class="info-item"><span class="info-label">Vacancies</span><span class="info-value">{{
+                                job[1].Vacancies }}</span></div>
+                        <div class="info-item"><span class="info-label">Graduation Year</span><span
+                                class="info-value">{{
+                                job[1].Graduation_Year }}</span></div>
+                        <div class="info-item"><span class="info-label">Deadline</span><span class="info-value">{{
+                                job[1].deadline.strftime("%d %b %Y")}}</span></div>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Eligible Branches</span>
+                        <span class="info-value">{{ job[1].Eligible_Branches }}</span>
+                    </div>
+
+                    <div
+                        style="font-size: 11px; font-weight: 600;  display: flex; align-items: center; justify-content: center; white-space: nowrap; margin-bottom: 10px;">
+                        <button type="button" class="view-jd-btn" onclick="openJD('{{job[1].id }}')">
+                            <i class="fa-solid fa-file-lines"></i>
+                            View Job Description
+                        </button>
+                    </div>
+
+                    {% if request.args.get('filter') != 'Expired' %}
+                    <form method="post" action="{{ url_for('Placement_officer.Post_Job_Drive', mode='post_job_drive') }}">
+                        <input type="hidden" name="drive_id" value="{{ job[1].id }}">
+                        <button class="view-btn" type="submit">Post Job Drive →</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </article>
+
+            <div class="jd-overlay" id="jdModal{{  job[1].id  }}" onclick="closeJDOutside(event, '{{ job[1].id }}')">
+                <div class="jd-modal">
+                    <!-- Header -->
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">
+                            Job Description
+                        </h3>
+                        <button type="button" class="jd-close-btn" onclick="closeJD('{{ job[1].id }}')">
+                            &times;
+                        </button>
+                    </div>
+                    <!-- Body -->
+
+                    <div class="jd-full-description">
+                        {{ job[1].description }}
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h2>No Job Drives Found</h2>
+            <p>There are currently no job drives available for applicant management.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function openJD(jobId) {
+        const modal = document.getElementById("jdModal" + jobId);
+        if (modal) {
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+    }
+    function closeJD(jobId) {
+        const modal = document.getElementById("jdModal" + jobId);
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "";
+        }
+    }
+    function closeJDOutside(event, jobId) {
+        if (event.target === event.currentTarget) {
+            closeJD(jobId);
+        }
+    }
+    /* Close using Escape key */
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            document.querySelectorAll(".jd-overlay").forEach(function (modal) {
+                modal.style.display = "none";
+            });
+            document.body.style.overflow = "";
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,1007 @@
+{% extends "Placement_office_Base.html" %}
+
+{% block title %}Placement Officer Dashboard{% endblock %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    /* ================================
+       Reports Page
+       ================================ */
+
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+    .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: 5px;
+    }
+
+
+    .reports-page {
+        padding: 0px 20px 0px;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-width: 1500px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .reports-header {
+
+        margin-bottom: 20px;
+    }
+
+    .reports-header-content h1 {
+        font-size: 30px;
+        font-weight: 700;
+        color: #172033;
+        letter-spacing: -0.5px;
+    }
+
+    .reports-header-content p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .logout-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 9px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: #374151;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .logout-btn:hover {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    /* Report Navigation */
+    .report-navigation {
+        display: flex;
+        gap: 10px;
+        padding: 7px;
+        background: #f3f4f6;
+        border-radius: 12px;
+        margin-bottom: 22px;
+        width: fit-content;
+    }
+.nav-tab-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 18px;
+        border-radius: 8px;
+        color: #4b5563;
+        background: transparent; 
+        text-decoration: none;   
+        font-family: inherit;    
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tab-btn:hover, 
+    .nav-tab-btn.active-tab {
+        background: #ffffff;
+        color: #2563eb;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+    /* Report Card */
+    .report-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .report-card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #eef0f3;
+        background: #fafbfc;
+    }
+
+    .report-card-header h2 {
+        margin: 0 0 5px;
+        font-size: 18px;
+        color: #172033;
+        font-weight: 700;
+    }
+
+    .report-card-header p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    /* Filters */
+    .filter-form {
+        padding: 24px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 18px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .filter-group select {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #374151;
+        font-size: 14px;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-group select:hover {
+        border-color: #9ca3af;
+    }
+
+    .filter-group select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    /* Generate Button */
+    .generate-btn {
+        height: 42px;
+        padding: 0 20px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .generate-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 12px rgba(37, 99, 235, 0.22);
+    }
+
+    .generate-btn:active {
+        transform: translateY(0);
+    }
+
+    /* PDF Preview */
+    .preview-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 22px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fafbfc;
+    }
+
+    .preview-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .preview-title h3 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: #374151;
+    }
+
+    .preview-status {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .pdf-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .pdf-frame-wrapper {
+        padding: 16px;
+        background: #f3f4f6;
+    }
+
+    .pdf-frame-wrapper iframe {
+        display: block;
+        width: 100%;
+        height: 800px;
+        border: 1px solid #dfe3e8;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    /* Empty State */
+    .empty-report {
+        padding: 50px 20px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .empty-report h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        color: #374151;
+    }
+
+    .empty-report p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+        .filter-grid {
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+        }
+    }
+
+    @media (max-width: 700px) {
+        .reports-page {
+            padding: 20px 16px 30px;
+        }
+
+        .reports-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .report-navigation {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .report-navigation a {
+            white-space: nowrap;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .generate-btn {
+            width: 100%;
+        }
+
+        .pdf-frame-wrapper iframe {
+            height: 600px;
+        }
+    }
+
+    .filter-container1 {
+        position: relative;
+    }
+
+    .filter-button1 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 15px;
+        border: 1px solid #e7eaf0;
+        border-radius: 11px;
+        background: #fff;
+        color: #344054;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+        font-size: 14px;
+        font-weight: 650;
+    }
+
+    .filter-button1:hover,
+    .filter-button1.active {
+        border-color: #b8caf5;
+        background: #f7faff;
+        color: #1d4ed8;
+    }
+
+    .filter-button1 svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .filter-popup1 {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        z-index: 1000;
+        display: none;
+        width: 315px;
+        padding: 20px;
+        border: 1px solid #e7eaf0;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, .14);
+    }
+
+    .filter-popup1.show {
+        display: block;
+        animation: filterIn .16s ease-out;
+    }
+
+    @keyframes filterIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-header1 {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .filter-header1 h3 {
+        margin: 0 0 4px;
+        color: #172033;
+        font-size: 17px;
+    }
+
+    .filter-header1 p {
+        margin: 0;
+        color: #667085;
+        font-size: 12px;
+    }
+
+    .filter-group1 {
+        margin-bottom: 15px;
+    }
+
+    .filter-group1 label {
+        display: block;
+        margin-bottom: 7px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .filter-group1 select {
+        box-sizing: border-box;
+        width: 100%;
+        height: 40px;
+        padding: 0 11px;
+        border: 1px solid #d9dee8;
+        border-radius: 9px;
+        outline: none;
+        background: #fff;
+        color: #344054;
+        font-size: 13px;
+    }
+
+    .filter-group1 select:focus {
+        border-color: #8daeff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
+    }
+
+    .filter-actions1 {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .apply-button1,
+    .reset-button1 {
+        flex: 1;
+        height: 40px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 650;
+        border: none;
+    }
+
+    .apply-button1 {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .apply-button1:hover {
+        background: #1d4ed8;
+    }
+
+    .reset-button1 {
+        border: 1px solid #d9dee8;
+        background: #fff;
+        color: #475467;
+    }
+
+    .reset-button1:hover {
+        background: #f8fafc;
+    }
+</style>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="reports-page">
+
+    <div class="fixed-top-section">
+
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                        </div>
+
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Placement officer'
+                                }}
+                            </div>
+                            <div class="profile-role">Placement officer</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Placement officer' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Placement officer account'
+                                    }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+
+
+
+    <!-- Report Navigation -->
+    <div style="display: flex; justify-content: space-between;">
+        <!-- Report Navigation -->
+    <!-- Report Navigation -->
+    <div class="report-navigation">
+
+        <a href="{{ url_for('Placement_officer.Reports', report='student_report') }}" 
+           class="nav-tab-btn {% if report == 'student_report' %}active-tab{% endif %}">
+            Student Report
+        </a>
+            
+        <a href="{{ url_for('Placement_officer.Reports', report='Company_Report') }}" 
+           class="nav-tab-btn {% if report == 'Company_Report' %}active-tab{% endif %}">
+            Company Report
+        </a>
+
+        <a href="{{ url_for('Placement_officer.Reports', report='Placement_Report') }}" 
+           class="nav-tab-btn {% if report == 'Placement_Report' %}active-tab{% endif %}">
+            Placement Report
+        </a>
+
+    </div>
+
+        {% if report == 'student_report' %}
+
+        <form method="POST" action="{{ url_for('Placement_officer.Reports', report='student_report') }}" target="pdf_frame">
+            <div class="filter-container1">
+                <button type="button" class="filter-button1" id="filterButton" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="4 5 20 5 14 12 14 19 10 21 10 12 4 5"></polygon>
+                    </svg>
+                    Filters
+                </button>
+                <div class="filter-popup1" id="filterPopup">
+                    <div class="filter-header1">
+                        <div>
+                            <h3>Filters: </h3>
+                        </div>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="resume-status">Resume status</label>
+                        <select name="Resume_Status" id="resume-status">
+                            <option value="">All</option>
+                            <option value="Pending" {% if request.args.get('Resume_Status')=='Pending' %}selected{%
+                                endif %}>
+                                Pending</option>
+                            <option value="Verified" {% if request.args.get('Resume_Status')=='Verified' %}selected{%
+                                endif %}>
+                                Verified</option>
+                            <option value="Rejected" {% if request.args.get('Resume_Status')=='Rejected' %}selected{%
+                                endif %}>
+                                Rejected</option>
+                            <option value="Reuploaded" {% if request.args.get('Resume_Status')=='Reuploaded'
+                                %}selected{% endif %}>Reuploaded</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="graduation-year">Graduation year</label>
+                        <select name="Year" id="graduation-year">
+                            <option value="">All</option>
+                            {% for Year in Years %}
+                            <option value="{{ Year }}" {% if request.args.get('Year')|string==Year|string %}selected{%
+                                endif %}>
+                                {{ Year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="branch">Branch</label>
+                        <select name="Branch" id="branch">
+                            <option value="">All</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}" {% if request.args.get('Branch')|string==branch|string
+                                %}selected{% endif %}>{{ branch }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="placement-status">Placement status</label>
+                        <select name="Placement_Status" id="placement-status">
+                            <option value="">All</option>
+                            <option value="Open to Placement" {% if
+                                request.args.get('Placement_Status')=='Open to Placement' %}selected{% endif %}>Open to
+                                Placement</option>
+                            <option value="Placed" {% if request.args.get('Placement_Status')=='Placed' %}selected{%
+                                endif %}>
+                                Placed</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions1">
+                        <button type="button" class="reset-button1" id="resetFilters">Reset</button>
+                        <button type="submit" class="apply-button1">Apply Filters</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% elif report == 'Company_Report'%}
+        <form method="POST" action="{{ url_for('Placement_officer.Reports', report='Company_Report') }}" target="pdf_frame">
+            <div class="filter-container1">
+                <button type="button" class="filter-button1" id="filterButton" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="4 5 20 5 14 12 14 19 10 21 10 12 4 5"></polygon>
+                    </svg>
+                    Filters
+                </button>
+                <div class="filter-popup1" id="filterPopup">
+                    <div class="filter-header1">
+                        <div>
+                            <h3>Filters: </h3>
+                        </div>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="company-name">Company Name</label>
+                        <select name="company" id="company-name">
+                            <option value="">All</option>
+                            {% for company in Company_Name %}
+                            <option value="{{ company }}" {% if request.args.get('company')|string==company|string
+                                %}selected{% endif %}> {{ company }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="industry">Industry</label>
+                        <select name="Industry" id="industry">
+                            <option value="">All</option>
+                            {% for I in Industry %}
+                            <option value="{{ I }}" {% if request.args.get('Industry')|string==I|string %}selected{%
+                                endif %}>{{ I }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="company-year">Year</label>
+                        <select name="Year" id="company-year">
+                            <option value="">All</option>
+                            {% for Year in Years %}
+                            <option value="{{Year}}" {% if request.args.get('Year')|string==Year|string %}selected{%
+                                endif %}>{{ Year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-actions1">
+                        <button type="button" class="reset-button1" id="resetFilters">Reset</button>
+                        <button type="submit" class="apply-button1">Apply Filters</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% elif report == 'Placement_Report' %}
+        <form method="POST" action="{{ url_for('Placement_officer.Reports', report='Placement_Report') }}" target="pdf_frame">
+            <div class="filter-container1">
+                <button type="button" class="filter-button1" id="filterButton" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="4 5 20 5 14 12 14 19 10 21 10 12 4 5"></polygon>
+                    </svg>
+                    Filters
+                </button>
+                <div class="filter-popup1" id="filterPopup">
+                    <div class="filter-header1">
+                        <div>
+                            <h3>Filters: </h3>
+                        </div>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="placement-company">Company Name</label>
+                        <select name="company" id="placement-company">
+                            <option value="">All</option>
+                            {% for company in Company_Name %}
+                            <option value="{{ company }}" {% if request.args.get('company')|string==company|string
+                                %}selected{% endif %}> {{ company }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="placement-branch">Branch</label>
+                        <select name="branches" id="placement-branch">
+                            <option value="">All</option>
+                            {% for I in branches %}
+                            <option value="{{ I }}" {% if request.args.get('branches')|string==I|string %}selected{%
+                                endif %}>{{ I }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group1">
+                        <label for="placement-year">Year</label>
+                        <select name="Year" id="placement-year">
+                            <option value="">All</option>
+                            {% for Year in Years %}
+                            <option value="{{Year}}" {% if request.args.get('Year')|string==Year|string %}selected{%
+                                endif %}>{{ Year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-actions1">
+                        <button type="button" class="reset-button1" id="resetFilters">Reset</button>
+                        <button type="submit" class="apply-button1">Apply Filters</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+    <div class="scrollable-bottom-section">
+
+    <!-- ==========================
+     PDF PREVIEW
+     ========================== -->
+
+    <div class="preview-card">
+
+        <div class="preview-header">
+
+            <div class="preview-title">
+
+                <div class="pdf-icon">
+                    PDF
+                </div>
+
+                <h3>Report Preview</h3>
+
+            </div>
+
+          
+
+        </div>
+
+        <div class="pdf-frame-wrapper">
+
+            <iframe name="pdf_frame" title="Generated PDF Report Preview"></iframe>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+<script>
+    const filterButton = document.getElementById("filterButton");
+    const filterPopup = document.getElementById("filterPopup");
+    const resetFilters = document.getElementById("resetFilters");
+
+    if (filterButton && filterPopup) {
+        filterButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            const isOpen = filterPopup.classList.toggle("show");
+            filterButton.classList.toggle("active", isOpen);
+            filterButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        filterPopup.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+
+        document.addEventListener("click", function () {
+            filterPopup.classList.remove("show");
+            filterButton.classList.remove("active");
+            filterButton.setAttribute("aria-expanded", "false");
+        });
+    }
+
+    if (resetFilters) {
+        resetFilters.addEventListener("click", function () {
+            const filterIds = [
+                "resume-status", "graduation-year", "branch", 
+                "placement-status", "placement-statuss", 
+                "company-name", "industry", "company-year", 
+                "placement-company", "placement-year", "placement-branch"
+            ];
+
+            filterIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = "";
+                }
+            });
+        });
+    }
+
+    window.addEventListener('load', function() {
+        const pdfForm = document.querySelector('form[target="pdf_frame"]');
+        
+        if (pdfForm) {
+            setTimeout(() => {
+                pdfForm.submit();
+            }, 100);
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,957 @@
+{%extends "Student_Base.html" %}
+{% block style %}
+{{super()}}
+<style>
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+    .welcome-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .welcome-row h2 {
+        margin: 0;
+        font-size: clamp(24px, 2.3vw, 32px);
+        letter-spacing: -.7px;
+        color: var(--text);
+    }
+
+    .welcome-row p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+
+    .hero {
+        min-height: 150px;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(100deg, #0f46fc 30%, #d144a9 60%, #fc8450 100%);
+        box-shadow: 0 12px 30px rgba(89, 52, 225, .14);
+        margin-bottom: 20px;
+    }
+
+    .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, transparent 45%, rgba(255, 255, 255, .07));
+        opacity: .7;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        padding: 28px 34px;
+        width: 62%;
+        color: #fff;
+    }
+
+    .hero-content h2 {
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: -.4px;
+    }
+
+    .hero-content p {
+        margin: 9px 0 0;
+        max-width: 460px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, .9);
+    }
+
+    .hero-image {
+        position: absolute;
+        right: 12px;
+        bottom: 0;
+        height: 154px;
+        width: auto;
+        z-index: 2;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 15px rgba(35, 20, 100, .16));
+    }
+
+
+
+
+    .overview {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cardbox {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        height: 100px;
+        display: flex;
+        gap: 10px;
+        /* Space between icon and text */
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        /* Stacks the text vertically */
+        justify-content: center;
+        /* Centers the text inside its own block */
+        height: 55px;
+        margin-top: 7px;
+        align-items: center;
+        /* <-- This centers the text horizontally */
+        gap: 3px;
+
+    }
+
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.65fr) minmax(340px, 1fr);
+        gap: 18px;
+        margin-bottom: 18px;
+
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid #e9e8f3;
+        border-radius: 17px;
+        overflow: hidden;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .panel-header {
+        padding: 17px 19px 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .view-all {
+        color: #4f2bea;
+        ;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .view-all:hover {
+        text-decoration: underline;
+    }
+
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        padding: 0 12px 10px;
+    }
+
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        min-width: 600px;
+    }
+
+    .dashboard-table th {
+        background: #f7f7fc;
+        color: #656980;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 750;
+        padding: 10px 9px;
+        border-bottom: 1px solid #e9e8f3;
+        white-space: nowrap;
+    }
+
+    .dashboard-table td {
+        padding: 11px 9px;
+        border-bottom: 1px solid #f0eff6;
+        color: #272a43;
+        vertical-align: middle;
+    }
+
+    .dashboard-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .company-cell {
+        font-weight: 750;
+        color: #1d2040;
+    }
+
+    .join-button,
+    .details-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 750;
+        color: #4f2bea;
+        background: #f1efff;
+        border: 1px solid #ddd7ff;
+        white-space: nowrap;
+    }
+
+    .join-button:hover,
+    .details-button:hover {
+        background: #e7e2ff;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 99px;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-applied {
+        color: #2878e8;
+        background: #eaf2ff;
+    }
+
+    .status-shortlisted {
+        color: #0c9b65;
+        background: #e7faf2;
+    }
+
+    .status-interview {
+        color: #7852dc;
+        background: #f0ebff;
+    }
+
+    .status-selected {
+        color: #c51d60;
+        background: #ffe9f1;
+    }
+
+    .status-rejected {
+        color: #d82f3e;
+        background: #ffeaec;
+    }
+
+    .status-default {
+        color: #6d7083;
+        background: #f1f1f5;
+    }
+
+    /* Job drives */
+    .jobs-panel {
+        margin-bottom: 18px;
+    }
+
+    .job-table {
+        min-width: 700px;
+    }
+
+    .deadline {
+        font-weight: 750;
+        color: #e54657;
+    }
+
+    .empty-state {
+        padding: 25px 18px;
+        text-align: center;
+        color: #73778f;
+        font-size: 13px;
+    }
+
+    .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        padding: 5px;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+</style>
+{%endblock%}
+
+{%block main%}
+<div style="padding: 0 20px 0px; height: 100vh; display: flex; flex-direction: column; overflow: hidden;  ">
+    <div class="fixed-top-section">
+        <header class="topbar">
+            <div>
+                <h1>Welcome, {{ current_user.name if current_user.name else 'Student' }}! 👋</h1>
+            </div>
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        {% if student.profile_pic is none %}
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                        </div>
+                        {% else %}
+                        <div class="profilepic">
+                            <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                style="width: 36px; height: 36px; object-fit: cover;">
+                        </div>
+                        {% endif %}
+
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}</div>
+                            <div class="profile-role">Student</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            {% if student.profile_pic is none %}
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                            </div>
+                            {% else %}
+                            <div class="profilepic">
+                                <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                    style="width: 36px; height: 36px; object-fit: cover;">
+                            </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Student' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
+                            </div>
+                        </div>
+
+                        <a class="profile-action" href="{{ url_for('student.Student_Profile') }}">
+                            <span class="action-icon">👤</span>
+                            <span>My Profile</span>
+                        </a>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+    <div class="scrollable-bottom-section">
+        <!-- Hero banner -->
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Dream. Prepare. Get Placed.</h2>
+                <p>Explore new opportunities, keep your profile updated and take the next step toward your dream career.
+                </p>
+            </div>
+            <img class="hero-image"
+                src="{{ url_for('static', filename='Images/student-illustration-transparent.png') }}"
+                alt="Student working on laptop">
+        </section>
+
+        <div class='overview'>
+
+            <div class='cardbox'>
+                <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
+                        <defs>
+                            <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#643fe3" />
+                                <stop offset="100%" stop-color="#2b14a7" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#purpleGradient)" />
+                        <g fill="#ffffff">
+                            <circle cx="50" cy="38" r="13" />
+                            <path
+                                d="M 50,57 C 34,57 28,68 28,74 A 2,2 0 0 0 30,76 L 70,76 A 2,2 0 0 0 72,74 C 72,68 66,57 50,57 Z" />
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Dedicated block to force vertical stacking -->
+                <div class='content' style="margin-top: 20px;">
+                    <div>
+                        Profile status
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800;">
+                        {{profile_percentage}} %
+                    </div>
+                </div>
+            </div>
+
+            <div class='cardbox'>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="55px" height="55px"
+                    style="margin-top: 22px; margin-left: 10px;">
+                    <defs> <!-- Background Gradient matching the vibrant green app icon -->
+                        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#2ecc71" />
+                            <stop offset="100%" stop-color="#27ae60" />
+                        </linearGradient> <!-- Soft Drop Shadow for the main background squircle -->
+                        <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
+                            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#1e7e43" flood-opacity="0.4" />
+                        </filter>
+                    </defs> <!-- Background Squircle (Rounded Corner Square) -->
+                    <rect x="32" y="32" width="448" height="448" rx="115" fill="url(#bgGrad)"
+                        filter="url(#softShadow)" /> <!-- Document Sheet Container Group -->
+                    <g transform="translate(146, 126)"> <!-- White Document Body with a Dog-Ear folded corner -->
+                        <!-- Path traces the main sheet and cuts inwards at the top right for the fold -->
+                        <path
+                            d="M 20,0 L 150,0 L 220,70 L 220,240 A 20,20 0 0 1 200,260 L 20,260 A 20,20 0 0 1 0,240 L 0,20 A 20,20 0 0 1 20,0 Z"
+                            fill="#ffffff" /> <!-- Dog-Ear Folded Corner Shadow & Flap -->
+                        <path d="M 150,0 L 150,50 A 20,20 0 0 0 170,70 L 220,70 Z" fill="#e0e0e0" />
+                        <!-- Greener Internal Lines -->
+                        <!-- Stylized text lines utilizing a matching dark green hue (#27ae60) with rounded caps -->
+                        <g stroke="#27ae60" stroke-width="16" stroke-linecap="round"> <!-- Top Line -->
+                            <line x1="40" y1="130" x2="180" y2="130" /> <!-- Middle Line -->
+                            <line x1="40" y1="185" x2="120" y2="185" />
+                        </g>
+                    </g>
+                </svg>
+
+                <div class='content' style="margin-top: 19px;">
+                    <div>
+                        Resume status
+                    </div>
+                    <div style="font-size: 16px; font-weight: 700;">
+                        {{resume_status}}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class='cardbox'>
+
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="55" height="55"
+                    style="margin-top: 22px; margin-left: 10px;">
+                    <defs> <!-- Background Gradient: Smooth vibrant blue -->
+                        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#3A88F6" />
+                            <stop offset="100%" stop-color="#1261D4" />
+                        </linearGradient> <!-- Subtle Drop Shadow for the Inner Document Paper Sheet -->
+                        <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.15" />
+                        </filter>
+                    </defs> <!-- 1. Main Squircle/Rounded Background Container -->
+                    <rect x="32" y="32" width="448" height="448" rx="110" ry="110" fill="url(#bgGradient)" />
+                    <!-- 2. White Paper Sheet with Top-Right Folded Corner -->
+                    <!-- Coordinates map out the standard Google document shape with a clipped top-right corner -->
+                    <path
+                        d="M 166 140 L 290 140 L 346 196 L 346 372 A 12 12 0 0 1 334 384 L 166 384 A 12 12 0 0 1 154 372 L 154 152 A 12 12 0 0 1 166 140 Z"
+                        fill="#FFFFFF" filter="url(#dropShadow)" />
+                    <!-- 3. Document Inner Text Alignment Lines (The Blue Stripes) -->
+                    <g fill="#2B76E6"> <!-- Top Long Line -->
+                        <rect x="186" y="230" width="130" height="10" rx="5" /> <!-- Middle Long Line -->
+                        <rect x="186" y="270" width="130" height="10" rx="5" /> <!-- Bottom Medium Line -->
+                        <rect x="186" y="310" width="90" height="10" rx="5" />
+                    </g>
+                </svg>
+                <div class='content' style="margin-top: 22px;">
+                    <div>
+                        Applications
+                    </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                        {{total_applications}}
+                    </div>
+                </div>
+            </div>
+
+            <div class='cardbox'>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="55" height="55"
+                    style="margin-top: 22px; margin-left: 10px;">
+                    <defs> <!-- Vibrant, warm linear gradient matching the original image backdrop -->
+                        <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#FFBA3A" />
+                            <stop offset="40%" stop-color="#FFA01A" />
+                            <stop offset="100%" stop-color="#F27A00" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="46" y="46" width="420" height="420" rx="96" ry="96" fill="url(#orangeGradient)" />
+                    <g fill="#FFFFFF">
+                        <!-- The Calendar silhouette combines: - The main backplate with a distinct header divider indentation - The two overarching top binder rings/pegs -->
+                        <path
+                            d=" M 194,184 L 194,166 C 194,154 202,146 212,146 C 222,146 230,154 230,166 L 230,184 L 282,184 L 282,166 C 282,154 290,146 300,146 C 310,146 318,154 318,166 L 318,184 L 348,184 C 366,184 378,196 378,214 L 378,230 L 134,230 L 134,214 C 134,196 146,184 164,184 Z M 134,246 L 378,246 L 378,354 C 378,372 366,384 348,384 L 164,384 C 146,384 134,372 134,354 Z" />
+                    </g>
+                    <g fill="#E67300"> <!-- Row 1 -->
+                        <circle cx="190" cy="286" r="13" />
+                        <circle cx="256" cy="286" r="13" />
+                        <circle cx="322" cy="286" r="13" /> <!-- Row 2 -->
+                        <circle cx="190" cy="336" r="13" />
+                        <circle cx="256" cy="336" r="13" />
+                        <circle cx="322" cy="336" r="13" />
+                    </g>
+                </svg>
+                <div class='content' style="margin-top: 22px;">
+                    <div>
+                        Interviews
+                    </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                        {{upcoming_interview_count}}
+                    </div>
+                </div>
+            </div>
+
+            <div class='cardbox'>
+
+                <svg width="60" height="60" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"
+                    style="margin-top: 20px; margin-left: 10px;">
+                    <circle cx="64" cy="64" r="60" fill="#fdfaca" />
+                    <g transform="translate(25.6, 25.6) scale(0.6)">
+                        <path
+                            d="M97.12 59.35c2.22-1.83 15.04-9.76 22.06-16.44c5.48-5.22 7.6-18.85-.83-25.48c-10.96-8.61-21.48.43-21.48.43s-.92-5.11-7.32-8.11c-8.06-3.78-18.27-5.19-27.66-5.07c-9.1.11-17.48 1.21-24.92 4.86c-6.66 3.27-7.06 7.93-7.06 7.93s-8.74-8.35-19.45-1.57C-.24 22.69 2.83 36.29 7.98 42c6.71 7.44 14.77 11.23 18.43 13.97c3.65 2.74 7.15 5.35 7.15 7.7c0 2.35-1.04 2.87-1.44 2.74c-.39-.13-1.08-2.42-2.87-1.44c-2.44 1.35-1.7 6.79 3.39 7.31c4.93.51 5.87-4.7 5.87-4.7l.78-5.09l8.09 5.61l8.87 7.31l-.26 6.26s-.39 4.83-2.74 9.01s-6.13 8.35-6.13 8.35l-.12 3.78l32.89-.78l-1.04-3.65s-4.24-4.66-6.79-9.66c-1.82-3.58-2.11-7.19-2.11-7.19l-.08-8.98l17.07-10.46s1.83 1.44 1.57 1.96s-.32 5.85 3.78 7.83c4.05 1.96 7.31-.52 6.92-3.92c-.39-3.39-2.48-2.22-3.13-1.7c-.65.52-2.09.65-2.48-1.31c-.4-1.94 1.3-3.77 3.52-5.6zM13.09 40.89l-3.91-11.9l4.73-6.19l5.3-1.55s6.77 5.05 7.01 5.46c.24.41 4.32 8.8 4.32 8.8l5.38 19.48l-22.83-14.1zm76.86 15.65c.08-.41 5.05-20.87 5.05-20.87c0-.24 3.5-1.87 3.5-2.2c0-.33 6.36-10.68 6.36-10.68l10.6.41l2.2 10.51l-5.3 8.72c.01.01-22.49 14.51-22.41 14.11z"
+                            fill="#fec417"></path>
+                        <path
+                            d="M119.92 30.64c-.78-9.32-10-11.55-13.79-10.2s-6.25 3.88-7.09 7.48c-.68 2.91-1.36 4.85-2.14 5.15c-.86.32-1.65.19-1.65.19s-.14-6.3-.1-8.84c.1-5.24 1.7-6.58 1.7-6.58s-.34-1.77-1.02-2.75c-.68-.97-1.94-2.23-1.94-2.23s.29 2.52-.97 3.11s-2.62-.29-2.62-.29l1.26 5.24s-2.04 26.12-2.23 26.7c-.19.58-7.86 13.88-7.86 13.88s-4.47 4.18-6.6 5.15c-2.14.97-3.98 3.5-12.23 3.59c-8.25.1-15.34-6.41-15.34-6.41l-7.09-6.8l-5.24-15.44l-.78-15.73l.33-5.72l.23-2.39l-.37-1.21s-.68.68-1.94.39c-1.26-.29-1.75-1.94-1.75-1.94s-.49.78-.58 1.17c-.1.39-.2 1.29-.2 1.29s1.36 1.43 1.65 3.47c.29 2.04-.1 10.49-1.55 10.29c-1.46-.19-.98-7.28-6.51-10c-4.79-2.36-11.94-1.65-14.86 4.27c-2.91 5.92-.78 12.91 8.35 19.42s18.85 11.98 20.39 17.2c1.84 6.21-2.33 9.9-2.33 9.9s3.03-.42 4.52-3.67c.48-1.05.66-2.58.73-3.49c3.45 4.5 8.04 8.31 14.12 10.15c2.3.79 4.89 1.19 8.49 1.19c.52 0 1.03-.02 1.54-.04c4.21-.15 7.81-.94 11.3-2.67c4.71-2.18 8.36-5.51 11.18-9.29c-.08.9.47 3.14 1.52 4.91c1.84 3.11 4.95 3.3 4.95 3.3s-4.27-2.52-3.4-8.54c.87-6.02 4.85-8.16 10.87-12.04c6.04-3.89 19.82-11.85 19.05-21.17zM21.27 43.85c-2.71-1.91-7.46-4.46-9.42-8.35c-2.61-5.19-.49-11.46 4.47-12.23c10.3-1.62 10.49 11.17 11.17 12.72c.68 1.55 2.62 1.65 2.62 1.65s.07.86.35 2.52c.01.05.02.09.02.14l.03.15c.19 1.13.46 2.54.84 4.15l.03.12c.21.91.43 1.77.66 2.56c.46 1.66 1.02 3.45 1.71 5.29c-1-.68-6.73-4.65-12.48-8.72zm93.31-7.19c-2.15 3.48-6.5 6.07-9.71 8.25c-4.14 2.81-10.3 7.03-12.04 8.21c.4-1.06.75-2.11 1.07-3.14c.52-1.36 1.07-3.02 1.45-4.81c1-4.7 1.17-8.81 1.17-8.81s2.04.58 3.3-.78c1.26-1.36 1.73-5.58 2.91-7.57c1.84-3.11 5.53-6.31 11.07-2.43c3.2 2.25 3.32 6.96.78 11.08z"
+                            fill="#ffa828"></path>
+                        <path
+                            d="M60.52 79.31l5.65-.07s.15 6.17 1.04 10.77c.89 4.61 2.08 9.73 2.08 9.73s-11.51 3.86-11.44-.3s1.78-12.26 1.78-12.26s1.04-9.65.89-7.87z"
+                            fill="#ffa828"></path>
+                        <path
+                            d="M51.04 15.19s6.29-.71 12.14-.62s11.87 1.24 11.87 1.24s-.35 19.58-1.42 30.57c-1.06 10.99-5.22 19.22-6.33 21.55c-1.07 2.26-1.85 3.47-1.85 3.47l-5.64-.66l-9.75-19.58l.98-35.97z"
+                            fill="#ffa828"></path>
+                        <path
+                            d="M43.51 18.12s1.77-.89 4.34-1.86c2.33-.88 4.43-1.15 4.43-1.15s.06 12.98.27 22.24c.18 7.89 3.1 20.82 4.52 24.28c1.42 3.46 3.98 8.74 3.98 8.74s-5.15-.74-8.32-4.76c-1.67-2.12-9.48-18.52-9.75-29.33s.79-18.43.53-18.16z"
+                            fill="#ffefab"></path>
+                        <path
+                            d="M40.58 19.62c-.18.53-1.59 11.7.62 22.06s5.48 17.45 7.64 20.26c1.92 2.49 3.17 3.67 3.88 3.67s-2.92-8.59-4.61-15.33c-1.68-6.73-2.57-14.8-2.75-18.78c-.18-3.99-.35-14.27-.35-14.27s-1.95.89-2.39 1.15c-.44.27-2.04 1.24-2.04 1.24z"
+                            fill="#fffcfd"></path>
+                        <path
+                            d="M53.34 99.01s3.81-6.2 4.61-10.9c.8-4.7 1.24-8.86 1.24-8.86l2.36.1s-.23 6.81-.5 11.42s-1.06 9.13-1.06 9.13l-6.65-.89z"
+                            fill="#ffefab"></path>
+                        <path
+                            d="M56.27 75.41s1.77-1.73 6.64-1.73s6.96 1.87 6.96 1.87l.13 6.01s-3.24-1.01-7.18-1.06c-3.28-.04-6.81 1.18-6.81 1.18l.26-6.27z"
+                            fill="#d1701c"></path>
+                        <path
+                            d="M35 15.72c.82-.76 8.68-6.66 27.29-6.82c20.02-.18 27.53 5.62 28 5.94c.53.35 1.15 1.95.89 2.66c-.27.71-.8.97-2.3.35c-1.51-.62-8.95-6.05-26.85-5.49c-17.19.53-24.48 5.76-25.25 6.2c-.62.35-1.77.44-2.3-.27c-.54-.7-.01-2.07.52-2.57z"
+                            fill="#d1701c"></path>
+                        <path
+                            d="M91.18 19.89c-2.3.18-.71 18.7-5.58 30.3c-5.22 12.41-11.88 15.95-11.61 16.66c.27.71 6.79-1.26 10.9-7.09c3.81-5.4 6.11-10.19 7.18-16.57c1.05-6.38 1.67-23.5-.89-23.3z"
+                            fill="#d1701c"></path>
+                        <path
+                            d="M34.51 22.01c-.58-.03.01 9.21-.93 13.27c-.36 1.56-1.24 1.88-1.33 2.23c-.09.35 1.93 12.24 5.32 17.46c3.28 5.05 9.75 11.34 10.81 10.28c1.06-1.06-4.7-4.61-8.59-12.32c-2.24-4.42-4.52-11.08-4.61-18.7c-.06-5.04.57-12.15-.67-12.22z"
+                            fill="#d1701c"></path>
+                        <path
+                            d="M86.77 112.71l-.01-14.29H40.89c.14 0 .03 11.62.01 14.34h-6.52v10.35h58.25v-10.35l-5.86-.05z"
+                            fill="#865c50"></path>
+                        <path
+                            d="M55.59 105.93c-1.13-.05-2.43.18-2.48 1.58s-.05 5.45-.05 6.22c0 .77.63 1.44 2.21 1.49c1.58.05 16.41 0 17.45 0c1.04 0 1.58-.9 1.62-1.8c.05-.9-.05-4.69-.05-5.72c0-1.71-1.53-1.71-2.57-1.71c-1.12-.02-16.13-.06-16.13-.06z"
+                            fill="#fcc219"></path>
+                    </g>
+                </svg>
+                <div class='content' style="margin-top: 22px; margin-left: 5px;">
+                    <div>
+                        Selected
+                    </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                        {{selections}}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <section class="content-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="27" height="27">
+                            <defs>
+                                <!-- Linear gradient matching the subtle vertical inner shadow and lighting of the reference icon -->
+                                <linearGradient id="calendarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#eeeeff" />
+                                    <stop offset="100%" stop-color="#ddddff" />
+                                </linearGradient>
+                            </defs> <!-- Base Calendar Body Container (Sharp rectangular corners) -->
+                            <rect x="3" y="4" width="18" height="17" fill="url(#calendarGrad)" stroke="#1a1aff"
+                                stroke-width="2" stroke-linejoin="round" /> <!-- Header Separator Line -->
+                            <line x1="3" y1="9" x2="21" y2="9" stroke="#1a1aff" stroke-width="2" />
+                            <!-- Left Binder Pillar / Ring -->
+                            <line x1="7" y1="2" x2="7" y2="6" stroke="#1a1aff" stroke-width="2"
+                                stroke-linecap="round" /> <!-- Right Binder Pillar / Ring -->
+                            <line x1="17" y1="2" x2="17" y2="6" stroke="#1a1aff" stroke-width="2"
+                                stroke-linecap="round" />
+                            <!-- Grid Cells / Days Representation (Matching the dot array signature from the image) -->
+                            <!-- Row 1 -->
+                            <circle cx="7" cy="13" r="1.2" fill="#1a1aff" />
+                            <circle cx="12" cy="13" r="1.2" fill="#1a1aff" />
+                            <circle cx="17" cy="13" r="1.2" fill="#1a1aff" /> <!-- Row 2 -->
+                            <circle cx="7" cy="17" r="1.2" fill="#1a1aff" />
+                            <circle cx="12" cy="17" r="1.2" fill="#1a1aff" />
+                            <circle cx="17" cy="17" r="1.2" fill="#1a1aff" />
+                        </svg>
+                        Upcoming Interviews
+                    </div>
+                    <a class="view-all" href="{{ url_for('student.Student_interview') }}">View All →</a>
+                </div>
+
+                {% if upcoming_interviews %}
+                <div class="table-wrap">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Role</th>
+                                <th>Round</th>
+                                <th>Date &amp; Time</th>
+                                <th>Meeting Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interview_round in upcoming_interviews %}
+                            <tr>
+                                <td class="company-cell"> {{ interview_round[0] }}</td>
+                                <td>{{ interview_round[1] }}</td>
+                                <td>{{ interview_round[2] }}</td>
+                                <td>{{ interview_round[3] }}</td>
+                                <td>
+                                    {% if interview_round[4] %}
+                                    <a class="join-button" href="{{ interview_round[4] }}" target="_blank"
+                                        rel="noopener">
+                                        Join</a>
+                                    {% else %}
+                                    <span class="status-badge status-default">Not available</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">No upcoming interviews scheduled.</div>
+                {% endif %}
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="27" height="27">
+                            <defs>
+                                <!-- Linear gradient matching the subtle vertical illumination of the reference icon -->
+                                <linearGradient id="docGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#eeeeff" />
+                                    <stop offset="100%" stop-color="#ddddff" />
+                                </linearGradient>
+                            </defs> <!-- Document Main Body Vector Shape with Folded Corner Detail -->
+                            <path d="M4,3 L14,3 L20,9 L20,20 C20,21.1 19.1,22 18,22 L6,22 C4.9,22 4,21.1 4,20 Z"
+                                fill="url(#docGrad)" stroke="#1a1aff" stroke-width="2" stroke-linejoin="round" />
+                            <!-- Folded Page Corner Lines -->
+                            <path d="M14,3 L14,9 L20,9" fill="none" stroke="#1a1aff" stroke-width="2"
+                                stroke-linejoin="round" /> <!-- Horizontal Content Text Line 1 -->
+                            <line x1="8" y1="13" x2="16" y2="13" stroke="#1a1aff" stroke-width="2"
+                                stroke-linecap="round" /> <!-- Horizontal Content Text Line 2 -->
+                            <line x1="8" y1="17" x2="16" y2="17" stroke="#1a1aff" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                        My Applications
+                    </div>
+                    <a class="view-all" href="{{ url_for('student.Application') }}">View All →</a>
+                </div>
+
+                {% if applications %}
+                <div class="table-wrap">
+                    <table class="dashboard-table" style="min-width: 430px;">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for application in applications %}
+                            {% set status = application[2]|string %}
+                            <tr>
+                                <td class="company-cell">{{ application[0] }}</td>
+                                <td>{{ application[1] }}</td>
+                                <td>
+                                    {% if 'Selected' in status %}
+                                    <span class="status-badge status-selected">Selected</span>
+                                    {% elif 'Rejected' in status %}
+                                    <span class="status-badge status-rejected">Rejected</span>
+                                    {% elif 'Interview' in status %}
+                                    <span class="status-badge status-interview">Interview Scheduled</span>
+                                    {% elif 'Shortlisted' in status %}
+                                    <span class="status-badge status-shortlisted">Shortlisted</span>
+                                    {% elif 'Applied' in status %}
+                                    <span class="status-badge status-applied">Applied</span>
+                                    {% else %}
+                                    <span class="status-badge status-default">{{ status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">You have not applied to any job drives yet.</div>
+                {% endif %}
+            </div>
+        </section>
+
+
+
+        <!-- New job drives -->
+        <section class="panel jobs-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="27" height="27">
+                        <defs> <!-- Smooth gradient matching the blue-purple tone of the icon -->
+                            <linearGradient id="briefcaseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#635bff" />
+                                <stop offset="100%" stop-color="#3c31dd" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Handle & Upper Body Combined: The handle is now solid/filled in with the gradient -->
+                        <path
+                            d="M 38,25 C 38,18 42,14 48,14 L 52,14 C 58,14 62,18 62,25 L 62,28 L 80,28 C 85,28 89,32 89,37 L 89,45 L 58,45 C 57,45 56,46 55,47 L 53,50 C 52,51 48,51 47,50 L 45,47 C 44,46 43,45 42,45 L 11,45 L 11,37 C 11,32 15,28 20,28 L 38,28 Z"
+                            fill="url(#briefcaseGradient)" />
+                        <!-- Lower Body Half: Separated by the white, transparent horizontal U-shaped gap -->
+                        <path d="M 11,52 L 89,52 L 89,74 C 89,79 85,83 80,83 L 20,83 C 15,83 11,79 11,74 Z"
+                            fill="url(#briefcaseGradient)" />
+                    </svg>
+                    New Job Drives
+                </div>
+                <a class="view-all" href="{{ url_for('student.Student_Job_Drive') }}">View All →</a>
+            </div>
+
+            {% if job %}
+            <div class="table-wrap">
+                <table class="dashboard-table job-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Package</th>
+                            <th>Location</th>
+                            <th>Deadline</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in job %}
+                        <tr>
+                            <td class="company-cell">{{ j[0] }}</td>
+                            <td>{{ j[1] }}</td>
+                            <td><strong>{{ j[2] }}</strong></td>
+                            <td>{{ j[3] }}</td>
+                            <td class="deadline">{{ j[4] }}</td>
+                            <td>
+                                <a class="details-button" href="{{ url_for('student.Student_Job_Drive') }}">View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">No new job drives are available right now.</div>
+            {% endif %}
+        </section>
+
+    </div>
+</div>
+
+
+{%endblock%}

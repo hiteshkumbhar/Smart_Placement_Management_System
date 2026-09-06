@@ -1,0 +1,379 @@
+{%extends "Student_Base.html" %}
+{% block style %}
+{{super()}}
+<style>
+    .details-page {
+        background: #f5f7fb;
+        min-height: calc(100vh - 70px);
+        padding: 32px 5%;
+        color: #172b4d;
+    }
+
+    .details-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 20px;
+    }
+
+    .details-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: #102a56;
+    }
+
+ 
+
+    .application-card,
+    .interview-card {
+        background: #fff;
+        border: 1px solid #e5eaf2;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(16, 42, 86, 0.07);
+        overflow: hidden;
+    }
+
+    .application-card {
+        margin-bottom: 24px;
+    }
+
+    .application-details {
+        padding: 8px 26px;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 58px 230px 1fr;
+        align-items: center;
+        min-height: 82px;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #2167d5;
+    }
+
+    .detail-label {
+        font-weight: 700;
+        color: #203552;
+    }
+
+    .detail-value {
+        color: #394b64;
+        line-height: 1.6;
+    }
+
+    .status-badge,
+    .result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 13px;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: 700;
+        background: #e5f7ec;
+        color: #18864b;
+    }
+
+    .interview-card {
+        padding: 24px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 20px;
+        font-size: 21px;
+        color: #172b4d;
+    }
+
+    .section-title .title-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef4ff;
+        color: #2167d5;
+    }
+
+    .interview-table-wrapper {
+        overflow-x: auto;
+        border: 1px solid #e3e8f0;
+        border-radius: 10px;
+    }
+
+    .interview-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 720px;
+    }
+
+    .interview-table th {
+        background: #2167d5;
+        color: #fff;
+        text-align: left;
+        padding: 15px 16px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .interview-table td {
+        padding: 16px;
+        border-bottom: 1px solid #e8edf4;
+        color: #394b64;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .interview-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .interview-table tbody tr:hover {
+        background: #f8faff;
+    }
+
+    .date-cell {
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       STATUS BADGES
+    ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        padding: 6px 11px;
+
+        border-radius: 7px;
+
+        font-size: 16px;
+        font-weight: 650;
+
+        white-space: nowrap;
+    }
+
+
+    .status-applied {
+        color: #4f46e5;
+        background: #eef0ff;
+    }
+
+    .status-shortlisted {
+        color: #16834b;
+        background: #e8f7ef;
+    }
+
+    .status-interview {
+        color: #a96d00;
+        background: #fff3d8;
+    }
+
+    .status-selected {
+        color: #07814a;
+        background: #e6f8ee;
+    }
+
+    .status-rejected {
+        color: #d12e42;
+        background: #fdecef;
+    }
+
+    .status-default {
+        color: #64748b;
+        background: #f1f3f6;
+    }
+
+
+    @media (max-width: 850px) {
+        .details-page {
+            padding: 24px 18px;
+        }
+
+        .details-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .detail-row {
+            grid-template-columns: 50px 150px 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .details-header h1 {
+            font-size: 26px;
+        }
+
+        .detail-row {
+            grid-template-columns: 46px 1fr;
+            padding: 15px 0;
+            row-gap: 6px;
+        }
+
+        .detail-value {
+            grid-column: 2;
+        }
+
+        .application-details {
+            padding: 4px 18px;
+        }
+
+        .interview-card {
+            padding: 18px;
+        }
+    }
+</style>
+{% endblock %}
+
+{%block main%}
+<div class="details-page">
+
+    <div class="details-header">
+        <h1>Application Details</h1>
+     
+    </div>
+
+    <div class="application-card">
+        <div class="application-details">
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #eef4ff;"> <svg fill="#9141ac" width="30px" height="30px" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z"></path></g></svg> </div>
+                <div class="detail-label">Company Name</div>
+                <div class="detail-value">{{ Job[1] }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #e3fceb;"><svg width="30px" height="30px" viewBox="0 0 32 32" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><defs><style>.cls-1{fill:#33d17a;}</style></defs><title></title><path class="cls-1" d="M28,8H21V6a2,2,0,0,0-2-2H13a2,2,0,0,0-2,2V8H4a2,2,0,0,0-2,2V26a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V10A2,2,0,0,0,28,8ZM13,6h6V8H13Zm15,4v9H4V10ZM4,26V21H28v5Z"></path><path class="cls-1" d="M15,18h2a1,1,0,0,0,0-2H15a1,1,0,0,0,0,2Z"></path></g></svg></div>
+                <div class="detail-label">Role</div>
+                <div class="detail-value">{{ Job[0].title }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #fcfce3;"><svg width = "27px" height = "27px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="2"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="#ff7800" d="M32,8.5C32,7.673,31.327,7,30.5,7H26V1.908c0-0.743-0.222-1.282-0.658-1.603 c-0.486-0.355-1.176-0.396-2.041-0.123L0.359,6.883c-0.24,0.07-0.378,0.306-0.345,0.547C0.011,7.454,0,7.475,0,7.5v23 C0,31.327,0.673,32,1.5,32h29c0.827,0,1.5-0.673,1.5-1.5V8.5z M31,24h-9.5c-0.275,0-0.5-0.224-0.5-0.5v-8 c0-0.276,0.225-0.5,0.5-0.5H31V24z M23.592,1.139c0.538-0.169,0.951-0.181,1.158-0.028C24.957,1.263,25,1.628,25,1.908V7H3.526 L23.592,1.139z M30.5,31h-29C1.225,31,1,30.776,1,30.5V8h29.5C30.775,8,31,8.224,31,8.5V14h-9.5c-0.827,0-1.5,0.673-1.5,1.5v8 c0,0.827,0.673,1.5,1.5,1.5H31v5.5C31,30.776,30.775,31,30.5,31z"></path> <path fill="#ff7800" d="M25.351,21.605c1.193,0,2.165-0.971,2.165-2.164s-0.972-2.165-2.165-2.165s-2.164,0.971-2.164,2.165 S24.157,21.605,25.351,21.605z M25.351,18.277c0.643,0,1.165,0.522,1.165,1.165s-0.522,1.164-1.165,1.164 c-0.642,0-1.164-0.522-1.164-1.164S24.709,18.277,25.351,18.277z"></path> </g> </g></svg></div>
+                <div class="detail-label">Package</div>
+                <div class="detail-value">{{ Job[0].package }} LPA</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #e3f7fc;"><svg fill="#1a5fb4" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" xml:space="preserve" width="30px" height="30px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:none;} </style> <path d="M12,2C8.7,2,6,4.7,6,8c0,5.2,6,11.1,6,11.1s6-6,6-11.1C18,4.7,15.3,2,12,2z M12,5.9c1.1,0,2.1,1,2.1,2.1 c0,1.2-0.9,2.1-2.1,2.1S9.9,9.1,9.9,8C9.9,6.8,10.9,5.9,12,5.9z M6.8,15.1c-1.3,0.3-2.3,0.6-3.2,1c-0.4,0.2-0.8,0.5-1.1,0.8 S2,17.8,2,18.3c0,0.8,0.5,1.4,1.1,1.8s1.3,0.7,2.2,1C7.1,21.7,9.4,22,12,22s4.9-0.3,6.7-0.8c0.9-0.3,1.6-0.6,2.2-1s1.1-1,1.1-1.8 c0-1-0.8-1.7-1.6-2.2c-0.8-0.5-1.9-0.8-3.2-1l-0.3,2c1.1,0.2,2,0.5,2.6,0.8c0.4,0.2,0.5,0.4,0.6,0.4c0,0-0.1,0.1-0.2,0.2 c-0.3,0.2-0.9,0.5-1.6,0.7C16.6,19.7,14.4,20,12,20s-4.6-0.3-6.1-0.8c-0.7-0.2-1.3-0.5-1.6-0.7c-0.1-0.1-0.2-0.2-0.2-0.2 c0.1-0.1,0.2-0.2,0.5-0.4c0.6-0.3,1.5-0.6,2.7-0.8L6.8,15.1z"></path> <rect class="st0" width="24" height="24"></rect> </g></svg></div>
+                <div class="detail-label">Location</div>
+                <div class="detail-value">{{ Job[0].location }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #ffecec;"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M8 13H14M8 17H16M13 3H5V21H19V9M13 3H14L19 8V9M13 3V7C13 8 14 9 15 9H19" stroke="#e01b24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg></div>
+                <div class="detail-label">Description</div>
+                <div class="detail-value">{{ Job[0].description }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #f6ecff;"><svg fill="#6b42f5" width="25px" height="25px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M960 95.888l-256.224.001V32.113c0-17.68-14.32-32-32-32s-32 14.32-32 32v63.76h-256v-63.76c0-17.68-14.32-32-32-32s-32 14.32-32 32v63.76H64c-35.344 0-64 28.656-64 64v800c0 35.343 28.656 64 64 64h896c35.344 0 64-28.657 64-64v-800c0-35.329-28.656-63.985-64-63.985zm0 863.985H64v-800h255.776v32.24c0 17.679 14.32 32 32 32s32-14.321 32-32v-32.224h256v32.24c0 17.68 14.32 32 32 32s32-14.32 32-32v-32.24H960v799.984zM736 511.888h64c17.664 0 32-14.336 32-32v-64c0-17.664-14.336-32-32-32h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32zm0 255.984h64c17.664 0 32-14.32 32-32v-64c0-17.664-14.336-32-32-32h-64c-17.664 0-32 14.336-32 32v64c0 17.696 14.336 32 32 32zm-192-128h-64c-17.664 0-32 14.336-32 32v64c0 17.68 14.336 32 32 32h64c17.664 0 32-14.32 32-32v-64c0-17.648-14.336-32-32-32zm0-255.984h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32h64c17.664 0 32-14.336 32-32v-64c0-17.68-14.336-32-32-32zm-256 0h-64c-17.664 0-32 14.336-32 32v64c0 17.664 14.336 32 32 32h64c17.664 0 32-14.336 32-32v-64c0-17.68-14.336-32-32-32zm0 255.984h-64c-17.664 0-32 14.336-32 32v64c0 17.68 14.336 32 32 32h64c17.664 0 32-14.32 32-32v-64c0-17.648-14.336-32-32-32z"></path></g></svg></div>
+                <div class="detail-label">Applied Date</div>
+                <div class="detail-value">{{ Job[2].applied_at.strftime('%d-%m-%Y %I:%M %p') }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-icon" style = "background: #e3fceb;"><svg fill="#33d17a" width="25px" height="25px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M429.811 577.1l-80.485-86.309c-21.425-22.976-57.42-24.233-80.396-2.807s-24.233 57.42-2.807 80.396l81.839 87.762-.158.152 43.493 45.038c19.643 20.341 52.056 20.907 72.397 1.264l35.686-34.462 8.195-7.642-.133-.143 251.802-243.163c22.607-21.832 23.236-57.857 1.405-80.464s-57.857-23.236-80.464-1.405L429.812 577.1zM512 1024C229.23 1024 0 794.77 0 512S229.23 0 512 0s512 229.23 512 512-229.23 512-512 512z"></path></g></svg></div>
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                    {% if 'shortlist' in (Job[2].status.value | lower) %}
+                        <span class="status-badge status-shortlisted">
+                            {{ Job[2].status.value }}
+                        </span>
+                        {% elif 'interview' in (Job[2].status.value | lower) %}
+                        <span class="status-badge status-interview">
+                            {{ Job[2].status.value }}
+                        </span>
+                        {% elif 'selected' in (Job[2].status.value | lower) %}
+                        <span class="status-badge status-selected">
+                            {{ Job[2].status.value }}
+                        </span>
+                        {% elif 'reject' in (Job[2].status.value | lower) %}
+                        <span class="status-badge status-rejected">
+                            {{ Job[2].status.value }}
+                        </span>
+                        {% elif 'applied' in (Job[2].status.value | lower) %}
+                        <span class="status-badge status-applied">
+                            {{ Job[2].status.value }}
+                        </span>
+                        {% else %}
+                        <span class="status-badge status-default">
+                            {{ Job[2].status.value }}
+                        </span>
+                        {% endif %}
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="interview-card">
+        <h2 class="section-title">
+            <span class="title-icon">👥</span>
+            Interview Process
+        </h2>
+
+        <div class="interview-table-wrapper">
+            <table class="interview-table">
+                <thead>
+                    <tr>
+                        <th>Round Name</th>
+                        <th>Date and Time</th>
+                        <th>Result</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for i in Job[3] %}
+                    <tr>
+                        <td>{{ i.round_name }}</td>
+                        <td class="date-cell">{{ i.date.strftime('%d-%m-%Y %I:%M %p') }}</td>
+                        <td>
+                            {% if i.result %}
+                                <span class="result-badge">{{ i.result }}</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ i.feedback or '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:28px;">
+                            No interview rounds scheduled yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+
+

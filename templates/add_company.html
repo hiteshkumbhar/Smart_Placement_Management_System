@@ -1,0 +1,849 @@
+{% extends "Placement_office_Base.html" %}
+
+{% block title %}
+{% if mode == 'edit' %}Edit Company{% else %}Add Company{% endif %}
+{% endblock %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+
+    .company-page {
+        height: 100vh;
+        background: #f5f7fb;
+        padding: 0px 0px 50px;
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
+    }
+
+    .company-container {
+        max-width: 1050px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        gap: 20px;
+    }
+
+    .page-title-wrapper h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .page-title-wrapper p {
+        margin: 7px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+
+
+
+    /* Main Card */
+    .company-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 22px 28px;
+        border-bottom: 1px solid #eef0f4;
+        background: #ffffff;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #172033;
+        font-weight: 700;
+    }
+
+    .card-header p {
+        margin: 5px 0 0;
+        color: #7b8494;
+        font-size: 13px;
+    }
+
+    .form-content {
+        padding: 30px;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px 25px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 650;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .required {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .form-input {
+        width: 100%;
+        height: 45px;
+        border: 1px solid #d8dee8;
+        border-radius: 9px;
+        padding: 0 13px;
+        font-size: 14px;
+        color: #1f2937;
+        background: #ffffff;
+        outline: none;
+        transition: 0.2s ease;
+    }
+
+    .form-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+    }
+
+    .form-input::placeholder {
+        color: #a0a8b5;
+    }
+
+    textarea.form-input {
+        height: 100px;
+        padding: 12px 13px;
+        resize: vertical;
+    }
+
+    /* File Upload */
+    .file-wrapper {
+        position: relative;
+    }
+
+    .file-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 9px;
+        background: #f8fafc;
+        font-size: 13px;
+        color: #64748b;
+        cursor: pointer;
+    }
+
+    .file-input:hover {
+        border-color: #60a5fa;
+        background: #f8fbff;
+    }
+
+    .file-help {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #8a94a4;
+    }
+
+    /* Error */
+    .error {
+        min-height: 18px;
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    /* Flash Messages */
+    .flash-message {
+        margin: 0 30px 20px;
+        padding: 12px 15px;
+        border-radius: 9px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #c2410c;
+        font-size: 13px;
+    }
+
+    /* Footer */
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #eef0f4;
+    }
+
+    .cancel-btn {
+        text-decoration: none;
+        padding: 11px 20px;
+        border-radius: 9px;
+        border: 1px solid #d8dee8;
+        background: #ffffff;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s ease;
+    }
+
+    .cancel-btn:hover {
+        background: #f8fafc;
+    }
+
+    .submit-btn {
+        border: none;
+        padding: 11px 22px;
+        border-radius: 9px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 650;
+        cursor: pointer;
+        transition: 0.2s ease;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18);
+    }
+
+    .submit-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .fixed-top-section {
+        padding: 0px 24px;
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 0px 24px 45px;
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        /* Ensures the flex child can scroll */
+    }
+
+    /* Responsive */
+    @media (max-width: 750px) {
+        .company-page {
+            padding: 25px 14px 40px;
+        }
+
+        .page-header {
+            align-items: flex-start;
+        }
+
+        .page-title-wrapper h1 {
+            font-size: 23px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full-width {
+            grid-column: auto;
+        }
+
+        .form-content {
+            padding: 22px;
+        }
+
+        .card-header {
+            padding: 20px 22px;
+        }
+
+        .form-footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            text-align: center;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            flex-direction: column;
+        }
+
+
+    }
+</style>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="company-page">
+    <div class="fixed-top-section">
+
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                        </div>
+
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Placement officer'
+                                }}
+                            </div>
+                            <div class="profile-role">Placement officer</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Placement officer' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Placement officer account'
+                                    }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <div class="company-container">
+
+            <!-- Page Header -->
+            <div class="page-header">
+
+                <div class="page-title-wrapper">
+                    <h1>
+                        {% if mode == 'edit' %}
+                        Edit Company
+                        {% else %}
+                        Add Company
+                        {% endif %}
+                    </h1>
+
+                    <p>
+                        {% if mode == 'edit' %}
+                        Update the company's information and recruiter details.
+                        {% else %}
+                        Add a new company to your placement management system.
+                        {% endif %}
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Company Form Card -->
+            <div class="company-card">
+
+                <div class="card-header">
+
+                    <h2>
+                        {% if mode == 'edit' %}
+                        Company Information
+                        {% else %}
+                        New Company Information
+                        {% endif %}
+                    </h2>
+
+                    <p>
+                        Enter accurate company and HR contact information.
+                    </p>
+
+                </div>
+
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+
+                {% for category, message in messages %}
+
+                {% if category == "profile_pic" or category == "Logo_size_error" %}
+
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+
+                {% endif %}
+
+                {% endfor %}
+
+                {% endif %}
+                {% endwith %}
+
+
+                <div class="form-content">
+
+                    {% if mode == 'edit' %}
+
+                    <form id="addcompany" action="{{ url_for('Placement_officer.edit_company', id=company.id) }}" method="POST"
+                        enctype="multipart/form-data">
+
+                        {% else %}
+
+                        <form id="addcompany" action="{{ url_for('Placement_officer.add_company') }}" method="POST"
+                            enctype="multipart/form-data">
+
+                            {% endif %}
+
+
+                            <div class="form-grid">
+
+                                <!-- Company Name -->
+                                <div class="form-group">
+
+                                    <label class="form-label" for="name">
+                                        Company Name <span class="required">*</span>
+                                    </label>
+
+                                    <input id="name" class="form-input" type="text" name="name" placeholder="e.g. TCS"
+                                        value="{% if mode == 'edit' %}{{ company.company_name or '' }}{% endif %}">
+
+                                    <small class="error" id="nameError"></small>
+
+                                </div>
+
+
+                                <!-- Industry -->
+                                <div class="form-group">
+
+                                    <label class="form-label" for="Industry">
+                                        Industry <span class="required">*</span>
+                                    </label>
+
+                                    <input id="Industry" class="form-input" type="text" name="Industry"
+                                        placeholder="e.g. Information Technology"
+                                        value="{% if mode == 'edit' %}{{ company.industry or '' }}{% endif %}">
+
+                                    <small class="error" id="IndustryError"></small>
+
+                                </div>
+
+
+                                <!-- Website -->
+                                <div class="form-group">
+
+                                    <label class="form-label" for="website">
+                                        Company Website <span class="required">*</span>
+                                    </label>
+
+                                    <input id="website" class="form-input" type="url" name="website"
+                                        placeholder="https://example.com"
+                                        value="{% if mode == 'edit' %}{{ company.website or '' }}{% endif %}">
+
+                                    <small class="error" id="websiteError"></small>
+
+                                </div>
+
+
+                                <!-- HR Name -->
+                                <div class="form-group">
+
+                                    <label class="form-label" for="HR_Name">
+                                        HR / Recruiter Name <span class="required">*</span>
+                                    </label>
+
+                                    <input id="HR_Name" class="form-input" type="text" name="HR_Name"
+                                        placeholder="e.g. Priya Sharma"
+                                        value="{% if mode == 'edit' %}{{ company.hr_name or '' }}{% endif %}">
+
+                                    <small class="error" id="HR_NameError"></small>
+
+                                </div>
+
+
+                                <!-- HR Email -->
+                                <div class="form-group">
+
+                                    <label class="form-label" for="HR_Email">
+                                        HR Email <span class="required">*</span>
+                                    </label>
+
+                                    <input id="HR_Email" class="form-input" type="email" name="HR_Email"
+                                        placeholder="hr@example.com"
+                                        value="{% if mode == 'edit' %}{{ company.email or '' }}{% endif %}">
+
+                                    <small class="error" id="HR_EmailError"></small>
+
+                                </div>
+
+
+                                <!-- Phone -->
+                                <div class="form-group">
+
+                                    <label class="form-label" for="HR_number">
+                                        HR Phone Number <span class="required">*</span>
+                                    </label>
+
+                                    <input id="HR_number" class="form-input" type="tel" name="HR_number"
+                                        placeholder="e.g. 9876543210"
+                                        value="{% if mode == 'edit' %}{{ company.phone or '' }}{% endif %}">
+
+                                    <small class="error" id="HR_numberError"></small>
+
+                                </div>
+
+
+                                <!-- Address -->
+                                <div class="form-group full-width">
+
+                                    <label class="form-label" for="Address">
+                                        Company Address <span class="required">*</span>
+                                    </label>
+
+                                    <textarea id="Address" class="form-input" name="Address"
+                                        placeholder="Enter complete company address">{% if mode == 'edit' %}{{ company.address or '' }}{% endif %}</textarea>
+
+                                    <small class="error" id="AddressError"></small>
+
+                                </div>
+
+
+                                <!-- Logo -->
+                                <div class="form-group full-width">
+
+                                    <label class="form-label" for="Logo">
+                                        Company Logo
+                                    </label>
+
+                                    <div class="file-wrapper">
+
+                                        <input id="Logo" class="file-input" type="file" name="Logo"
+                                            accept=".jpg,.jpeg,.png">
+
+                                    </div>
+
+                                    <div class="file-help">
+                                        Accepted formats: JPG, JPEG, PNG.
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Form Footer -->
+                            <div class="form-footer">
+
+                                <a href="{{ url_for('logout') }}" class="cancel-btn">
+                                    Cancel
+                                </a>
+
+                                <button type="submit" class="submit-btn">
+
+                                    {% if mode == 'edit' %}
+                                    Update Company
+                                    {% else %}
+                                    Add Company
+                                    {% endif %}
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const form = document.getElementById("addcompany");
+
+    form.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
+        document.querySelectorAll(".error").forEach(error => {
+            error.textContent = "";
+        });
+
+        let valid = true;
+
+        const companyname = document.getElementById("name").value.trim();
+        const industry = document.getElementById("Industry").value.trim();
+        const website = document.getElementById("website").value.trim();
+        const hrName = document.getElementById("HR_Name").value.trim();
+        const hrEmail = document.getElementById("HR_Email").value.trim();
+        const hrNumber = document.getElementById("HR_number").value.trim();
+        const address = document.getElementById("Address").value.trim();
+
+
+        if (companyname === "") {
+            document.getElementById("nameError").textContent =
+                "Please enter company name.";
+            valid = false;
+        }
+
+
+        if (industry === "") {
+            document.getElementById("IndustryError").textContent =
+                "Please enter industry.";
+            valid = false;
+        }
+
+
+        if (website === "") {
+            document.getElementById("websiteError").textContent =
+                "Please enter company website.";
+            valid = false;
+        }
+
+
+        if (hrName === "") {
+            document.getElementById("HR_NameError").textContent =
+                "Please enter HR / recruiter name.";
+            valid = false;
+        }
+
+
+        if (hrEmail === "") {
+            document.getElementById("HR_EmailError").textContent =
+                "Please enter HR email.";
+            valid = false;
+        }
+
+
+        if (hrNumber === "") {
+            document.getElementById("HR_numberError").textContent =
+                "Please enter HR phone number.";
+            valid = false;
+        }
+
+
+        if (address === "") {
+            document.getElementById("AddressError").textContent =
+                "Please enter company address.";
+            valid = false;
+        }
+
+
+        if (valid) {
+            form.submit();
+        }
+
+    });
+</script>
+
+{% endblock %}

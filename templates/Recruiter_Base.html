@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> {% block title %} {% endblock %}</title>
+    </head>
+    {% block style %}
+    <style>
+        
+        *{
+            box-sizing: border-box;
+            margin: 0%;
+            padding: 0%;
+        }
+        body {
+            display: flex;
+        }
+        aside {
+            background-image: linear-gradient(180deg, #4a0970 9%, #1667ff 50%, #1667ff 100%);
+            width: 20%;
+            height: 100vh;
+        }
+        main{
+            flex:1;
+            background-color: rgb(241, 241, 241);
+        }
+        
+        .nav-tite{
+            display: flex;
+            justify-content: center;
+            gap: 0px;
+            height: 100px;
+            width: 100%;
+            align-items: center;
+            padding-left: 10px;
+        }
+            .nav-item:hover {
+        background: rgba(255, 255, 255, 0.10);
+        color: #ffffff;
+    }
+
+    .nav-item.active {
+        background: linear-gradient(135deg, #5471f1,
+                #4089e8);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 12px rgba(166, 102, 255, 0.75), inset 0 0 10px rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+ 
+    </style>
+    {% endblock %}
+
+    <body> 
+        <aside>
+            <div class = "nav-tite">
+                <svg width="90" height="75" viewBox="0 0 200 185" xmlns="http://www.w3.org/2000/svg"> <defs> <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"> <feGaussianBlur stdDeviation="1.5" result="blur"/> <feMerge> <feMergeNode in="blur"/> <feMergeNode in="SourceGraphic"/> </feMerge> </filter> </defs> <!-- Shield --> <path d=" M42 42 C62 42 82 38 100 24 C118 38 138 42 158 42 C164 42 166 46 164 52 C162 58 162 66 162 76 V112 C162 138 144 150 100 176 C56 150 38 138 38 112 V76 C38 66 38 58 36 52 C34 46 36 42 42 42 Z " fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /> <!-- Graduation cap top --> <polygon points="58,79 100,61 142,79 100,97" fill="white" /> <!-- Cap base --> <path d=" M76 93 V109 C76 121 124 121 124 109 V93 L100 103 Z" fill="white" /> <!-- Tassel --> <path d=" M65 83 V109 " stroke="white" stroke-width="4" stroke-linecap="round" /> <rect x="61" y="107" width="8" height="14" rx="4" fill="white" /> </svg>
+                <div style="color: rgb(255, 255, 255); font-size: 23px;"> Recruiter Portal </div>
+            </div>
+            
+            <div class="nav-section">
+                
+                <a href="{{ url_for('Recruiter.Recruiter_Dashboard') }}" style="text-decoration: none;">
+                    <div class="nav-item {% if request.endpoint == 'Recruiter.Recruiter_Dashboard' %}active{% endif %}" data-target="Dashboard" style="margin-top: 18%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-left: 5%;">
+                            <svg width="23" height="23" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg"> <!-- Top Left (Outline) --> <rect x="1.5" y="1.5" width="5" height="5" rx="1" fill="none" stroke="white" stroke-width="1"/> <!-- Top Right (Filled) --> <rect x="8" y="1" width="6" height="6" rx="1" fill="white"/> <!-- Bottom Left (Filled) --> <rect x="1" y="8" width="6" height="6" rx="1" fill="white"/> <!-- Bottom Right (Outline) --> <rect x="8.5" y="8.5" width="5" height="5" rx="1" fill="none" stroke="white" stroke-width="1"/> </svg>                            
+                            <span class="label" style=" font-size: 22px; color: white;">Dashboard</span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href=" {{ url_for('Recruiter.Job_drive') }} " style="text-decoration: none;">
+                    <div class="nav-item {% if request.endpoint == 'Recruiter.Job_drive' %}active{% endif %}" data-target="Profile" style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; ">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-left: 5%;">
+                            <svg width="23px" height="23px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>profile_round [#1342]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -2159.000000)" fill="#ffffff"> <g id="icons" transform="translate(56.000000, 160.000000)"> <path d="M100.562548,2016.99998 L87.4381713,2016.99998 C86.7317804,2016.99998 86.2101535,2016.30298 86.4765813,2015.66198 C87.7127655,2012.69798 90.6169306,2010.99998 93.9998492,2010.99998 C97.3837885,2010.99998 100.287954,2012.69798 101.524138,2015.66198 C101.790566,2016.30298 101.268939,2016.99998 100.562548,2016.99998 M89.9166645,2004.99998 C89.9166645,2002.79398 91.7489936,2000.99998 93.9998492,2000.99998 C96.2517256,2000.99998 98.0830339,2002.79398 98.0830339,2004.99998 C98.0830339,2007.20598 96.2517256,2008.99998 93.9998492,2008.99998 C91.7489936,2008.99998 89.9166645,2007.20598 89.9166645,2004.99998 M103.955674,2016.63598 C103.213556,2013.27698 100.892265,2010.79798 97.837022,2009.67298 C99.4560048,2008.39598 100.400241,2006.33098 100.053171,2004.06998 C99.6509769,2001.44698 97.4235996,1999.34798 94.7348224,1999.04198 C91.0232075,1998.61898 87.8750721,2001.44898 87.8750721,2004.99998 C87.8750721,2006.88998 88.7692896,2008.57398 90.1636971,2009.67298 C87.1074334,2010.79798 84.7871636,2013.27698 84.044024,2016.63598 C83.7745338,2017.85698 84.7789973,2018.99998 86.0539717,2018.99998 L101.945727,2018.99998 C103.221722,2018.99998 104.226185,2017.85698 103.955674,2016.63598" id="profile_round-[#1342]"> </path> </g> </g> </g> </g></svg>                        
+                            <span class="label" style=" font-size: 22px; color: white;">Job drive</span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('Recruiter.Recruiter_Application') }}" style="text-decoration: none;">
+                    <div class="nav-item {% if request.endpoint == 'Recruiter.Recruiter_Application' %}active{% endif %}" data-target="Profile" style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; "> 
+                        <div style="display: flex; align-items: center; gap: 4px; margin-left: 0%;">
+                            <svg width="50px" height="50px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"> <g fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"> <!-- Document --> <path d=" M176 96 H300 L368 164 V336 C368 354 354 368 336 368 H176 C158 368 144 354 144 336 V128 C144 110 158 96 176 96 Z "/> <!-- Larger folded corner --> <path d=" M300 96 V164 H368 "/> <!-- Text lines --> <line x1="198" y1="220" x2="302" y2="220"/> <line x1="198" y1="252" x2="302" y2="252"/> <line x1="198" y1="284" x2="262" y2="284"/> </g> </svg>                        
+                            <span class="label" style=" font-size: 22px; color: white;">Applications</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('Recruiter.Recruiter_Interview') }}" style="text-decoration: none;">
+                    <div class="nav-item {% if request.endpoint == 'Recruiter.Recruiter_Interview' %}active{% endif %}" data-target="Profile" style="margin-top: 3%; margin-left: 8%; margin-right: 9%; height: 50px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; "> 
+                        <div style="display: flex; align-items: center; gap: 4px; margin-left: 0%;">
+                            <svg width="50px" height="50px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"> <g fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"> <!-- Document --> <path d=" M176 96 H300 L368 164 V336 C368 354 354 368 336 368 H176 C158 368 144 354 144 336 V128 C144 110 158 96 176 96 Z "/> <!-- Larger folded corner --> <path d=" M300 96 V164 H368 "/> <!-- Text lines --> <line x1="198" y1="220" x2="302" y2="220"/> <line x1="198" y1="252" x2="302" y2="252"/> <line x1="198" y1="284" x2="262" y2="284"/> </g> </svg>                        
+                            <span class="label" style=" font-size: 22px; color: white;">Interview</span>
+                        </div>
+                    </div>
+                </a>
+                
+            </div>
+        </aside>
+
+        <main>
+            {%block main%}
+            {%endblock%}
+        </main>
+    </body>
+</html>
+
+

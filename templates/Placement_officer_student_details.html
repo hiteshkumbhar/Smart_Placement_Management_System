@@ -1,0 +1,1420 @@
+{% extends "Placement_office_Base.html" %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #16a34a;
+        --danger: #dc2626;
+        --warning: #d97706;
+        --text: #1e293b;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --surface: #ffffff;
+        --background: #f8fafc;
+    }
+
+.topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+    .student-profile-page {
+        height: 100vh;        
+        margin: 0 auto;
+        padding: 0px 25px 0px;
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; 
+    }
+
+    /* =========================
+       PROFILE HEADER
+       ========================= */
+
+    .profile-header {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 28px;
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 25px;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    .profile-header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .student-avatar {
+        width: 78px;
+        height: 78px;
+        flex: 0 0 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 30px;
+        font-weight: 700;
+        overflow: hidden;
+    }
+
+    .profile-title h1 {
+        margin: 0 0 5px;
+        font-size: 25px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .profile-title p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .placement-status {
+        text-align: right;
+    }
+
+    .status-label {
+        color: #0f172a;
+        margin-bottom: 7px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-weight: 600;
+        display: block;
+        font-size: 12px;
+    }
+    .placement-status-label{
+        display: block;
+        font-size: 12px;
+        color: white;
+        margin-bottom: 7px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-weight: 600;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 13px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    /* =========================
+       SECTIONS
+       ========================= */
+
+    .profile-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .section-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--border);
+        background: #fcfdff;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .section-header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .section-body {
+        padding: 22px;
+    }
+
+    /* =========================
+       INFORMATION GRID
+       ========================= */
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .info-item {
+        padding: 15px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #ffffff;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .info-value {
+        display: block;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .not-specified {
+        color: #94a3b8;
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    /* =========================
+       SKILLS
+       ========================= */
+
+    .skills-value {
+        line-height: 1.7;
+    }
+
+    /* =========================
+       LINKS
+       ========================= */
+
+    .profile-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        word-break: break-all;
+    }
+
+    .profile-link:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    /* =========================
+       ACTION BUTTONS
+       ========================= */
+
+    .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 9px;
+        padding: 9px 15px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .btn-success {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .btn-success:hover {
+        background: #bbf7d0;
+    }
+
+    .btn-danger {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .btn-danger:hover {
+        background: #fecaca;
+    }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    /* =========================
+       FILES
+       ========================= */
+
+    .file-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 12px;
+        background: #ffffff;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .file-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eff6ff;
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    .file-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+        word-break: break-word;
+    }
+
+    .link-button {
+        background: #eff6ff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary);
+        cursor: pointer;
+    }
+
+    .link-button:hover {
+        background: #dbeafe;
+    }
+
+    /* =========================
+       VERIFICATION
+       ========================= */
+
+    .verification-box {
+        padding: 18px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+    }
+
+    .verification-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: #fff7ed;
+        color: var(--warning);
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .remark-box {
+        margin-top: 14px;
+        padding: 13px;
+        border-left: 3px solid #f59e0b;
+        background: #fffbeb;
+        color: #78350f;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .remark-form {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .remark-input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 10px 12px;
+        outline: none;
+        font-size: 13px;
+    }
+
+    .remark-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+    }
+
+    /* =========================
+       APPLICATION TABLE
+       ========================= */
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .applications-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 650px;
+    }
+
+    .applications-table th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        font-weight: 700;
+        text-align: center; 
+        vertical-align: middle;
+        padding: 13px 15px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .applications-table td {
+        padding: 15px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 13px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .applications-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .applications-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .application-status {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 35px 20px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    /* =========================
+       RESPONSIVE
+       ========================= */
+
+    @media (max-width: 900px) {
+        .info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .profile-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .placement-status {
+            text-align: left;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .student-profile-page {
+            padding: 15px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-header {
+            padding: 20px;
+        }
+
+        .profile-header-left {
+            align-items: flex-start;
+        }
+
+        .file-card {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .remark-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    .profile-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #172554 0%, #1e3a8a 55%, #2563eb 100%);
+        color: #fff;
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 22px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .profile-hero::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        right: -80px;
+        top: -100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+
+    .student-avatar {
+        width: 78px;
+        height: 78px;
+        flex: 0 0 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        font-size: 30px;
+        font-weight: 700;
+        overflow: hidden;
+    }
+
+    .hero-title {
+        margin: 0 0 6px;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .hero-subtitle {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+<div class="student-profile-page">
+
+    <!-- =========================
+         PROFILE HEADER
+         ========================= -->
+<div class="fixed-top-section">
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+        <div class="scrollable-bottom-section">
+
+    <div class="profile-hero">
+        <div class="hero-content">
+            <div class="student-avatar">
+                {% if student.profile_pic %}
+                <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                    style="width: 78px; height: 78px;">
+                {% else %}
+                {{ (student.user.name or 'S')[0]|upper }}
+                {% endif %}
+            </div>
+
+            <div>
+                <h1 class="hero-title">{{ student.user.name or 'Student Profile' }}</h1>
+                <p class="hero-subtitle">
+                    {{ student.branch or 'Branch not specified' }}
+                    {% if student.graduation_year %}
+                    &nbsp;•&nbsp; {{ student.graduation_year }}
+                    {% endif %}
+                    {% if student.cgpa %}
+                    &nbsp;•&nbsp; CGPA:&nbsp;{{ student.cgpa }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="placement-status">
+
+            <span class="placement-status-label">
+                Placement Status
+            </span>
+
+            <span class="status-badge">
+                <span class="status-dot"></span>
+                {{ student.placement_status or 'Not specified' }}
+            </span>
+
+        </div>
+    </div>
+
+    <!-- =========================
+         BASIC INFORMATION
+         ========================= -->
+
+    <div class="profile-section">
+
+        <div class="section-header">
+            <h2>Academic & Professional Information</h2>
+        </div>
+
+        <div class="section-body">
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">
+                        {{ student.user.name or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Branch</span>
+                    <span class="info-value">
+                        {{ student.branch or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">CGPA</span>
+                    <span class="info-value">
+                        {{ student.cgpa or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Graduation Year</span>
+                    <span class="info-value">
+                        {{ student.graduation_year or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">10th Percentage</span>
+                    <span class="info-value">
+                        {{ student.tenth_Percentage or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">12th Percentage</span>
+                    <span class="info-value">
+                        {{ student.twelth_Percentage or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Diploma Percentage</span>
+                    <span class="info-value">
+                        {{ student.Diploma_Percentage or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Total Backlogs</span>
+                    <span class="info-value">
+                        {{ student.Total_Backlogs or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Active Backlogs</span>
+                    <span class="info-value">
+                        {{ student.Active_Backlogs or 'Not specified' }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         PERSONAL INFORMATION
+         ========================= -->
+
+    <div class="profile-section">
+
+        <div class="section-header">
+            <h2>Personal Information</h2>
+        </div>
+
+        <div class="section-body">
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span class="info-label">Mobile Number</span>
+                    <span class="info-value">
+                        {{ student.mobile_number or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Gender</span>
+                    <span class="info-value">
+                        {{ student.Gender or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value">
+                        {{ student.DOB or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">City</span>
+                    <span class="info-value">
+                        {{ student.City or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">State</span>
+                    <span class="info-value">
+                        {{ student.State or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Pin Code</span>
+                    <span class="info-value">
+                        {{ student.pin_code or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">
+                        {{ student.Address or 'Not specified' }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         SKILLS & LINKS
+         ========================= -->
+
+    <div class="profile-section">
+
+        <div class="section-header">
+            <h2>Skills & Professional Links</h2>
+        </div>
+
+        <div class="section-body">
+
+            <div class="info-grid">
+
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Skills</span>
+                    <span class="info-value skills-value">
+                        {{ student.skills or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">LinkedIn</span>
+                    <span class="info-value">
+                        {% if student.LinkedIn %}
+                        <a href="{{ student.LinkedIn if 'https://' in student.LinkedIn else 'https://' + student.LinkedIn }}"
+                            target="_blank" class="profile-link">
+                            View Profile
+                        </a>
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">GitHub</span>
+                    <span class="info-value">
+                        {% if student.GitHub %}
+                        <a href="{{ student.GitHub if 'https://' in student.GitHub else 'https://' + student.GitHub }}"
+                            target="_blank" class="profile-link">
+                            View Profile
+                        </a>
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Portfolio</span>
+                    <span class="info-value">
+                        {% if student.Portfolio_Website %}
+                        <a href="{{  student.Portfolio_Website if 'https://' in student.Portfolio_Website else 'https://' + student.Portfolio_Website  }}"
+                            target="_blank" class="profile-link">
+                            Visit Website
+                        </a>
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">LeetCode</span>
+                    <span class="info-value">
+                        {% if student.LeetCode %}
+                        <a href="{{ student.LeetCode if 'https://' in student.LeetCode else 'https://' + student.LeetCode  }}"
+                            target="_blank" class="profile-link">
+                            View Profile
+                        </a>
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">HackerRank</span>
+                    <span class="info-value">
+                        {% if student.HackerRank %}
+                        <a href="{{ student.HackerRank if 'https://' in student.HackerRank else 'https://' + student.HackerRank }}"
+                            target="_blank" class="profile-link">
+                            View Profile
+                        </a>
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         CERTIFICATIONS
+         ========================= -->
+
+    <div class="profile-section">
+
+        <div class="section-header">
+            <h2>Certifications</h2>
+        </div>
+
+        <div class="section-body">
+
+            {% if certifications != None %}
+
+            {% for cert in certifications %}
+
+            <div class="file-card">
+
+                <div class="file-info">
+
+                    <div class="file-icon">
+                        CERT
+                    </div>
+
+                    <div class="file-name">
+                        {{ cert }}
+                    </div>
+
+                </div>
+
+                <form action="{{url_for('Recruiter.download_certifications')}}" method="post">
+
+                    <input type="hidden" value="{{cert}}" name="name">
+                    <input type="hidden" value="{{student.user_id}}" name="id">
+
+                    <button type="submit" class="link-button">
+                        Download
+                    </button>
+
+                </form>
+
+            </div>
+
+            {% endfor %}
+
+            {% else %}
+
+            <div class="empty-state">
+                No certifications uploaded.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         RESUME
+         ========================= -->
+
+    <div class="profile-section">
+
+        <div class="section-header">
+            <h2>Resume & Verification</h2>
+        </div>
+
+        <div class="section-body">
+
+            <div class="file-card">
+
+                <div class="file-info">
+
+                    <div class="file-icon">
+                        PDF
+                    </div>
+
+                    <div>
+
+                        <div class="file-name">
+                            {{ student.resume_path or 'No resume uploaded' }}
+                        </div>
+
+                        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                            Resume document
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% if student.resume_path != None %}
+
+                <form action="{{url_for('Recruiter.download_resume')}}" method="post">
+
+                    <input type="hidden" value="{{student.id}}" name="id">
+
+                    <button type="submit" class="btn btn-primary">
+                        Download Resume
+                    </button>
+
+                </form>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="verification-box">
+
+                <span class="status-label">
+                    Current Resume Status: <span class="verification-status">
+                        {{ student.resume_status or 'Pending' }}
+                    </span>
+                </span>
+
+
+
+                <div class="action-row">
+
+                    <form method="post" action="{{url_for('Placement_officer_student')}}">
+
+                        <input type="hidden" name="Student_details" value="{{student.id}}">
+                        <input type="hidden" name="mode" value="resume_status">
+
+                        <button type="submit" name="action" value="verify" class="btn btn-success">
+                            Verify Resume
+                        </button>
+
+                        <button type="submit" name="action" value="reject" class="btn btn-danger">
+                            Reject Resume
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <div class="remark-box">
+
+                    <strong>Remark:</strong>
+
+                    {{ student.resume_remark or 'No remark added.' }}
+
+                </div>
+
+
+                {% if mode == "remark" %}
+
+                <form method="post" action="{{url_for('Placement_officer_student')}}" class="remark-form">
+
+                    <input type="hidden" name="Student_details" value="{{student.id}}">
+
+                    <input type="hidden" name="mode" value="give_remark">
+
+                    <input type="text" name="remark" class="remark-input"
+                        placeholder="Enter resume verification remark..." required>
+
+                    <button type="submit" class="btn btn-primary">
+                        Save Remark
+                    </button>
+
+                </form>
+
+                {% else %}
+
+                <form method="post" action="{{url_for('Placement_officer_student')}}" class="remark-form">
+
+                    <input type="hidden" name="Student_details" value="{{student.id}}">
+
+                    <input type="hidden" name="mode" value="give_remark">
+
+                    <input type="hidden" name="remark" value="">
+
+                    <button type="submit" class="btn btn-secondary">
+                        Give / Edit Remark
+                    </button>
+
+                </form>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         PLACEMENT STATUS ACTION
+         ========================= -->
+
+    {% if student.placement_status == 'Open to Placement' %}
+
+    <div class="profile-section">
+
+        <div class="section-header">
+            <h2>Placement Action</h2>
+            <p>Update the student's placement status.</p>
+        </div>
+
+        <div class="section-body">
+
+            <form action="{{url_for('Placement_officer_student')}}" method="post">
+
+                <input type="hidden" value="{{student.id}}" name="Student_details">
+
+                <input type="hidden" name="mode" value="placement_status">
+
+                <button type="submit" class="btn btn-success">
+                    Mark Student as Placed
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- =========================
+         APPLICATIONS
+         ========================= -->
+
+    <div class="profile-section">
+
+        <div class="section-header">
+
+            <h2>Placement Applications</h2>
+
+        </div>
+
+        <div class="section-body">
+
+            {% if applications %}
+
+            <div class="table-wrapper">
+
+                <table class="applications-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th >Status</th>
+                            <th >Details</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for app in applications %}
+
+                        <tr>
+
+                            <td >
+                                <strong>{{app[0]}}</strong>
+                            </td>
+
+                            <td>
+                                {{app[1]}}
+                            </td>
+
+                            <td>
+
+                                <span class="application-status">
+                                    {{app[2]}}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {% if app[2] not in ['Recommended', 'Opted Out'] %}
+
+                                <form method="POST" action="{{ url_for('Recruiter.Student_Profile_Recruiter') }}">
+
+                                    <input type="hidden" value="{{ student.id }}" name="id">
+
+                                    <input type="hidden" value="{{ app[3] }}" name="application_id">
+
+                                    <button type="submit" class="btn btn-primary">
+                                        View Details
+                                    </button>
+
+                                </form>
+
+                                {% else %}
+
+                                <span style="color:#94a3b8;">
+                                    —
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+                This student has not applied to any placement drives yet.
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+</div>
+
+{% endblock %}

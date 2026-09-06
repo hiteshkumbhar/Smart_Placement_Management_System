@@ -1,0 +1,980 @@
+{% extends "Student_Base.html" %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    .applications-page {
+        padding: 0px 20px 0px;
+        background: #f8f9fc;
+        color: #172554;
+        height: 100vh; 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden; 
+    }
+
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .page-title-section h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 750;
+        color: #101c4d;
+    }
+
+    .page-title-section p {
+        margin: 7px 0 0;
+        color: #718096;
+        font-size: 15px;
+    }
+
+
+    /* ---------------- Search --------------- */
+
+    .search {
+        /* The search box container */
+        display: flex;
+        /* Use flex so icon + input sit in a row */
+        align-items: center;
+        /* Vertically center */
+        gap: 8px;
+        /* Space between icon and input */
+        background: #fff;
+        /* White background */
+        border: 1px solid #c5c2c2;
+        /* Light gray border */
+        border-radius: 8px;
+        /* Rounded corners */
+        padding: 8px 12px;
+        /* Inner spacing */
+        width: 260px;
+        /* Fixed width */
+    }
+
+    .search input {
+        border: none;
+        /* No border (the box already has one) */
+        outline: none;
+        /* Remove blue focus outline */
+        width: 100%;
+        /* Fill the search box */
+        font-size: 16px;
+        /* Readable text size */
+        background: transparent;
+        /* Show the parent's white background */
+    }
+
+    .search .icon {
+        color: #9ca3af;
+    }
+
+    /* The 🔍 icon color (gray) */
+
+
+
+
+    /* =========================================================
+       SUMMARY CARDS
+    ========================================================= */
+
+    .application-summary {
+        display: grid;
+        grid-template-columns: repeat(5, auto);
+        gap: 18px;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e7eaf2;
+        border-radius: 16px;
+        min-height: 80px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        transition: transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .summary-icon {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .summary-icon.total {
+        background: #eeeeff;
+        color: #5146d8;
+    }
+
+    .summary-icon.shortlisted {
+        background: #dcffe5;
+        color: #e89b00;
+    }
+
+    .summary-icon.inteview {
+        background: #fff4dc;
+    }
+
+    .summary-icon.selected {
+        background: #fff4dc;
+        color: #e89b00;
+    }
+
+    .summary-icon.rejected {
+        background: #fdecef;
+        color: #dc3045;
+    }
+
+    .summary-content {
+        min-width: 0;
+        display: grid;
+        place-items: center;
+    }
+
+    .summary-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 5px;
+    }
+
+    .summary-number {
+        font-size: 27px;
+        line-height: 1;
+        font-weight: 750;
+        color: #172554;
+    }
+
+    .summary-description {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #8a94a6;
+    }
+
+
+    /* =========================================================
+       APPLICATION TABLE
+    ========================================================= */
+
+    .applications-table-container {
+        background: #ffffff;
+
+        border: 1px solid #e3e6ef;
+        border-radius: 16px;
+
+        overflow: hidden;
+
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .applications-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .applications-table thead {
+        background: #fbfcfe;
+    }
+
+    .applications-table th {
+        padding: 16px 20px;
+
+        text-align: left;
+
+        font-size: 11px;
+        font-weight: 750;
+
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        color: #64748b;
+
+        border-bottom: 1px solid #e7eaf0;
+
+        white-space: nowrap;
+    }
+
+    .applications-table td {
+        padding: 17px 20px;
+
+        font-size: 14px;
+
+        color: #334155;
+
+        border-bottom: 1px solid #eef0f4;
+
+        vertical-align: middle;
+    }
+
+    .applications-table tbody tr {
+        transition: background 0.15s ease;
+    }
+
+    .applications-table tbody tr:hover {
+        background: #fafaff;
+    }
+
+    .applications-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+
+    /* =========================================================
+       COMPANY
+    ========================================================= */
+
+    .company-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        min-width: 180px;
+    }
+
+    .company-logo {
+        height: 42px;
+        min-width: 42px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+    }
+
+    .company-name {
+        font-weight: 700;
+        color: #172554;
+        margin-left: 5px;
+    }
+
+    .company-subtitle {
+        margin-top: 3px;
+
+        font-size: 12px;
+
+        color: #8791a3;
+    }
+
+
+    /* =========================================================
+       STATUS BADGES
+    ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        padding: 6px 11px;
+
+        border-radius: 7px;
+
+        font-size: 12px;
+        font-weight: 650;
+
+        white-space: nowrap;
+    }
+
+    .status-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-applied {
+        color: #4f46e5;
+        background: #eef0ff;
+    }
+
+    .status-shortlisted {
+        color: #16834b;
+        background: #e8f7ef;
+    }
+
+    .status-interview {
+        color: #a96d00;
+        background: #fff3d8;
+    }
+
+    .status-selected {
+        color: #07814a;
+        background: #e6f8ee;
+    }
+
+    .status-rejected {
+        color: #d12e42;
+        background: #fdecef;
+    }
+
+    .status-default {
+        color: #64748b;
+        background: #f1f3f6;
+    }
+
+
+    /* =========================================================
+       VIEW DETAILS BUTTON
+    ========================================================= */
+
+    .details-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 8px 14px;
+
+        border: 1px solid #b8b2ff;
+        border-radius: 8px;
+
+        background: #ffffff;
+
+        color: #5146e8;
+
+        text-decoration: none;
+
+        font-size: 12px;
+        font-weight: 650;
+
+        transition: 0.2s ease;
+    }
+
+    .details-btn:hover {
+        background: #5146e8;
+        border-color: #5146e8;
+
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+
+    /* =========================================================
+       NEXT STEP
+    ========================================================= */
+
+    .next-step {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .next-step-icon {
+        width: 30px;
+        height: 30px;
+
+        border-radius: 8px;
+
+        background: #f0efff;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: #5146e8;
+
+        font-size: 14px;
+    }
+
+    .next-step-text {
+        color: #263454;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .next-step-date {
+        margin-top: 2px;
+
+        font-size: 11px;
+        color: #8a94a6;
+    }
+
+
+    /* =========================================================
+       EMPTY STATE
+    ========================================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+
+        color: #7b8494;
+    }
+
+    .empty-icon {
+        width: 65px;
+        height: 65px;
+
+        margin: 0 auto 15px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #eeeeff;
+
+        color: #5146e8;
+
+        font-size: 27px;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 6px;
+
+        color: #273252;
+
+        font-size: 18px;
+    }
+
+    .empty-state p {
+        margin: 0;
+
+        font-size: 13px;
+    }
+
+
+  .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        padding: 5px;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+<div class="applications-page">
+    
+    <div class="fixed-top-section">
+
+    <header class="topbar">
+        <div class="top-actions">
+            <details class="profile-menu">
+                <summary>
+                    {% if student.profile_pic is none %}
+                    <div class="avatar">
+                        {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                    </div>
+                    {% else %}
+                    <div class="profilepic">
+                        <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                            style="width: 36px; height: 36px; object-fit: cover;">
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}
+                        </div>
+                        <div class="profile-role">Student</div>
+                    </div>
+                    <span class="chevron">⌄</span>
+                </summary>
+
+                <div class="profile-dropdown">
+                    <div class="profile-summary">
+                        {% if student.profile_pic is none %}
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                        </div>
+                        {% else %}
+                        <div class="profilepic">
+                            <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                style="width: 36px; height: 36px; object-fit: cover;">
+                        </div>
+                        {% endif %}
+                        <div>
+                            <strong>{{ current_user.name if current_user.name else 'Student' }}</strong>
+                            <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
+                        </div>
+                    </div>
+
+                    <a class="profile-action" href="{{ url_for('student.Student_Profile') }}">
+                        <span class="action-icon">👤</span>
+                        <span>My Profile</span>
+                    </a>
+
+                    <hr class="profile-divider">
+
+                    <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                        <span class="action-icon">↪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </details>
+        </div>
+    </header>
+
+    <div class="page-header">
+
+        <div class="page-title-section">
+            <h1>My Applications</h1>
+            <p>Track and manage all your placement applications.</p>
+        </div>
+
+        <form method='POST' action="{{url_for('student.Application')}}">
+            <div class="search">
+                <span class="icon">🔍</span>
+                <input type="text" name="search" id="searchInput" placeholder="Search Comapny..." />
+            </div>
+        </form>
+    </div>
+</div>
+    <div class="scrollable-bottom-section">
+
+
+    <div class="application-summary">
+
+        <a href="{{url_for('student.Application', filter = 'All')}}" style="text-decoration: none;">
+            <div class="summary-card">
+                <div class="summary-icon total">
+                    <span style="margin-top: 5px;"><svg width="40px" height="40px" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M8 13H14M8 17H16M13 3H5V21H19V9M13 3H14L19 8V9M13 3V7C13 8 14 9 15 9H19"
+                                    stroke="#813d9c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                </path>
+                            </g>
+                        </svg></span>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-label">
+                        Total Applications
+                    </div>
+
+                    <div class="summary-number">
+                        {{ total_applications }}
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{url_for('student.Application', filter = 'shortlisted')}}" style="text-decoration: none;">
+        <div class="summary-card">
+            <div class="summary-icon shortlisted">
+                <span style="margin-top: 5px;">
+                    <svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M11.2691 4.41115C11.5006 3.89177 11.6164 3.63208 11.7776 3.55211C11.9176 3.48263 12.082 3.48263 12.222 3.55211C12.3832 3.63208 12.499 3.89177 12.7305 4.41115L14.5745 8.54808C14.643 8.70162 14.6772 8.77839 14.7302 8.83718C14.777 8.8892 14.8343 8.93081 14.8982 8.95929C14.9705 8.99149 15.0541 9.00031 15.2213 9.01795L19.7256 9.49336C20.2911 9.55304 20.5738 9.58288 20.6997 9.71147C20.809 9.82316 20.8598 9.97956 20.837 10.1342C20.8108 10.3122 20.5996 10.5025 20.1772 10.8832L16.8125 13.9154C16.6877 14.0279 16.6252 14.0842 16.5857 14.1527C16.5507 14.2134 16.5288 14.2807 16.5215 14.3503C16.5132 14.429 16.5306 14.5112 16.5655 14.6757L17.5053 19.1064C17.6233 19.6627 17.6823 19.9408 17.5989 20.1002C17.5264 20.2388 17.3934 20.3354 17.2393 20.3615C17.0619 20.3915 16.8156 20.2495 16.323 19.9654L12.3995 17.7024C12.2539 17.6184 12.1811 17.5765 12.1037 17.56C12.0352 17.5455 11.9644 17.5455 11.8959 17.56C11.8185 17.5765 11.7457 17.6184 11.6001 17.7024L7.67662 19.9654C7.18404 20.2495 6.93775 20.3915 6.76034 20.3615C6.60623 20.3354 6.47319 20.2388 6.40075 20.1002C6.31736 19.9408 6.37635 19.6627 6.49434 19.1064L7.4341 14.6757C7.46898 14.5112 7.48642 14.429 7.47814 14.3503C7.47081 14.2807 7.44894 14.2134 7.41394 14.1527C7.37439 14.0842 7.31195 14.0279 7.18708 13.9154L3.82246 10.8832C3.40005 10.5025 3.18884 10.3122 3.16258 10.1342C3.13978 9.97956 3.19059 9.82316 3.29993 9.71147C3.42581 9.58288 3.70856 9.55304 4.27406 9.49336L8.77835 9.01795C8.94553 9.00031 9.02911 8.99149 9.10139 8.95929C9.16534 8.93081 9.2226 8.8892 9.26946 8.83718C9.32241 8.77839 9.35663 8.70162 9.42508 8.54808L11.2691 4.41115Z"
+                                stroke="#33d17a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </g>
+                    </svg> </span>
+            </div>
+            <div class="summary-content">
+                <div class="summary-label">
+                    Shortlisted
+                </div>
+                <div class="summary-number">
+                    {{ shortlisted_count }}
+                </div>
+            </div>
+        </div>
+                </a>
+
+        <a href="{{url_for('student.Application', filter = 'inteview')}}" style="text-decoration: none;">
+
+        <div class="summary-card">
+
+            <div class="summary-icon inteview">
+                <span>
+                    <svg fill="#ff7800" height="40px" width="40px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"> <g id="SVGRepo_bgCarrier" stroke-width="0"></g> <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g> <g id="SVGRepo_iconCarrier"> <g><g><path d="M255.946,83.759c-33.069,0-59.972,26.903-59.972,59.971c0,33.069,26.903,59.972,59.972,59.972 c33.068,0,59.971-26.903,59.971-59.972C315.917,110.662,289.014,83.759,255.946,83.759z M255.946,183.304 c-21.821,0-39.574-17.753-39.574-39.574c0-21.821,17.753-39.573,39.574-39.573c21.821,0,39.573,17.753,39.573,39.573 C295.519,165.551,277.767,183.304,255.946,183.304z"> </path> </g></g> <g> <g> <path d="M112.363,144.796c-27.175,0-49.283,22.108-49.283,49.283c0,27.175,22.108,49.283,49.283,49.283 c27.175,0,49.283-22.108,49.283-49.283S139.537,144.796,112.363,144.796z M112.363,222.963c-15.927,0-28.884-12.957-28.884-28.884 c0-15.927,12.957-28.884,28.884-28.884c15.927,0,28.884,12.958,28.884,28.884C141.247,210.005,128.29,222.963,112.363,222.963z"> </path> </g> </g> <g> <g> <path d="M399.674,144.796c-27.174,0-49.283,22.108-49.283,49.283c0,27.175,22.109,49.283,49.283,49.283 c27.175,0,49.282-22.108,49.282-49.283S426.848,144.796,399.674,144.796z M399.674,222.963c-15.927,0-28.884-12.957-28.884-28.884 c0-15.927,12.957-28.884,28.884-28.884c15.926,0,28.883,12.958,28.883,28.884C428.557,210.005,415.6,222.963,399.674,222.963z"> </path> </g> </g> <g> <g> <path d="M501.801,407.843h-28.677V332.75c0-40.5-32.95-73.45-73.451-73.45c-22.522,0-42.698,10.198-56.181,26.209 c-10.521-38.473-45.781-66.836-87.546-66.836c-41.729,0-76.956,28.381-87.451,66.874c-13.464-16.033-33.626-26.247-56.132-26.247 c-40.5,0-73.451,32.95-73.451,73.45v75.093H10.199C4.566,407.843,0,412.409,0,418.042c0,5.633,4.566,10.199,10.199,10.199h491.602 c5.632,0,10.199-4.566,10.199-10.199C512,412.409,507.433,407.843,501.801,407.843z M165.306,407.843H59.31V332.75 c0-29.252,23.799-53.051,53.052-53.051c29.193,0,52.943,23.799,52.943,53.051V407.843z M326.225,407.843H185.704v-98.421 c0-38.792,31.51-70.351,70.242-70.351c38.792,0,70.351,31.559,70.351,70.351L326.225,407.843z M452.725,407.842h-106.03v-77.865 c1.447-27.969,24.657-50.279,52.979-50.279c29.252,0,53.051,23.799,53.051,53.051V407.842z"> </path> </g> </g> <g> <g> <path d="M207.08,329.54c-5.633,0-10.199,4.566-10.199,10.199v48.939c0,5.633,4.566,10.199,10.199,10.199 s10.199-4.566,10.199-10.199V339.74C217.279,334.108,212.713,329.54,207.08,329.54z"> </path> </g> </g> <g> <g> <path d="M207.08,296.915c-5.633,0-10.199,4.566-10.199,10.199v2.175c0,5.633,4.566,10.199,10.199,10.199 s10.199-4.566,10.199-10.199v-2.175C217.279,301.481,212.713,296.915,207.08,296.915z"> </path> </g> </g> </g> </svg>
+                </span>
+            </div>
+            <div class="summary-content">
+                <div class="summary-label">
+                    Interview Scheduled
+                </div>
+                <div class="summary-number">
+                    {{ interview_count }}
+                </div>
+            </div>
+        </div>
+        </a>
+        <a href="{{url_for('student.Application', filter = 'selected')}}" style="text-decoration: none;">
+        <div class="summary-card">
+            <div class="summary-icon selected">
+                <svg width="60" height="60" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"> <circle cx="64" cy="64" r="60" fill="#fdfaca" /> <g transform="translate(25.6, 25.6) scale(0.6)"> <path d="M97.12 59.35c2.22-1.83 15.04-9.76 22.06-16.44c5.48-5.22 7.6-18.85-.83-25.48c-10.96-8.61-21.48.43-21.48.43s-.92-5.11-7.32-8.11c-8.06-3.78-18.27-5.19-27.66-5.07c-9.1.11-17.48 1.21-24.92 4.86c-6.66 3.27-7.06 7.93-7.06 7.93s-8.74-8.35-19.45-1.57C-.24 22.69 2.83 36.29 7.98 42c6.71 7.44 14.77 11.23 18.43 13.97c3.65 2.74 7.15 5.35 7.15 7.7c0 2.35-1.04 2.87-1.44 2.74c-.39-.13-1.08-2.42-2.87-1.44c-2.44 1.35-1.7 6.79 3.39 7.31c4.93.51 5.87-4.7 5.87-4.7l.78-5.09l8.09 5.61l8.87 7.31l-.26 6.26s-.39 4.83-2.74 9.01s-6.13 8.35-6.13 8.35l-.12 3.78l32.89-.78l-1.04-3.65s-4.24-4.66-6.79-9.66c-1.82-3.58-2.11-7.19-2.11-7.19l-.08-8.98l17.07-10.46s1.83 1.44 1.57 1.96s-.32 5.85 3.78 7.83c4.05 1.96 7.31-.52 6.92-3.92c-.39-3.39-2.48-2.22-3.13-1.7c-.65.52-2.09.65-2.48-1.31c-.4-1.94 1.3-3.77 3.52-5.6zM13.09 40.89l-3.91-11.9l4.73-6.19l5.3-1.55s6.77 5.05 7.01 5.46c.24.41 4.32 8.8 4.32 8.8l5.38 19.48l-22.83-14.1zm76.86 15.65c.08-.41 5.05-20.87 5.05-20.87c0-.24 3.5-1.87 3.5-2.2c0-.33 6.36-10.68 6.36-10.68l10.6.41l2.2 10.51l-5.3 8.72c.01.01-22.49 14.51-22.41 14.11z" fill="#fec417"></path> <path d="M119.92 30.64c-.78-9.32-10-11.55-13.79-10.2s-6.25 3.88-7.09 7.48c-.68 2.91-1.36 4.85-2.14 5.15c-.86.32-1.65.19-1.65.19s-.14-6.3-.1-8.84c.1-5.24 1.7-6.58 1.7-6.58s-.34-1.77-1.02-2.75c-.68-.97-1.94-2.23-1.94-2.23s.29 2.52-.97 3.11s-2.62-.29-2.62-.29l1.26 5.24s-2.04 26.12-2.23 26.7c-.19.58-7.86 13.88-7.86 13.88s-4.47 4.18-6.6 5.15c-2.14.97-3.98 3.5-12.23 3.59c-8.25.1-15.34-6.41-15.34-6.41l-7.09-6.8l-5.24-15.44l-.78-15.73l.33-5.72l.23-2.39l-.37-1.21s-.68.68-1.94.39c-1.26-.29-1.75-1.94-1.75-1.94s-.49.78-.58 1.17c-.1.39-.2 1.29-.2 1.29s1.36 1.43 1.65 3.47c.29 2.04-.1 10.49-1.55 10.29c-1.46-.19-.98-7.28-6.51-10c-4.79-2.36-11.94-1.65-14.86 4.27c-2.91 5.92-.78 12.91 8.35 19.42s18.85 11.98 20.39 17.2c1.84 6.21-2.33 9.9-2.33 9.9s3.03-.42 4.52-3.67c.48-1.05.66-2.58.73-3.49c3.45 4.5 8.04 8.31 14.12 10.15c2.3.79 4.89 1.19 8.49 1.19c.52 0 1.03-.02 1.54-.04c4.21-.15 7.81-.94 11.3-2.67c4.71-2.18 8.36-5.51 11.18-9.29c-.08.9.47 3.14 1.52 4.91c1.84 3.11 4.95 3.3 4.95 3.3s-4.27-2.52-3.4-8.54c.87-6.02 4.85-8.16 10.87-12.04c6.04-3.89 19.82-11.85 19.05-21.17zM21.27 43.85c-2.71-1.91-7.46-4.46-9.42-8.35c-2.61-5.19-.49-11.46 4.47-12.23c10.3-1.62 10.49 11.17 11.17 12.72c.68 1.55 2.62 1.65 2.62 1.65s.07.86.35 2.52c.01.05.02.09.02.14l.03.15c.19 1.13.46 2.54.84 4.15l.03.12c.21.91.43 1.77.66 2.56c.46 1.66 1.02 3.45 1.71 5.29c-1-.68-6.73-4.65-12.48-8.72zm93.31-7.19c-2.15 3.48-6.5 6.07-9.71 8.25c-4.14 2.81-10.3 7.03-12.04 8.21c.4-1.06.75-2.11 1.07-3.14c.52-1.36 1.07-3.02 1.45-4.81c1-4.7 1.17-8.81 1.17-8.81s2.04.58 3.3-.78c1.26-1.36 1.73-5.58 2.91-7.57c1.84-3.11 5.53-6.31 11.07-2.43c3.2 2.25 3.32 6.96.78 11.08z" fill="#ffa828"></path> <path d="M60.52 79.31l5.65-.07s.15 6.17 1.04 10.77c.89 4.61 2.08 9.73 2.08 9.73s-11.51 3.86-11.44-.3s1.78-12.26 1.78-12.26s1.04-9.65.89-7.87z" fill="#ffa828"></path> <path d="M51.04 15.19s6.29-.71 12.14-.62s11.87 1.24 11.87 1.24s-.35 19.58-1.42 30.57c-1.06 10.99-5.22 19.22-6.33 21.55c-1.07 2.26-1.85 3.47-1.85 3.47l-5.64-.66l-9.75-19.58l.98-35.97z" fill="#ffa828"></path> <path d="M43.51 18.12s1.77-.89 4.34-1.86c2.33-.88 4.43-1.15 4.43-1.15s.06 12.98.27 22.24c.18 7.89 3.1 20.82 4.52 24.28c1.42 3.46 3.98 8.74 3.98 8.74s-5.15-.74-8.32-4.76c-1.67-2.12-9.48-18.52-9.75-29.33s.79-18.43.53-18.16z" fill="#ffefab"></path> <path d="M40.58 19.62c-.18.53-1.59 11.7.62 22.06s5.48 17.45 7.64 20.26c1.92 2.49 3.17 3.67 3.88 3.67s-2.92-8.59-4.61-15.33c-1.68-6.73-2.57-14.8-2.75-18.78c-.18-3.99-.35-14.27-.35-14.27s-1.95.89-2.39 1.15c-.44.27-2.04 1.24-2.04 1.24z" fill="#fffcfd"></path> <path d="M53.34 99.01s3.81-6.2 4.61-10.9c.8-4.7 1.24-8.86 1.24-8.86l2.36.1s-.23 6.81-.5 11.42s-1.06 9.13-1.06 9.13l-6.65-.89z" fill="#ffefab"></path> <path d="M56.27 75.41s1.77-1.73 6.64-1.73s6.96 1.87 6.96 1.87l.13 6.01s-3.24-1.01-7.18-1.06c-3.28-.04-6.81 1.18-6.81 1.18l.26-6.27z" fill="#d1701c"></path> <path d="M35 15.72c.82-.76 8.68-6.66 27.29-6.82c20.02-.18 27.53 5.62 28 5.94c.53.35 1.15 1.95.89 2.66c-.27.71-.8.97-2.3.35c-1.51-.62-8.95-6.05-26.85-5.49c-17.19.53-24.48 5.76-25.25 6.2c-.62.35-1.77.44-2.3-.27c-.54-.7-.01-2.07.52-2.57z" fill="#d1701c"></path> <path d="M91.18 19.89c-2.3.18-.71 18.7-5.58 30.3c-5.22 12.41-11.88 15.95-11.61 16.66c.27.71 6.79-1.26 10.9-7.09c3.81-5.4 6.11-10.19 7.18-16.57c1.05-6.38 1.67-23.5-.89-23.3z" fill="#d1701c"></path> <path d="M34.51 22.01c-.58-.03.01 9.21-.93 13.27c-.36 1.56-1.24 1.88-1.33 2.23c-.09.35 1.93 12.24 5.32 17.46c3.28 5.05 9.75 11.34 10.81 10.28c1.06-1.06-4.7-4.61-8.59-12.32c-2.24-4.42-4.52-11.08-4.61-18.7c-.06-5.04.57-12.15-.67-12.22z" fill="#d1701c"></path> <path d="M86.77 112.71l-.01-14.29H40.89c.14 0 .03 11.62.01 14.34h-6.52v10.35h58.25v-10.35l-5.86-.05z" fill="#865c50"></path> <path d="M55.59 105.93c-1.13-.05-2.43.18-2.48 1.58s-.05 5.45-.05 6.22c0 .77.63 1.44 2.21 1.49c1.58.05 16.41 0 17.45 0c1.04 0 1.58-.9 1.62-1.8c.05-.9-.05-4.69-.05-5.72c0-1.71-1.53-1.71-2.57-1.71c-1.12-.02-16.13-.06-16.13-.06z" fill="#fcc219"></path> </g> </svg>
+            </div>
+            <div class="summary-content">
+                <div class="summary-label">
+                    Selected
+                </div>
+                <div class="summary-number">
+                    {{ select_count }}
+                </div>
+            </div>
+        </div>
+                </a>
+        <a href="{{url_for('student.Application', filter = 'rejected')}}" style="text-decoration: none;">
+
+        <div class="summary-card">
+            <div class="summary-icon rejected">
+                <span style="margin-top: 5px;"><svg width="50px" height="50px" viewBox="0 0 25 25" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M9.5 15.5L12.5 12.5M12.5 12.5L15.5 9.5M12.5 12.5L9.5 9.5M12.5 12.5L15.5 15.5M20.5 12.5C20.5 16.9183 16.9183 20.5 12.5 20.5C8.08172 20.5 4.5 16.9183 4.5 12.5C4.5 8.08172 8.08172 4.5 12.5 4.5C16.9183 4.5 20.5 8.08172 20.5 12.5Z"
+                                stroke="#e01b24" stroke-width="1.2"></path>
+                        </g>
+                    </svg></span>
+            </div>
+            <div class="summary-content">
+                <div class="summary-label">
+                    Rejected
+                </div>
+                <div class="summary-number">
+                    {{ reject_count }}
+                </div>
+            </div>
+        </div>
+        </a>
+
+    </div>
+
+
+    <div class="applications-table-container">
+        <table class="applications-table">
+            <thead>
+                <tr>
+                    <th style=>Company</th>
+                    <th>Role</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="applicationTableBody">
+                {% if applications %}
+                {% for i in applications %}
+                {% set current_status = i[3]|string %}
+                {% set status_lower = current_status|lower %}
+                <tr class="application-row" data-company="{{ i[0]|lower }}" data-role="{{ i[1]|lower }}"
+                    data-status="{{ status_lower }}">
+                    <td>
+                        <div class="company-info">
+                            <div class="company-logo">
+                                {% if i[5] %}
+                                <img src="{{ url_for('static', filename='Images/company/logo/' + i[5]) }}"
+                                    alt="Company Logo" class="company-logo" style="height:45px;">
+                                {% else %}
+                                <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                        </path>
+                                    </g>
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="company-name">
+                                    {{ i[0] }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <strong>
+                            {{ i[1] }}
+                        </strong>
+                    </td>
+                    <td>
+                        {{ i[2] }}
+                    </td>
+                    <!-- Status -->
+                    <td>
+                        {% if 'shortlist' in status_lower %}
+                        <span class="status-badge status-shortlisted">
+                            {{ i[3] }}
+                        </span>
+                        {% elif 'interview' in status_lower %}
+                        <span class="status-badge status-interview">
+                            {{ i[3] }}
+                        </span>
+                        {% elif 'selected' in status_lower %}
+                        <span class="status-badge status-selected">
+                            {{ i[3] }}
+                        </span>
+                        {% elif 'reject' in status_lower %}
+                        <span class="status-badge status-rejected">
+                            {{ i[3] }}
+                        </span>
+                        {% elif 'applied' in status_lower %}
+                        <span class="status-badge status-applied">
+                            {{ i[3] }}
+                        </span>
+                        {% else %}
+                        <span class="status-badge status-default">
+                            {{ i[3] }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <!-- Details -->
+                    <td>
+                        <a class="details-btn" href="{{ url_for(
+                                    'student.Student_Application_Details',
+                                    job_id=i[4]
+                                ) }}">
+                            View Details
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="6">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                ▤
+                            </div>
+
+                            <h3>
+                                No applications yet
+                            </h3>
+
+                            <p>
+                                Your job applications will appear here once you apply for a placement drive.
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+</div>
+
+
+{% endblock %}

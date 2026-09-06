@@ -1,0 +1,2382 @@
+{% extends "Student_Base.html" %}
+
+{% block style %}
+{{ super() }}
+
+<style>
+    :root {
+        --sp-primary: #5b2cff;
+        --sp-primary-2: #3f7cff;
+        --sp-bg: #f6f7fb;
+        --sp-card: #ffffff;
+        --sp-text: #18213d;
+        --sp-muted: #718096;
+        --sp-border: #e7eaf2;
+        --sp-success: #18a957;
+        --sp-danger: #e5484d;
+        --sp-warning: #f0a11a;
+        --sp-shadow: 0 8px 28px rgba(37, 45, 75, 0.07);
+        --sp-radius: 16px;
+    }
+
+    main {
+        min-height: 100vh;
+        background: var(--sp-bg);
+        color: var(--sp-text);
+        overflow-x: hidden;
+    }
+
+    .sp-page {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .sp-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 18px;
+        margin-bottom: 10px;
+    }
+
+    .sp-page-title {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+
+    .sp-header-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--sp-text);
+        font-size: 14px;
+        font-weight: 700;
+
+    }
+
+    .sp-header-user-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 14px rgba(45, 54, 90, .12);
+    }
+
+    .sp-card {
+        background: var(--sp-card);
+        border: 1px solid var(--sp-border);
+        border-radius: var(--sp-radius);
+        box-shadow: 0px 0px 1px rgb(202, 202, 202);
+        ;
+    }
+
+    .sp-hero {
+        padding: 28px 30px;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        background:
+            radial-gradient(circle at 95% 15%, rgba(91, 44, 255, .10), transparent 24%),
+            linear-gradient(135deg, #ffffff 0%, #f7f4ff 100%);
+    }
+
+    .sp-hero::after {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -70px;
+        top: -80px;
+        border-radius: 50%;
+        background: rgba(63, 124, 255, .08);
+    }
+
+    .sp-hero-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+    }
+
+    .sp-avatar-wrap {
+        position: relative;
+        flex: 0 0 auto;
+        display: inline-block;
+    }
+
+    .sp-avatar-none {
+        width: 138px;
+        height: 138px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 7px solid #fff;
+        box-shadow: 0 8px 25px rgba(42, 51, 85, .16);
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 60px;
+        font-weight: 800;
+    }
+
+    .sp-avatar {
+        width: 138px;
+        height: 138px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 7px solid #fff;
+        box-shadow: 0 8px 25px rgba(42, 51, 85, .16);
+    }
+
+    .sp-photo-edit {
+        position: absolute;
+        right: 1px;
+        bottom: 2px;
+        width: 39px;
+        height: 39px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--sp-primary), var(--sp-primary-2));
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        border: 3px solid #fff;
+    }
+
+    .profile-pic-alert {
+        padding: 10px 13px;
+        border-radius: 9px;
+        background: #fff0f0;
+        color: #b52f36;
+        font-size: 12px;
+        margin-top: 7px;
+    }
+
+    .sp-hero-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sp-name {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    .sp-course {
+        margin: 5px 0 16px;
+        color: var(--sp-primary);
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .sp-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-bottom: 17px;
+    }
+
+    .sp-badge {
+        padding: 8px 12px;
+        border-radius: 10px;
+        background: #f1efff;
+        color: var(--sp-primary);
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .sp-badge.success {
+        background: #e8f8ef;
+        color: #128448;
+    }
+
+    .sp-contact-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .sp-contact-item {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sp-icon-box {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        background: #f0edff;
+        color: var(--sp-primary);
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .sp-contact-label {
+        color: var(--sp-muted);
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .sp-contact-value {
+        font-size: 13px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .sp-section-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
+    .sp-section {
+        padding: 20px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .sp-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 17px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--sp-border);
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .sp-section-title .sp-title-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #f0edff;
+        color: var(--sp-primary);
+    }
+
+    .sp-field-list {
+        border: 1px solid var(--sp-border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .sp-field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 58px;
+        border-bottom: 1px solid var(--sp-border);
+    }
+
+    .sp-field-row:last-child {
+        border-bottom: 0;
+    }
+
+    .sp-field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        min-width: 0;
+        border-right: 1px solid var(--sp-border);
+    }
+
+    .sp-field-row .sp-field:last-child {
+        border-right: 0;
+    }
+
+    .sp-field-icon {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: #e7ebfc;
+        color: #4773df;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .sp-field-label {
+        color: #657089;
+        font-size: 11px;
+        line-height: 1.25;
+        margin-bottom: 3px;
+    }
+
+    .sp-field-value {
+        color: var(--sp-text);
+        font-size: 13px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .sp-muted {
+        color: #9aa3b5;
+        font-weight: 600;
+    }
+
+    .sp-links {
+        padding: 20px;
+        margin-bottom: 18px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .sp-link-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+    }
+
+    .sp-link-card {
+        display: block;
+        text-decoration: none;
+        color: var(--sp-text);
+        border: 1px solid var(--sp-border);
+        border-radius: 12px;
+        padding: 15px;
+        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        min-width: 0;
+    }
+
+    .sp-link-card:hover {
+        transform: translateY(-2px);
+        border-color: #cfc7ff;
+        box-shadow: 0 8px 20px rgba(65, 55, 145, .08);
+    }
+
+    .sp-link-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #f1efff;
+        color: var(--sp-primary);
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .sp-link-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .sp-link-url {
+        display: block;
+        color: var(--sp-primary);
+        font-size: 11px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sp-documents {
+        padding: 20px;
+        margin-bottom: 18px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .sp-doc-grid {
+        display: grid;
+        grid-template-columns: 100%;
+        gap: 20px;
+    }
+
+    .sp-resume-card {
+        padding: 18px;
+        border: 1px solid #dfe5f5;
+        border-radius: 13px;
+        background: linear-gradient(145deg, #f7f9ff, #ffffff);
+    }
+
+    .sp-Certification-card {
+        padding: 18px;
+        border: 1px solid #dfe5f5;
+        border-radius: 13px;
+        background: linear-gradient(145deg, #f7f9ff, #ffffff);
+    }
+
+    .sp-doc-label {
+        color: var(--sp-primary);
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 13px;
+    }
+
+    .sp-file-row {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 12px;
+        border: 1px solid var(--sp-border);
+        border-radius: 11px;
+        background: #fff;
+        width: 100%;
+    }
+
+    .sp-file-remark {
+        display: grid;
+        grid-template-columns: max-content auto;
+        grid-template-rows: auto;
+        width: 100%;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .sp-file-remark>*:nth-child(1) {
+        border-right: 1px solid #e0e0e0;
+        /* Clean, light gray line */
+        padding: 12px 16px;
+        /* Padding inside the left column */
+    }
+
+    .sp-file-remark>*:nth-child(2) {
+        padding: 12px 16px;
+        /* Padding inside the right column */
+    }
+
+    .sp-remark-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sp-file-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #fff0ef;
+        color: #dc3e32;
+        font-weight: 900;
+    }
+
+    .sp-file-name {
+        flex: 1;
+        min-width: 0;
+        font-size: 12px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .sp-file-meta {
+        margin-top: 4px;
+        color: var(--sp-muted);
+        font-size: 10px;
+    }
+
+    .sp-cert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .sp-cert-list {
+        border: 1px solid var(--sp-border);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .sp-cert-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+    }
+
+    .sp-cert-item:last-child {
+        border-bottom: 0;
+    }
+
+    .sp-cert-name {
+        flex: 1;
+        min-width: 0;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .sp-btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 16px;
+        background: linear-gradient(135deg, var(--sp-primary), var(--sp-primary-2));
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 7px 16px rgba(91, 44, 255, .18);
+    }
+
+    .sp-cert-actions {
+        display: flex;
+        gap: 7px;
+    }
+
+    .sp-small-btn {
+        border: 1px solid #d8d3ff;
+        background: #fff;
+        color: var(--sp-primary);
+        padding: 7px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sp-small-btn.danger {
+        color: var(--sp-danger);
+        border-color: #ffd2d3;
+    }
+
+    .sp-primary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 16px;
+        background: linear-gradient(135deg, var(--sp-primary), var(--sp-primary-2));
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 7px 16px rgba(91, 44, 255, .18);
+    }
+
+    .sp-secondary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d8d3ff;
+        border-radius: 10px;
+        padding: 10px 15px;
+        background: #fff;
+        color: var(--sp-primary);
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+
+    /* Edit mode */
+    .sp-edit-card {
+        padding: 24px;
+        margin-bottom: 18px;
+    }
+
+    .sp-edit-section {
+        margin-bottom: 25px;
+    }
+
+    .sp-edit-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .sp-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .sp-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .sp-form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .sp-form-label {
+        color: #4c5872;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .sp-form-input,
+    .sp-form-select {
+        width: 100%;
+        border: 1px solid #dfe3ed;
+        border-radius: 10px;
+        padding: 11px 12px;
+        background: #fff;
+        color: var(--sp-text);
+        outline: none;
+        font: inherit;
+        font-size: 13px;
+    }
+
+    .sp-form-input:focus,
+    .sp-form-select:focus {
+        border-color: var(--sp-primary);
+        box-shadow: 0 0 0 3px rgba(91, 44, 255, .10);
+    }
+
+    .sp-readonly {
+        background: #f5f6fa;
+        color: #737c91;
+    }
+
+    .sp-file-input {
+        width: 100%;
+        border: 1px dashed #cfc8ff;
+        border-radius: 11px;
+        padding: 12px;
+        background: #faf9ff;
+        font-size: 12px;
+    }
+
+    .sp-alert {
+        padding: 10px 13px;
+        border-radius: 9px;
+        background: #fff0f0;
+        color: #b52f36;
+        font-size: 12px;
+        margin-top: 7px;
+    }
+
+
+    .sp-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 10px;
+        padding-top: 18px;
+        border-top: 1px solid var(--sp-border);
+    }
+
+    .fixed-top-section {
+        flex-shrink: 0;
+        padding: 20px 20px 0px 20px;
+    }
+
+    .scrollable-bottom-section {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="sp-page">
+
+    {% if mode != 'Update' %}
+
+    <!-- PAGE HEADER -->
+    <div class="fixed-top-section">
+        <div class="sp-page-header">
+
+
+            <div class="top-actions">
+
+                <details class="profile-menu">
+                    <summary>
+                        {% if student.profile_pic is none %}
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                        </div>
+                        {% else %}
+                        <div class="profilepic">
+                            <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                style="width: 36px; height: 36px; object-fit: cover;">
+                        </div>
+                        {% endif %}
+
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}</div>
+                            <div class="profile-role">Student</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            {% if student.profile_pic is none %}
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                            </div>
+                            {% else %}
+                            <div class="profilepic">
+                                <img src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                                    style="width: 36px; height: 36px; object-fit: cover;">
+                            </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Student' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
+                            </div>
+                        </div>
+
+                        <a class="profile-action" href="{{ url_for('student.Student_Profile') }}">
+                            <span class="action-icon">👤</span>
+                            <span>My Profile</span>
+                        </a>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <!-- PROFILE HERO -->
+        <section class="sp-card sp-hero">
+
+            <div class="sp-hero-inner">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 150px;">
+                    <div class="sp-avatar-wrap">
+                        {% if student.profile_pic is none %}
+                        <div class="sp-avatar-none">
+                            {{ (current_user.name[:1] if current_user.name else 'S')|upper }}
+                        </div>
+                        {% else %}
+                        <img class="sp-avatar"
+                            src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
+                            alt="Profile Picture">
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('student.Student_Profile')}}" enctype="multipart/form-data">
+                            <label for="profile-pic-upload" style="cursor: pointer;">
+                                <span class="sp-photo-edit" title="Profile photo">✎</span>
+                            </label>
+                            <input type="hidden" name="action" value="change_photo">
+                            <input id="profile-pic-upload" name="profile_photo" type="file" style="display: none;"
+                                onchange="this.form.submit()" />
+                        </form>
+                    </div>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    {% if category in ["profile_photo_extension_error", "profile_photo_size_error"] %}
+                    <div class="profile-pic-alert">{{ message | safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="sp-hero-content">
+                    <h2 class="sp-name">{{ name }}</h2>
+                    <div class="sp-course">B.Tech · {{ student.branch or 'Branch not specified' }}</div>
+
+                    <div class="sp-badges">
+                        <span class="sp-badge">Registration No. : {{ student.registration_no }}</span>
+                        <span class="sp-badge">CGPA : {{ student.cgpa or 'Not specified' }}</span>
+                        <span class="sp-badge success">Placement Status : {{ student.placement_status or 'Not specified'
+                            }}</span>
+                    </div>
+
+                    <div class="sp-contact-row">
+                        <div class="sp-contact-item">
+                            <div class="sp-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+                                    fill="#6b42f5">
+                                    <path
+                                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="sp-contact-label">Mobile Number</div>
+                                <div class="sp-contact-value">{{ student.mobile_number or 'Not specified' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sp-contact-item">
+                            <div class="sp-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+                                    fill="#6b42f5">
+                                    <path
+                                        d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+                                    <path
+                                        d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+                                </svg>
+
+                            </div>
+                            <div>
+                                <div class="sp-contact-label">Email Address</div>
+                                <div class="sp-contact-value">{{ current_user.email }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sp-contact-item">
+                            <div class="sp-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision"
+                                    text-rendering="geometricPrecision" image-rendering="optimizeQuality"
+                                    fill-rule="evenodd" clip-rule="evenodd" width="25" height="25"
+                                    viewBox="0 0 500 512.36" fill="#6b42f5">
+                                    <path fill-rule="nonzero"
+                                        d="M46.87 47.16h53.24v57.68c0 6.35 1.43 12.3 4.03 17.63 2.71 5.58 6.75 10.57 11.79 14.7 4.26 3.53 9.3 6.38 14.83 8.34a51.1 51.1 0 0 0 16.99 2.9c5.97 0 11.72-1.04 17-2.9 5.52-1.96 10.56-4.8 14.83-8.3 5.04-4.17 9.07-9.16 11.79-14.74 2.59-5.33 4.03-11.28 4.03-17.63V47.16h107.3v57.68c0 6.35 1.44 12.3 4.03 17.63 2.71 5.58 6.75 10.57 11.79 14.7 4.26 3.53 9.3 6.38 14.83 8.34 5.27 1.86 11.03 2.9 16.99 2.9 5.97 0 11.73-1.04 17-2.9 5.53-1.96 10.57-4.8 14.83-8.3 5.04-4.17 9.08-9.16 11.79-14.74 2.59-5.33 4.03-11.28 4.03-17.63V47.16h55.14c12.86 0 24.58 5.29 33.09 13.79 8.5 8.47 13.78 20.19 13.78 33.08v371.45c0 12.9-5.28 24.62-13.77 33.11-8.52 8.48-20.24 13.77-33.1 13.77H46.87c-12.85 0-24.56-5.28-33.07-13.77C5.28 490.05 0 478.34 0 465.49V94.03c0-12.87 5.28-24.58 13.76-33.07 8.53-8.52 20.25-13.8 33.11-13.8zM158.92 318.1h182.32c11.85 0 21.53 9.68 21.53 21.51v13.84c-8.18 6.77-15.72 10.4-22.6 10.58-8.56.22-16.76-5.29-24.52-17.24-.42-.64-.93-1.23-1.58-1.69-2.86-2.08-6.84-1.46-8.9 1.4-7.82 10.73-13.65 16.69-21.91 17.14-8.36.44-17.7-4.66-28.15-16.11-.14-.14-.27-.28-.42-.42a6.38 6.38 0 0 0-9.03.42c-9.78 10.74-18.97 16.32-27.49 16.41-8.31.09-14.51-5.15-22.96-16.04a6 6 0 0 0-1.39-1.31c-2.87-2.04-6.87-1.33-8.89 1.55-6.23 8.85-13.5 14.09-21.33 15.5-5.36.96-11.12.04-17.27-2.49-12.72-5.19-8.1-5.66-8.95-21.51-.63-11.83 9.69-21.54 21.54-21.54zm202.42 60.86v29.9H139.11v-28.4c8.2 3.26 16.24 4.16 23.91 2.78 9.33-1.69 17.86-6.7 25.26-14.82 9.84 10.42 18.03 15.44 28.95 15.32 11.07-.11 22.14-5.6 33.18-16.22 11.91 11.44 23.44 16.52 34.61 15.91 10.56-.55 18.07-6.14 27.04-16.15 9.42 11.54 19.94 16.88 31.42 16.58 5.86-.16 11.8-1.83 17.86-4.9zM129.69 423.6H370.3c1.96 0 3.56 1.7 3.56 3.57v16.76c0 1.86-1.7 3.57-3.56 3.57H129.69c-1.85 0-3.56-1.6-3.56-3.57v-16.76c0-1.97 1.6-3.57 3.56-3.57zm101.15-118.11v-30.53c0-4.11 3.37-7.45 7.44-7.45h23.42c4.11 0 7.44 3.38 7.44 7.45v30.53h-38.3zm19.17-96.92c4.03 17.92 16.19 26.87 16.19 35.88 0 8.95-4.03 17.92-16.19 17.92-12.11 0-16.18-8.97-16.18-17.92 0-8.96 12.11-17.92 16.18-35.88zm77.7-190.02C327.71 8.32 337.83 0 350.34 0c12.52 0 22.64 8.32 22.64 18.55v86.29c0 10.24-10.12 18.55-22.64 18.55-12.51 0-22.63-8.31-22.63-18.55V18.55zm-202.59 0C125.12 8.32 135.24 0 147.75 0s22.64 8.32 22.64 18.55v86.29c0 10.24-10.13 18.55-22.64 18.55s-22.63-8.31-22.63-18.55V18.55zm354.86 184.33v-20.02H20.02v272.62c0 20.26 16.58 36.86 36.86 36.86h386.24c20.28 0 36.86-16.63 36.86-36.87V202.88z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="sp-contact-label">Date of Birth</div>
+                                <div class="sp-contact-value">{{ student.DOB or 'Not specified' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sp-contact-item">
+                            <div class="sp-icon-box"><svg fill="#6b42f5" height="30px" width="30px" version="1.1"
+                                    id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 485 485"
+                                    xml:space="preserve">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M455,102.524l30-0.049l-0.154-94.821L390.024,7.5l-0.049,30l43.74,0.071l-58.574,58.574 c-26.385-21.595-59.129-33.339-93.68-33.339c-23.563,0-46.285,5.462-66.723,15.785c-20.013-10.09-42.607-15.784-66.508-15.784 C66.496,62.807,0,129.303,0,211.038c0,76.672,58.514,139.933,133.231,147.476v47.601H91.663v30h41.568V477.5h30v-41.384H204.8v-30 h-41.569v-47.601c18.358-1.853,35.734-7.076,51.508-15.03c20.439,10.322,43.161,15.784,66.723,15.784 c39.594,0,76.818-15.419,104.815-43.416c27.998-27.997,43.417-65.221,43.417-104.815c0-34.551-11.744-67.295-33.339-93.68 l58.574-58.574L455,102.524z M148.231,329.269C83.038,329.269,30,276.231,30,211.038S83.038,92.807,148.231,92.807 c12.773,0,25.075,2.044,36.608,5.808c-2.809,2.422-5.542,4.958-8.192,7.608c-57.795,57.795-57.795,151.835,0,209.63 c2.65,2.65,5.383,5.186,8.192,7.607C173.306,327.225,161.004,329.269,148.231,329.269z M266.462,211.038 c0,40.529-20.502,76.356-51.676,97.667c-6.001-4.115-11.67-8.808-16.926-14.065c-46.098-46.099-46.098-121.105,0-167.204 c5.257-5.257,10.925-9.95,16.926-14.065C245.96,134.682,266.462,170.509,266.462,211.038z M365.064,294.64 c-22.331,22.331-52.021,34.629-83.602,34.629c-12.67,0-25.035-1.984-36.743-5.797c31.657-27.206,51.743-67.517,51.743-112.434 c0-44.918-20.086-85.228-51.744-112.434c11.709-3.813,24.073-5.797,36.744-5.797c31.581,0,61.271,12.298,83.602,34.629 s34.629,52.021,34.629,83.602S387.395,272.309,365.064,294.64z">
+                                        </path>
+                                    </g>
+                                </svg>
+
+                            </div>
+
+                            <div>
+                                <div class="sp-contact-label">Gender</div>
+                                <div class="sp-contact-value">{{ student.Gender or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- PERSONAL + ACADEMIC -->
+        <div class="sp-section-grid">
+
+            <section class="sp-card sp-section">
+                <h3 class="sp-section-title">
+                    <span class="sp-title-icon"><svg width="20" height="20" viewBox="0 0 12 12"
+                            enable-background="new 0 0 12 12" id="Слой_1" version="1.1" xml:space="preserve"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            fill="#000000">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <g>
+                                    <path
+                                        d="M9.3005371,6.5351563C8.4776001,7.4294434,7.3084106,8,6,8S3.5223999,7.4294434,2.6994629,6.5351563 C1.3145142,7.2350464,0.5,8.6131592,0.5,10.5V12h11v-1.5C11.5,8.6131592,10.6854858,7.2350464,9.3005371,6.5351563z"
+                                        fill="#6b42f5"></path>
+                                    <circle cx="6" cy="3.5" fill="#6b42f5" r="3.5"></circle>
+                                </g>
+                            </g>
+                        </svg></span>
+                    Personal Information
+                </h3>
+
+                <div class="sp-field-list">
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg viewBox="0 0 24 24" height="20" width="20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <circle cx="12" cy="6" r="4" fill="#6b42f5"></circle>
+                                        <path
+                                            d="M20 17.5C20 19.9853 20 22 12 22C4 22 4 19.9853 4 17.5C4 15.0147 7.58172 13 12 13C16.4183 13 20 15.0147 20 17.5Z"
+                                            fill="#6b42f5"></path>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Full Name</div>
+                                <div class="sp-field-value">{{ name }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon">
+                                <svg fill="#6b42f5" width="20px" height="20px" viewBox="0 0 50 50"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M10 4L10 20L2.9941406 20L3.1464844 46L17.046875 46L19.046875 46L33 46L47 46L47 8L31 8L31 9L31 28L25.996094 28L25.996094 4.0078125L10 4 z M 12 6L23.996094 6.0078125L23.996094 28L19.013672 28L18.998047 20L18 20L12 20L12 6 z M 15 8L15 10L17 10L17 8L15 8 z M 19.039062 8L19.039062 10L21 10L21 8L19.039062 8 z M 33 10L45 10L45 44L39.960938 44L39.960938 40L38 40L38 44L33 44L33 28L33 10 z M 15 12L15 14L17 14L17 12L15 12 z M 19 12L19 14L21 14L21 12L19 12 z M 36 12.003906L36 14L38 14L38 12.003906L36 12.003906 z M 40.019531 12.007812L40.019531 14.021484L41.980469 14.021484L41.980469 12.007812L40.019531 12.007812 z M 36 16.015625L36 18L38 18L38 16.015625L36 16.015625 z M 40.019531 16.015625L40.019531 18L41.980469 18L41.980469 16.015625L40.019531 16.015625 z M 36 20L36 22L38 22L38 20L36 20 z M 40 20L40 22L41.980469 22L41.980469 20L40 20 z M 5.0058594 22L17.001953 22L17.013672 28L16.998047 28L17.041016 44L11.980469 44L11.980469 40L10.019531 40L10.019531 44L5.1347656 44L5.0058594 22 z M 8 24L8 26.015625L10.039062 26.015625L10.039062 24L8 24 z M 12.039062 24L12.039062 26.015625L14 26.015625L14 24L12.039062 24 z M 36 24.007812L36 25.998047L38 25.998047L38 24.007812L36 24.007812 z M 40 24.007812L40 25.998047L41.980469 25.998047L41.980469 24.007812L40 24.007812 z M 8 27.984375L8 30L10.039062 30L10.039062 27.984375L8 27.984375 z M 12.039062 27.984375L12.039062 30L14 30L14 27.984375L12.039062 27.984375 z M 36 27.992188L36 30.007812L38 30.007812L38 27.992188L36 27.992188 z M 40.019531 27.992188L40.019531 30.007812L41.980469 30.007812L41.980469 27.992188L40.019531 27.992188 z M 19.017578 30L31 30L31 44L26 44L26 40L24 40L24 44L19.042969 44L19.017578 30 z M 8 32L8 34.015625L10.039062 34.015625L10.039062 32L8 32 z M 12.039062 32L12.039062 34.015625L14 34.015625L14 32L12.039062 32 z M 22 32L22 34.015625L24 34.015625L24 32L22 32 z M 26 32L26 34.015625L28 34.015625L28 32L26 32 z M 36 32L36 34.015625L38 34.015625L38 32L36 32 z M 40.019531 32L40.019531 34.015625L41.980469 34.015625L41.980469 32L40.019531 32 z M 22 35.984375L22 38L24 38L24 35.984375L22 35.984375 z M 26 35.984375L26 38L28 38L28 35.984375L26 35.984375 z M 36 35.984375L36 38L38 38L38 35.984375L36 35.984375 z M 40.019531 35.984375L40.019531 38L41.980469 38L41.980469 35.984375L40.019531 35.984375 z">
+                                        </path>
+                                    </g>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">City</div>
+                                <div class="sp-field-value">{{ student.City or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    width="24" height="24" fill="#6b42f5">
+                                    <path
+                                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Mobile Number</div>
+                                <div class="sp-field-value">{{ student.mobile_number or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg fill="#6b42f5" width="20px" height="20px"
+                                    viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M10 4L10 20L2.9941406 20L3.1464844 46L17.046875 46L19.046875 46L33 46L47 46L47 8L31 8L31 9L31 28L25.996094 28L25.996094 4.0078125L10 4 z M 12 6L23.996094 6.0078125L23.996094 28L19.013672 28L18.998047 20L18 20L12 20L12 6 z M 15 8L15 10L17 10L17 8L15 8 z M 19.039062 8L19.039062 10L21 10L21 8L19.039062 8 z M 33 10L45 10L45 44L39.960938 44L39.960938 40L38 40L38 44L33 44L33 28L33 10 z M 15 12L15 14L17 14L17 12L15 12 z M 19 12L19 14L21 14L21 12L19 12 z M 36 12.003906L36 14L38 14L38 12.003906L36 12.003906 z M 40.019531 12.007812L40.019531 14.021484L41.980469 14.021484L41.980469 12.007812L40.019531 12.007812 z M 36 16.015625L36 18L38 18L38 16.015625L36 16.015625 z M 40.019531 16.015625L40.019531 18L41.980469 18L41.980469 16.015625L40.019531 16.015625 z M 36 20L36 22L38 22L38 20L36 20 z M 40 20L40 22L41.980469 22L41.980469 20L40 20 z M 5.0058594 22L17.001953 22L17.013672 28L16.998047 28L17.041016 44L11.980469 44L11.980469 40L10.019531 40L10.019531 44L5.1347656 44L5.0058594 22 z M 8 24L8 26.015625L10.039062 26.015625L10.039062 24L8 24 z M 12.039062 24L12.039062 26.015625L14 26.015625L14 24L12.039062 24 z M 36 24.007812L36 25.998047L38 25.998047L38 24.007812L36 24.007812 z M 40 24.007812L40 25.998047L41.980469 25.998047L41.980469 24.007812L40 24.007812 z M 8 27.984375L8 30L10.039062 30L10.039062 27.984375L8 27.984375 z M 12.039062 27.984375L12.039062 30L14 30L14 27.984375L12.039062 27.984375 z M 36 27.992188L36 30.007812L38 30.007812L38 27.992188L36 27.992188 z M 40.019531 27.992188L40.019531 30.007812L41.980469 30.007812L41.980469 27.992188L40.019531 27.992188 z M 19.017578 30L31 30L31 44L26 44L26 40L24 40L24 44L19.042969 44L19.017578 30 z M 8 32L8 34.015625L10.039062 34.015625L10.039062 32L8 32 z M 12.039062 32L12.039062 34.015625L14 34.015625L14 32L12.039062 32 z M 22 32L22 34.015625L24 34.015625L24 32L22 32 z M 26 32L26 34.015625L28 34.015625L28 32L26 32 z M 36 32L36 34.015625L38 34.015625L38 32L36 32 z M 40.019531 32L40.019531 34.015625L41.980469 34.015625L41.980469 32L40.019531 32 z M 22 35.984375L22 38L24 38L24 35.984375L22 35.984375 z M 26 35.984375L26 38L28 38L28 35.984375L26 35.984375 z M 36 35.984375L36 38L38 38L38 35.984375L36 35.984375 z M 40.019531 35.984375L40.019531 38L41.980469 38L41.980469 35.984375L40.019531 35.984375 z">
+                                        </path>
+                                    </g>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">State</div>
+                                <div class="sp-field-value">{{ student.State or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg xmlns="http://www.w3.org/2000/svg"
+                                    shape-rendering="geometricPrecision" text-rendering="geometricPrecision"
+                                    image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" width="23"
+                                    height="23" viewBox="0 0 500 512.36" fill="#6b42f5">
+                                    <path fill-rule="nonzero"
+                                        d="M46.87 47.16h53.24v57.68c0 6.35 1.43 12.3 4.03 17.63 2.71 5.58 6.75 10.57 11.79 14.7 4.26 3.53 9.3 6.38 14.83 8.34a51.1 51.1 0 0 0 16.99 2.9c5.97 0 11.72-1.04 17-2.9 5.52-1.96 10.56-4.8 14.83-8.3 5.04-4.17 9.07-9.16 11.79-14.74 2.59-5.33 4.03-11.28 4.03-17.63V47.16h107.3v57.68c0 6.35 1.44 12.3 4.03 17.63 2.71 5.58 6.75 10.57 11.79 14.7 4.26 3.53 9.3 6.38 14.83 8.34 5.27 1.86 11.03 2.9 16.99 2.9 5.97 0 11.73-1.04 17-2.9 5.53-1.96 10.57-4.8 14.83-8.3 5.04-4.17 9.08-9.16 11.79-14.74 2.59-5.33 4.03-11.28 4.03-17.63V47.16h55.14c12.86 0 24.58 5.29 33.09 13.79 8.5 8.47 13.78 20.19 13.78 33.08v371.45c0 12.9-5.28 24.62-13.77 33.11-8.52 8.48-20.24 13.77-33.1 13.77H46.87c-12.85 0-24.56-5.28-33.07-13.77C5.28 490.05 0 478.34 0 465.49V94.03c0-12.87 5.28-24.58 13.76-33.07 8.53-8.52 20.25-13.8 33.11-13.8zM158.92 318.1h182.32c11.85 0 21.53 9.68 21.53 21.51v13.84c-8.18 6.77-15.72 10.4-22.6 10.58-8.56.22-16.76-5.29-24.52-17.24-.42-.64-.93-1.23-1.58-1.69-2.86-2.08-6.84-1.46-8.9 1.4-7.82 10.73-13.65 16.69-21.91 17.14-8.36.44-17.7-4.66-28.15-16.11-.14-.14-.27-.28-.42-.42a6.38 6.38 0 0 0-9.03.42c-9.78 10.74-18.97 16.32-27.49 16.41-8.31.09-14.51-5.15-22.96-16.04a6 6 0 0 0-1.39-1.31c-2.87-2.04-6.87-1.33-8.89 1.55-6.23 8.85-13.5 14.09-21.33 15.5-5.36.96-11.12.04-17.27-2.49-12.72-5.19-8.1-5.66-8.95-21.51-.63-11.83 9.69-21.54 21.54-21.54zm202.42 60.86v29.9H139.11v-28.4c8.2 3.26 16.24 4.16 23.91 2.78 9.33-1.69 17.86-6.7 25.26-14.82 9.84 10.42 18.03 15.44 28.95 15.32 11.07-.11 22.14-5.6 33.18-16.22 11.91 11.44 23.44 16.52 34.61 15.91 10.56-.55 18.07-6.14 27.04-16.15 9.42 11.54 19.94 16.88 31.42 16.58 5.86-.16 11.8-1.83 17.86-4.9zM129.69 423.6H370.3c1.96 0 3.56 1.7 3.56 3.57v16.76c0 1.86-1.7 3.57-3.56 3.57H129.69c-1.85 0-3.56-1.6-3.56-3.57v-16.76c0-1.97 1.6-3.57 3.56-3.57zm101.15-118.11v-30.53c0-4.11 3.37-7.45 7.44-7.45h23.42c4.11 0 7.44 3.38 7.44 7.45v30.53h-38.3zm19.17-96.92c4.03 17.92 16.19 26.87 16.19 35.88 0 8.95-4.03 17.92-16.19 17.92-12.11 0-16.18-8.97-16.18-17.92 0-8.96 12.11-17.92 16.18-35.88zm77.7-190.02C327.71 8.32 337.83 0 350.34 0c12.52 0 22.64 8.32 22.64 18.55v86.29c0 10.24-10.12 18.55-22.64 18.55-12.51 0-22.63-8.31-22.63-18.55V18.55zm-202.59 0C125.12 8.32 135.24 0 147.75 0s22.64 8.32 22.64 18.55v86.29c0 10.24-10.13 18.55-22.64 18.55s-22.63-8.31-22.63-18.55V18.55zm354.86 184.33v-20.02H20.02v272.62c0 20.26 16.58 36.86 36.86 36.86h386.24c20.28 0 36.86-16.63 36.86-36.87V202.88z" />
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">Date of Birth</div>
+                                <div class="sp-field-value">{{ student.DOB or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg width="25px" height="25px" viewBox="-0.5 0 25 25"
+                                    fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M12 12C14.4853 12 16.5 9.98528 16.5 7.5C16.5 5.01472 14.4853 3 12 3C9.51472 3 7.5 5.01472 7.5 7.5C7.5 9.98528 9.51472 12 12 12Z"
+                                            stroke="#6b42f5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                        <path d="M12 14.0137V22" stroke="#6b42f5" stroke-miterlimit="10"
+                                            stroke-linecap="round"></path>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Pin Code</div>
+                                <div class="sp-field-value">{{ student.pin_code or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg fill="#6b42f5" height="25px" width="25px" version="1.1"
+                                    id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 485 485"
+                                    xml:space="preserve">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M455,102.524l30-0.049l-0.154-94.821L390.024,7.5l-0.049,30l43.74,0.071l-58.574,58.574 c-26.385-21.595-59.129-33.339-93.68-33.339c-23.563,0-46.285,5.462-66.723,15.785c-20.013-10.09-42.607-15.784-66.508-15.784 C66.496,62.807,0,129.303,0,211.038c0,76.672,58.514,139.933,133.231,147.476v47.601H91.663v30h41.568V477.5h30v-41.384H204.8v-30 h-41.569v-47.601c18.358-1.853,35.734-7.076,51.508-15.03c20.439,10.322,43.161,15.784,66.723,15.784 c39.594,0,76.818-15.419,104.815-43.416c27.998-27.997,43.417-65.221,43.417-104.815c0-34.551-11.744-67.295-33.339-93.68 l58.574-58.574L455,102.524z M148.231,329.269C83.038,329.269,30,276.231,30,211.038S83.038,92.807,148.231,92.807 c12.773,0,25.075,2.044,36.608,5.808c-2.809,2.422-5.542,4.958-8.192,7.608c-57.795,57.795-57.795,151.835,0,209.63 c2.65,2.65,5.383,5.186,8.192,7.607C173.306,327.225,161.004,329.269,148.231,329.269z M266.462,211.038 c0,40.529-20.502,76.356-51.676,97.667c-6.001-4.115-11.67-8.808-16.926-14.065c-46.098-46.099-46.098-121.105,0-167.204 c5.257-5.257,10.925-9.95,16.926-14.065C245.96,134.682,266.462,170.509,266.462,211.038z M365.064,294.64 c-22.331,22.331-52.021,34.629-83.602,34.629c-12.67,0-25.035-1.984-36.743-5.797c31.657-27.206,51.743-67.517,51.743-112.434 c0-44.918-20.086-85.228-51.744-112.434c11.709-3.813,24.073-5.797,36.744-5.797c31.581,0,61.271,12.298,83.602,34.629 s34.629,52.021,34.629,83.602S387.395,272.309,365.064,294.64z">
+                                        </path>
+                                    </g>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">Gender</div>
+                                <div class="sp-field-value">{{ student.Gender or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg fill="#6b42f5" width="25px" height="25px"
+                                    viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <g id="Graduation">
+                                            <polygon
+                                                points="445.055 384.794 445.055 221.864 418.805 234.989 418.805 384.777 401.301 429.785 462.551 429.785 445.055 384.794">
+                                            </polygon>
+                                            <path
+                                                d="M229.0648,306.3708l-107.7643-53.88v53.7754c0,36.2433,58.7634,65.625,131.25,65.625,72.4887,0,131.25-29.3817,131.25-65.625V252.49L276.0277,306.3741C257.5813,313.681,247.5133,313.6789,229.0648,306.3708Z">
+                                            </path>
+                                            <path
+                                                d="M264.2912,282.8969l186.5207-93.26c6.4579-3.2289,6.4579-8.5107,0-11.74l-186.5207-93.26c-6.4556-3.2289-17.0214-3.2289-23.4793,0l-186.5207,93.26c-6.4556,3.2289-6.4556,8.5107,0,11.74l186.5207,93.26C247.27,286.1258,257.8356,286.1258,264.2912,282.8969Z">
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">University Roll No.</div>
+                                <div class="sp-field-value">{{ student.University_Roll_Number or 'Not specified' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg width="20px" height="20px" viewBox="0 0 1024 1024"
+                                    fill="#6b42f5" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M512 1012.8c-253.6 0-511.2-54.4-511.2-158.4 0-92.8 198.4-131.2 283.2-143.2h3.2c12 0 22.4 8.8 24 20.8 0.8 6.4-0.8 12.8-4.8 17.6-4 4.8-9.6 8.8-16 9.6-176.8 25.6-242.4 72-242.4 96 0 44.8 180.8 110.4 463.2 110.4s463.2-65.6 463.2-110.4c0-24-66.4-70.4-244.8-96-6.4-0.8-12-4-16-9.6-4-4.8-5.6-11.2-4.8-17.6 1.6-12 12-20.8 24-20.8h3.2c85.6 12 285.6 50.4 285.6 143.2 0.8 103.2-256 158.4-509.6 158.4z m-16.8-169.6c-12-11.2-288.8-272.8-288.8-529.6 0-168 136.8-304.8 304.8-304.8S816 145.6 816 313.6c0 249.6-276.8 517.6-288.8 528.8l-16 16-16-15.2zM512 56.8c-141.6 0-256.8 115.2-256.8 256.8 0 200.8 196 416 256.8 477.6 61.6-63.2 257.6-282.4 257.6-477.6C768.8 172.8 653.6 56.8 512 56.8z m0 392.8c-80 0-144.8-64.8-144.8-144.8S432 160 512 160c80 0 144.8 64.8 144.8 144.8 0 80-64.8 144.8-144.8 144.8zM512 208c-53.6 0-96.8 43.2-96.8 96.8S458.4 401.6 512 401.6c53.6 0 96.8-43.2 96.8-96.8S564.8 208 512 208z"
+                                            fill=""></path>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Address</div>
+                                <div class="sp-field-value">{{ student.Address or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field"></div>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="sp-card sp-section">
+                <h3 class="sp-section-title">
+                    <span class="sp-title-icon" style="background:#eaf8f0;color:#15945a;"><svg width="25px"
+                            height="25px" viewBox="0 0 64 64" id="TwoTone" xmlns="http://www.w3.org/2000/svg"
+                            fill="#000000">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <title></title>
+                                <desc></desc>
+                                <g data-name="Stroke copy 3" id="Stroke_copy_3">
+                                    <path
+                                        d="M57,11V43.34l-4.73-1.26a32,32,0,0,0-20.13,1.21l-.14.05-.14-.05a32,32,0,0,0-20.13-1.21L7,43.34V11H3V51H24a3,3,0,0,1,3,3H37a3,3,0,0,1,3-3H61V11Z"
+                                        style="fill:#79bd9a"></path>
+                                    <polygon points="21 58 17 55 13 58 13 43 21 43 21 58" style="fill:#cff09e">
+                                    </polygon>
+                                    <path
+                                        d="M11.73,42.08,7,43.34v4l4.73-1.26a32,32,0,0,1,20.13,1.21l.14.05v-4l-.14-.05A32,32,0,0,0,11.73,42.08Z"
+                                        style="fill:#a8dba8"></path>
+                                    <path
+                                        d="M32.14,43.29l-.14.05v4l.14-.05a32,32,0,0,1,20.13-1.21L57,47.34v-4l-4.73-1.26A32,32,0,0,0,32.14,43.29Z"
+                                        style="fill:#a8dba8"></path>
+                                    <path
+                                        d="M21.36,36a10,10,0,0,1-9.63-10v-19L7,8.34v35l4.73-1.26a32,32,0,0,1,20.13,1.21l.14.05v-5l-.14-.05A31.82,31.82,0,0,0,21.36,36Z"
+                                        style="fill:#cff09e"></path>
+                                    <path
+                                        d="M46.17,36.07A10,10,0,0,1,37,26V6.78a31,31,0,0,0-4.86,1.51L32,8.34v35l.14-.05a32,32,0,0,1,20.13-1.21L57,43.34v-5l-4.73-1.26A32.64,32.64,0,0,0,46.17,36.07Z"
+                                        style="fill:#cff09e"></path>
+                                </g>
+                                <g data-name="Stroke Close copy 3" id="Stroke_Close_copy_3">
+                                    <path
+                                        d="M61,10H58V8.34a1,1,0,0,0-.74-1L52.52,6.11A33.28,33.28,0,0,0,32,7.28,33.28,33.28,0,0,0,11.48,6.11L6.74,7.38a1,1,0,0,0-.74,1V10H3a1,1,0,0,0-1,1V51a1,1,0,0,0,1,1h9v6a1,1,0,0,0,.55.89,1,1,0,0,0,1-.09L17,56.25l3.4,2.55a1,1,0,0,0,.6.2.91.91,0,0,0,.45-.11A1,1,0,0,0,22,58V52h2a2,2,0,0,1,2,2,1,1,0,0,0,1,1H37a1,1,0,0,0,1-1,2,2,0,0,1,2-2H61a1,1,0,0,0,1-1V11A1,1,0,0,0,61,10ZM11.48,45.11,8,46V44.11l4-1.06a31.2,31.2,0,0,1,19,1V45.9A33.24,33.24,0,0,0,11.48,45.11ZM33,44a31.2,31.2,0,0,1,19-1l4,1.06V46l-3.48-.93A33.33,33.33,0,0,0,33,45.92Zm19-36,4,1.06V42l-3.48-.93A33.21,33.21,0,0,0,33,41.9V9A31.2,31.2,0,0,1,52,8.05ZM8,9.11l4-1.06A31.2,31.2,0,0,1,31,9V41.9a33.24,33.24,0,0,0-19.52-.79L8,42ZM4,50V12H6V47.34a1,1,0,0,0,.39.8,1,1,0,0,0,.61.2,1.15,1.15,0,0,0,.26,0L12,47.05h0v3Zm16,6-2.4-1.8a1,1,0,0,0-1.2,0L14,56V46.6A30.27,30.27,0,0,1,20,46Zm40-6H40a4,4,0,0,0-3.87,3H27.87A4,4,0,0,0,24,50H22V46.08a30.71,30.71,0,0,1,9.49,2.14l.14.05a1,1,0,0,0,.87-.07v0A31.16,31.16,0,0,1,52,47.05l4.73,1.26a1,1,0,0,0,1.26-1V12h2Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M14.19,22.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,21.76,1,1,0,0,0,14.19,22.56Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M14.19,16.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,15.76,1,1,0,0,0,14.19,16.56Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M38,16.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M38,22.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M38,34.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M38,28.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M14.19,28.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,27.76,1,1,0,0,0,14.19,28.56Z"
+                                        style="fill:#3b8686"></path>
+                                    <path
+                                        d="M14.19,34.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,33.76,1,1,0,0,0,14.19,34.56Z"
+                                        style="fill:#3b8686"></path>
+                                </g>
+                            </g>
+                        </svg></span>
+                    Academic Information
+                </h3>
+
+                <div class="sp-field-list">
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg width="25" height="25" viewBox="0 0 48 48"
+                                    xmlns="http://www.w3.org/2000/svg" fill="#33d17a">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <title>branch</title>
+                                        <g id="Layer_2" data-name="Layer 2">
+                                            <g id="invisible_box" data-name="invisible box">
+                                                <rect width="48" height="48" fill="none"></rect>
+                                            </g>
+                                            <g id="icons_Q2" data-name="icons Q2">
+                                                <path
+                                                    d="M44,9a7,7,0,1,0-9,6.7V16a6,6,0,0,1-6,6H21a10.3,10.3,0,0,0-6,2V15.7a7,7,0,1,0-4,0V32.3a7,7,0,1,0,4,0V32a6,6,0,0,1,6-6h8A10,10,0,0,0,39,16v-.3A7,7,0,0,0,44,9ZM10,9a3,3,0,0,1,6,0,3,3,0,0,1-6,0Zm6,30a3,3,0,1,1-3-3A2.9,2.9,0,0,1,16,39ZM37,12a2.9,2.9,0,0,1-3-3,3,3,0,0,1,6,0A2.9,2.9,0,0,1,37,12Z">
+                                                </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Branch</div>
+                                <div class="sp-field-value">{{ student.branch or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon">
+                                <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M7.25 10.5a3.75 3.75 0 1 1 0-7.5 3.75 3.75 0 0 1 0 7.5zm-1.543 9.207a1 1 0 0 1-1.414-1.414l14-14a1 1 0 1 1 1.414 1.414l-14 14zM13 17.25a3.75 3.75 0 1 0 7.5 0 3.75 3.75 0 0 0-7.5 0zM7.25 8.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5zm11.25 8.75a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0z"
+                                            fill="#33d17a"></path>
+                                    </g>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">10th Percentage</div>
+                                <div class="sp-field-value">{{ student.tenth_Percentage or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon">
+                                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="20"
+                                    height="20" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                    viewBox="0 0 122.65 122.88" style="enable-background:new 0 0 122.65 122.88"
+                                    xml:space="preserve">
+                                    <g>
+                                        <path fill="#33d17a"
+                                            d="M35.84,113.9c-0.06-1.56-0.29-3.12-0.66-4.65c-1.49-6.03-5.27-11.54-9.93-15.54c-0.18-0.16-0.36-0.31-0.55-0.46l-4.2,4.1 c3.24,2.48,5.58,5.88,6.54,9.05c0.52,1.72,0.67,3.41,0.38,4.93c-0.33,1.74-1.19,3.23-2.66,4.31c-0.33,0.24-0.68,0.45-1.06,0.64 c1.88,0.93,3.65,1.51,5.18,1.63c1.54,0.13,2.89-0.15,4.03-0.84C34,116.41,34.97,115.36,35.84,113.9L35.84,113.9z M78.92,71.24 c-0.4-0.21-0.72-0.51-0.95-0.87l-0.79,0.78c0.29,0.19,0.54,0.44,0.73,0.74c4.08,6.44,6.43,12.99,6.65,19.67 c0.22,6.71-1.71,13.45-6.19,20.25c-0.75,1.14-2.27,1.45-3.41,0.7s-1.45-2.27-0.7-3.41c3.89-5.9,5.57-11.69,5.38-17.39 c-0.19-5.73-2.27-11.45-5.89-17.17l-6.27,6.18c-0.06-0.19-0.12-0.37-0.18-0.56l-0.48,0.47l-26.39,35.19 c-1.35,2.47-3.01,4.28-4.97,5.46c-2.07,1.24-4.39,1.75-6.95,1.54c-3.91-0.32-8.86-2.76-13.5-6.31c-0.15-0.09-0.3-0.2-0.42-0.33 c-1.6-1.25-3.15-2.62-4.61-4.08c-3.31-3.31-6.18-7.11-7.96-10.89c-1.92-4.07-2.61-8.18-1.35-11.83c0.81-2.34,2.39-4.42,4.91-6.08 l36.99-28.15l20.01-21.39L86.1,1.36c0.4-0.55,0.98-0.88,1.6-0.99c3.44-0.66,6.94-0.41,10.34,0.53c5.84,1.61,11.37,5.27,15.68,9.88 c4.32,4.62,7.46,10.24,8.53,15.74c0.58,2.98,0.55,5.94-0.22,8.72c-0.15,0.56-0.49,1.03-0.93,1.35l0,0.01L85.7,62.21l-1.42,1.39 c0,0.19-0.01,0.38-0.02,0.57l-2.85,2.81c5.22,2.73,9.45,6.16,12.54,10.41c3.16,4.35,5.11,9.5,5.66,15.56 c0.12,1.35-0.88,2.55-2.23,2.67c-1.35,0.12-2.55-0.88-2.67-2.23c-0.47-5.14-2.09-9.48-4.73-13.11 C87.31,76.63,83.58,73.64,78.92,71.24L78.92,71.24z M20.57,90.39c-3.36-1.94-6.88-3.05-10.14-3.03c-0.83,0.01-1.65,0.09-2.45,0.26 C6.59,88.6,5.73,89.75,5.29,91c-0.8,2.31-0.25,5.16,1.15,8.12c1.53,3.26,4.06,6.57,7,9.52c1.23,1.23,2.53,2.4,3.85,3.45 c2.27,0.38,3.74,0.16,4.55-0.44c0.39-0.29,0.63-0.72,0.73-1.24c0.14-0.74,0.05-1.63-0.25-2.59c-0.88-2.91-3.42-6.1-6.89-7.89 c-1.21-0.62-1.69-2.1-1.07-3.31c0.13-0.25,0.29-0.46,0.48-0.64L20.57,90.39L20.57,90.39z M65.02,75.5 c-3.92-6.44-11.06-13.32-17.98-17.96l-0.96,1.03c-0.12,0.15-0.27,0.29-0.43,0.42l-31.3,23.82c3.9,0.74,7.88,2.55,11.52,5.14 l0.09,0.07l0.01,0.01c0.84,0.6,1.66,1.25,2.46,1.93c5.39,4.62,9.77,11.03,11.51,18.1l0.03,0.12l22.92-30.56 c0.09-0.14,0.2-0.27,0.33-0.39L65.02,75.5L65.02,75.5z M64.12,39.29c8.91,4.41,16.34,11.56,19.05,18.66l34.3-24.82 c0.35-1.79,0.31-3.71-0.07-5.68c-0.89-4.58-3.58-9.34-7.29-13.31c-3.73-3.99-8.44-7.14-13.36-8.49c-2.4-0.66-4.84-0.89-7.25-0.57 L66.49,36.74l-0.01-0.01c-0.06,0.08-0.12,0.16-0.2,0.24L64.12,39.29L64.12,39.29z" />
+                                    </g>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">Graduation Year</div>
+                                <div class="sp-field-value">{{ student.graduation_year or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon"> <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M7.25 10.5a3.75 3.75 0 1 1 0-7.5 3.75 3.75 0 0 1 0 7.5zm-1.543 9.207a1 1 0 0 1-1.414-1.414l14-14a1 1 0 1 1 1.414 1.414l-14 14zM13 17.25a3.75 3.75 0 1 0 7.5 0 3.75 3.75 0 0 0-7.5 0zM7.25 8.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5zm11.25 8.75a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0z"
+                                            fill="#33d17a"></path>
+                                    </g>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">12th Percentage</div>
+                                <div class="sp-field-value">{{ student.twelth_Percentage or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg xmlns="http://w3.org" viewBox="0 0 100 100" width="25"
+                                    height="25">
+                                    <rect x="8" y="14" width="72" height="60" rx="3" fill="none" stroke="#33d17a"
+                                        stroke-width="4.5" stroke-linejoin="round" />
+                                    <line x1="8" y1="28" x2="80" y2="28" stroke="#33d17a" stroke-width="4.5"
+                                        stroke-linecap="round" />
+                                    <path d="M22,6 L22,14 M22,6 L28,6 M28,6 L28,14" fill="none" stroke="#33d17a"
+                                        stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M60,6 L60,14 M60,6 L66,6 M66,6 L66,14" fill="none" stroke="#33d17a"
+                                        stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <rect x="16" y="36" width="8" height="8" rx="1" fill="none" stroke="#33d17a"
+                                        stroke-width="4" stroke-linejoin="round" />
+                                    <circle cx="34" cy="40" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <circle cx="48" cy="40" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <circle cx="62" cy="40" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <rect x="16" y="50" width="8" height="8" rx="1" fill="none" stroke="#33d17a"
+                                        stroke-width="4" stroke-linejoin="round" />
+                                    <circle cx="34" cy="54" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <circle cx="48" cy="54" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <rect x="16" y="64" width="8" height="8" rx="1" fill="none" stroke="#33d17a"
+                                        stroke-width="4" stroke-linejoin="round" />
+                                    <circle cx="34" cy="68" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <circle cx="48" cy="68" r="4" fill="none" stroke="#33d17a" stroke-width="4" />
+                                    <rect x="55" y="42" width="37" height="52" fill="#ffffff" />
+                                    <rect x="58" y="45" width="32" height="46" rx="4" fill="none" stroke="#33d17a"
+                                        stroke-width="4.5" stroke-linejoin="round" />
+                                    <line x1="66" y1="45" x2="66" y2="91" stroke="#33d17a" stroke-width="4.5" />
+                                    <path d="M58,85 L90,85" stroke="#33d17a" stroke-width="2.5" />
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">Semester</div>
+                                <div class="sp-field-value">{{ student.Semester or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg width="25px" height="25px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M7.25 10.5a3.75 3.75 0 1 1 0-7.5 3.75 3.75 0 0 1 0 7.5zm-1.543 9.207a1 1 0 0 1-1.414-1.414l14-14a1 1 0 1 1 1.414 1.414l-14 14zM13 17.25a3.75 3.75 0 1 0 7.5 0 3.75 3.75 0 0 0-7.5 0zM7.25 8.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5zm11.25 8.75a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0z"
+                                            fill="#33d17a"></path>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Diploma Percentage</div>
+                                <div class="sp-field-value">{{ student.Diploma_Percentage or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg version="1.1" id="Icons" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xml:space="preserve"
+                                    width="23px" height="23px" fill="#33d17a">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <style type="text/css">
+                                            .st0 {
+                                                fill: none;
+                                                stroke: #000000;
+                                                stroke-width: 2;
+                                                stroke-linecap: round;
+                                                stroke-linejoin: round;
+                                                stroke-miterlimit: 10;
+                                            }
+                                        </style>
+                                        <g>
+                                            <path d="M16,20c4.4,0,8-3.6,8-8s-3.6-8-8-8s-8,3.6-8,8S11.6,20,16,20z">
+                                            </path>
+                                            <path
+                                                d="M29.4,26.1l-3.5-7.3c1.3-1.9,2.1-4.3,2.1-6.8c0-6.6-5.4-12-12-12S4,5.4,4,12c0,2.6,0.8,4.9,2.2,6.9l-3.4,7.2 c-0.1,0.3-0.1,0.7,0,0.9s0.5,0.5,0.8,0.5l4.7,0.3l3.2,3.5c0.2,0.2,0.5,0.3,0.7,0.3c0,0,0.1,0,0.2,0c0.3,0,0.6-0.3,0.8-0.6l2.9-6 l2.9,6c0.1,0.3,0.4,0.5,0.8,0.6c0,0,0.1,0,0.2,0c0.3,0,0.5-0.1,0.7-0.3l3.2-3.5l4.7-0.3c0.3,0,0.6-0.2,0.8-0.5S29.5,26.4,29.4,26.1 z M16,2c5.5,0,10,4.5,10,10c0,5.5-4.5,10-10,10S6,17.5,6,12C6,6.5,10.5,2,16,2z">
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg>
+
+                            </span>
+                            <div>
+                                <div class="sp-field-label">CGPA</div>
+                                <div class="sp-field-value">{{ student.cgpa or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"
+                                    width="24" height="24" fill="none" stroke="#33d17a" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <!-- Top Box -->
+                                    <rect x="5" y="8" width="24" height="9" />
+                                    <rect x="9" y="11" width="3" height="3" fill="#33d17a" stroke="none" />
+                                    <line x1="15" y1="12.5" x2="25" y2="12.5" />
+
+                                    <!-- Middle Box (Indented) -->
+                                    <rect x="10" y="21" width="24" height="9" />
+                                    <rect x="14" y="24" width="3" height="3" fill="#33d17a" stroke="none" />
+                                    <line x1="20" y1="25.5" x2="30" y2="25.5" />
+
+                                    <!-- Bottom Box -->
+                                    <rect x="5" y="34" width="24" height="9" />
+                                    <rect x="9" y="37" width="3" height="3" fill="#33d17a" stroke="none" />
+                                    <line x1="15" y1="38.5" x2="25" y2="38.5" />
+
+                                    <!-- Return Arrow -->
+                                    <path d="M 37 25.5 L 45 25.5 L 45 12.5 L 34 12.5" />
+                                    <polyline points="39 7 32 12.5 39 18" />
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="sp-field-label">Backlogs</div>
+                                <div class="sp-field-value">Total: {{ student.Total_Backlogs or 0 }} Active: {{
+                                    student.Active_Backlogs or 0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-field-row">
+                        <div class="sp-field">
+                            <span class="sp-field-icon"><svg version="1.1" id="Layer_1"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    viewBox="0 0 512 512" xml:space="preserve" width="25px" height="25px"
+                                    fill="#000000">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <polygon style="fill:#FFFFFF;"
+                                            points="187.282,163.138 207.786,195.838 245.222,205.235 220.458,234.841 223.09,273.348 187.282,258.945 151.472,273.348 154.104,234.841 129.342,205.235 166.778,195.838 ">
+                                        </polygon>
+                                        <g>
+                                            <path style="fill:#33d17a;"
+                                                d="M151.474,288.407c-3.134,0-6.24-0.977-8.853-2.876c-4.194-3.048-6.526-8.038-6.173-13.21 l2.22-32.465l-20.878-24.958c-3.325-3.977-4.372-9.385-2.771-14.315c1.602-4.93,5.627-8.69,10.656-9.952l31.562-7.921l17.286-27.57 c2.754-4.393,7.575-7.06,12.759-7.06s10.005,2.667,12.759,7.06l17.286,27.57l31.56,7.921c5.028,1.262,9.053,5.022,10.656,9.952 c1.601,4.93,0.554,10.339-2.771,14.315l-20.878,24.96l2.22,32.465c0.354,5.173-1.977,10.163-6.173,13.21 c-4.195,3.046-9.662,3.723-14.47,1.789l-30.19-12.143l-30.191,12.143C155.278,288.048,153.371,288.407,151.474,288.407z M156.3,213.993l9.356,11.184c2.492,2.982,3.736,6.811,3.473,10.689l-0.994,14.548l13.529-5.442c3.607-1.45,7.632-1.45,11.238,0 l13.527,5.441l-0.994-14.547c-0.265-3.878,0.979-7.707,3.473-10.689l9.356-11.184l-14.143-3.549 c-3.769-0.946-7.028-3.313-9.093-6.606l-7.746-12.354l-7.746,12.354c-2.065,3.293-5.323,5.659-9.093,6.606L156.3,213.993z">
+                                            </path>
+                                            <path style="fill:#33d17a;"
+                                                d="M382.658,206.982h-85.835c-8.315,0-15.059-6.742-15.059-15.059c0-8.317,6.743-15.059,15.059-15.059 h85.835c8.315,0,15.059,6.742,15.059,15.059S390.975,206.982,382.658,206.982z">
+                                            </path>
+                                            <path style="fill:#33d17a;"
+                                                d="M352.523,259.622h-55.698c-8.315,0-15.059-6.742-15.059-15.059c0-8.317,6.743-15.059,15.059-15.059 h55.698c8.315,0,15.059,6.742,15.059,15.059C367.581,252.88,360.838,259.622,352.523,259.622z">
+                                            </path>
+                                        </g>
+                                        <polygon style="fill:#FFFFFF;"
+                                            points="187.282,325.887 207.786,358.587 245.222,367.982 220.458,397.589 223.09,436.096 187.282,421.692 151.472,436.096 154.104,397.589 129.342,367.982 166.778,358.587 ">
+                                        </polygon>
+                                        <g>
+                                            <path style="fill:#33d17a;"
+                                                d="M223.09,451.155c-1.897,0-3.804-0.358-5.617-1.087l-30.19-12.143l-30.191,12.143 c-4.808,1.934-10.276,1.257-14.47-1.789c-4.194-3.048-6.527-8.038-6.173-13.21l2.22-32.465l-20.879-24.96 c-3.325-3.977-4.372-9.385-2.771-14.315c1.602-4.93,5.627-8.69,10.656-9.952l31.562-7.921l17.286-27.57 c2.754-4.393,7.575-7.06,12.759-7.06s10.005,2.667,12.759,7.06l17.286,27.57l31.56,7.921c5.028,1.262,9.053,5.022,10.656,9.952 c1.601,4.93,0.554,10.338-2.771,14.315l-20.878,24.96l2.22,32.465c0.354,5.173-1.977,10.163-6.173,13.21 C229.329,450.178,226.224,451.155,223.09,451.155z M156.3,376.742l9.356,11.184c2.492,2.982,3.736,6.811,3.473,10.689 l-0.994,14.548l13.529-5.442c3.607-1.45,7.632-1.45,11.238,0l13.527,5.442l-0.994-14.548c-0.265-3.878,0.979-7.707,3.473-10.689 l9.356-11.184l-14.143-3.549c-3.769-0.946-7.028-3.313-9.093-6.606l-7.746-12.354l-7.746,12.354 c-2.065,3.293-5.323,5.659-9.093,6.606L156.3,376.742z">
+                                            </path>
+                                            <path style="fill:#33d17a;"
+                                                d="M382.658,369.73h-85.835c-8.315,0-15.059-6.742-15.059-15.059s6.743-15.059,15.059-15.059h85.835 c8.315,0,15.059,6.742,15.059,15.059S390.975,369.73,382.658,369.73z">
+                                            </path>
+                                            <path style="fill:#33d17a;"
+                                                d="M352.523,422.368h-55.698c-8.315,0-15.059-6.742-15.059-15.059c0-8.317,6.743-15.059,15.059-15.059 h55.698c8.315,0,15.059,6.742,15.059,15.059C367.581,415.627,360.838,422.368,352.523,422.368z">
+                                            </path>
+                                        </g>
+                                        <g>
+                                            <rect x="67.76" y="57.269" style="fill:#FFFFFF;" width="105.412"
+                                                height="48.142"></rect>
+                                            <rect x="338.824" y="57.269" style="fill:#FFFFFF;" width="105.412"
+                                                height="48.142"></rect>
+                                        </g>
+                                        <path style="fill:#33d17a;"
+                                            d="M323.765,105.412c0,8.317,6.743,15.059,15.059,15.059H444.24c8.315,0,15.059-6.742,15.059-15.059 V57.27c0-8.317-6.743-15.059-15.059-15.059h-90.357V15.059C353.882,6.742,347.139,0,338.824,0H173.176 c-8.315,0-15.059,6.742-15.059,15.059v27.153H67.76c-8.315,0-15.059,6.742-15.059,15.059v48.142v391.529 c0,8.317,6.743,15.059,15.059,15.059h376.48c8.315,0,15.059-6.742,15.059-15.059V191.923c0-8.317-6.743-15.059-15.059-15.059 s-15.059,6.742-15.059,15.059v289.959H82.819V120.471h90.357h105.969c8.315,0,15.059-6.742,15.059-15.059 s-6.743-15.059-15.059-15.059h-90.91V57.27V30.118h135.529V57.27V105.412z M82.819,72.329h75.299v18.024H82.819V72.329z M429.181,90.353h-75.299V72.329h75.299V90.353z">
+                                        </path>
+                                    </g>
+                                </svg></span>
+                            <div>
+                                <div class="sp-field-label">Skills</div>
+                                <div class="sp-field-value">{{ student.skills or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                        <div class="sp-field"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- PROFESSIONAL LINKS -->
+        <section class="sp-card sp-links">
+            <h3 class="sp-section-title">
+                <span class="sp-title-icon">
+                    <!-- Change stroke-width="1.5" to 1, 2, or whatever thickness you like! -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none"
+                        stroke="#6b42f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </span> Professional Links
+            </h3>
+
+            <div class="sp-link-grid">
+
+                {% if student.LinkedIn %}
+                <a class="sp-link-card" href="{{ student.LinkedIn }}" target="_blank" rel="noopener noreferrer">
+                    <span class="sp-link-icon"><svg width="30px" height="30px" viewBox="0 0 16 16"
+                            xmlns="http://www.w3.org/2000/svg" fill="none">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path fill="#0A66C2"
+                                    d="M12.225 12.225h-1.778V9.44c0-.664-.012-1.519-.925-1.519-.926 0-1.068.724-1.068 1.47v2.834H6.676V6.498h1.707v.783h.024c.348-.594.996-.95 1.684-.925 1.802 0 2.135 1.185 2.135 2.728l-.001 3.14zM4.67 5.715a1.037 1.037 0 01-1.032-1.031c0-.566.466-1.032 1.032-1.032.566 0 1.031.466 1.032 1.032 0 .566-.466 1.032-1.032 1.032zm.889 6.51h-1.78V6.498h1.78v5.727zM13.11 2H2.885A.88.88 0 002 2.866v10.268a.88.88 0 00.885.866h10.226a.882.882 0 00.889-.866V2.865a.88.88 0 00-.889-.864z">
+                                </path>
+                            </g>
+                        </svg></span>
+                    <span class="sp-link-name">LinkedIn</span>
+                    <span class="sp-link-url">{{ student.LinkedIn }}</span>
+                </a>
+                {% else %}
+                <div class="sp-link-card">
+                    <span class="sp-link-icon"><svg width="30px" height="30px" viewBox="0 0 16 16"
+                            xmlns="http://www.w3.org/2000/svg" fill="none">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path fill="#0A66C2"
+                                    d="M12.225 12.225h-1.778V9.44c0-.664-.012-1.519-.925-1.519-.926 0-1.068.724-1.068 1.47v2.834H6.676V6.498h1.707v.783h.024c.348-.594.996-.95 1.684-.925 1.802 0 2.135 1.185 2.135 2.728l-.001 3.14zM4.67 5.715a1.037 1.037 0 01-1.032-1.031c0-.566.466-1.032 1.032-1.032.566 0 1.031.466 1.032 1.032 0 .566-.466 1.032-1.032 1.032zm.889 6.51h-1.78V6.498h1.78v5.727zM13.11 2H2.885A.88.88 0 002 2.866v10.268a.88.88 0 00.885.866h10.226a.882.882 0 00.889-.866V2.865a.88.88 0 00-.889-.864z">
+                                </path>
+                            </g>
+                        </svg></span><span class="sp-link-name">LinkedIn</span><span class="sp-link-url sp-muted">Not
+                        added</span>
+                </div>
+                {% endif %}
+
+                {% if student.GitHub %}
+                <a class="sp-link-card" href="{{ student.GitHub }}" target="_blank" rel="noopener noreferrer">
+                    <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 20 20" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            fill="#000000">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <title>github [#142]</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs> </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)"
+                                        fill="#000000">
+                                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                                            <path
+                                                d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399"
+                                                id="github-[#142]"> </path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg></span>
+                    <span class="sp-link-name">GitHub</span>
+                    <span class="sp-link-url">{{ student.GitHub }}</span>
+                </a>
+                {% else %}
+                <div class="sp-link-card">
+                    <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 20 20" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            fill="#000000">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <title>github [#142]</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs> </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)"
+                                        fill="#000000">
+                                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                                            <path
+                                                d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399"
+                                                id="github-[#142]"> </path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg></span><span class="sp-link-name">GitHub</span><span class="sp-link-url sp-muted">Not
+                        added</span>
+                </div>
+                {% endif %}
+
+                {% if student.Portfolio_Website %}
+                <a class="sp-link-card" href="{{ student.Portfolio_Website }}" target="_blank"
+                    rel="noopener noreferrer">
+                    <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 64 64"
+                            xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#6b42f5" fill="none">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M39.93,55.72A24.86,24.86,0,1,1,56.86,32.15a37.24,37.24,0,0,1-.73,6"></path>
+                                <path d="M37.86,51.1A47,47,0,0,1,32,56.7"></path>
+                                <path d="M32,7A34.14,34.14,0,0,1,43.57,30a34.07,34.07,0,0,1,.09,4.85"></path>
+                                <path d="M32,7A34.09,34.09,0,0,0,20.31,32.46c0,16.2,7.28,21,11.66,24.24"></path>
+                                <line x1="10.37" y1="19.9" x2="53.75" y2="19.9"></line>
+                                <line x1="32" y1="6.99" x2="32" y2="56.7"></line>
+                                <line x1="11.05" y1="45.48" x2="37.04" y2="45.48"></line>
+                                <line x1="7.14" y1="32.46" x2="56.86" y2="31.85"></line>
+                                <path
+                                    d="M53.57,57,58,52.56l-8-8,4.55-2.91a.38.38,0,0,0-.12-.7L39.14,37.37a.39.39,0,0,0-.46.46L42,53.41a.39.39,0,0,0,.71.13L45.57,49Z">
+                                </path>
+                            </g>
+                        </svg></span>
+                    <span class="sp-link-name">Portfolio Website</span>
+                    <span class="sp-link-url">{{ student.Portfolio_Website }}</span>
+                </a>
+                {% else %}
+                <div class="sp-link-card">
+                    <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 64 64"
+                            xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#6b42f5" fill="none">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M39.93,55.72A24.86,24.86,0,1,1,56.86,32.15a37.24,37.24,0,0,1-.73,6"></path>
+                                <path d="M37.86,51.1A47,47,0,0,1,32,56.7"></path>
+                                <path d="M32,7A34.14,34.14,0,0,1,43.57,30a34.07,34.07,0,0,1,.09,4.85"></path>
+                                <path d="M32,7A34.09,34.09,0,0,0,20.31,32.46c0,16.2,7.28,21,11.66,24.24"></path>
+                                <line x1="10.37" y1="19.9" x2="53.75" y2="19.9"></line>
+                                <line x1="32" y1="6.99" x2="32" y2="56.7"></line>
+                                <line x1="11.05" y1="45.48" x2="37.04" y2="45.48"></line>
+                                <line x1="7.14" y1="32.46" x2="56.86" y2="31.85"></line>
+                                <path
+                                    d="M53.57,57,58,52.56l-8-8,4.55-2.91a.38.38,0,0,0-.12-.7L39.14,37.37a.39.39,0,0,0-.46.46L42,53.41a.39.39,0,0,0,.71.13L45.57,49Z">
+                                </path>
+                            </g>
+                        </svg></span>
+                    <span class="sp-link-name">Portfolio Website</span><span class="sp-link-url sp-muted">Not
+                        added</span>
+                </div>
+                {% endif %}
+
+                {% if student.LeetCode %}
+                <a class="sp-link-card" href="{{ student.LeetCode }}" target="_blank" rel="noopener noreferrer">
+                    <span class="sp-link-icon"><svg xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 94 110.92" width="27"
+                            height="27">
+                            <defs />
+                            <g id="LeetCode’s-new-logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                <g transform="translate(-812.000000, -3714.000000)" id="logo_english_dark">
+                                    <g transform="translate(812.000000, 3714.000000)">
+                                        <g id="Logo_English">
+                                            <g id="Group-10">
+                                                <path
+                                                    d="M67.5068339,83.0664138 C70.0005384,80.5763786 74.0371402,80.5828822 76.5228362,83.0809398 C79.0085322,85.5789975 79.00204,89.6226456 76.5083355,92.1126808 L65.4351451,103.169577 C55.2192332,113.370744 38.5604663,113.518673 28.1722578,103.513204 C28.112217,103.455678 23.486583,98.9201326 8.22702585,83.9570195 C-1.92478479,74.0028895 -2.93614945,58.0748736 6.61697549,47.8463644 L24.4286944,28.7745461 C33.9100043,18.6218594 51.3874487,17.5122246 62.2279907,26.2789232 L78.4052912,39.3620235 C81.1448956,41.5776292 81.5728103,45.5984975 79.3610655,48.3428842 C77.1493207,51.0872709 73.1354592,51.5159327 70.3958548,49.300327 L54.2186634,36.2173149 C48.5492813,31.6325105 38.631911,32.2621597 33.7398535,37.5006265 L15.9279056,56.5726899 C11.2772073,61.552182 11.7865613,69.5740156 17.1461283,74.8292186 C28.3515339,85.8169393 36.9874071,94.2846214 36.9973988,94.294225 C42.3981571,99.4959838 51.130862,99.418438 56.43358,94.1233737 L67.5068339,83.0664138 Z"
+                                                    id="Combined-Shape" fill="#FFA116" fill-rule="nonzero" />
+                                                <path
+                                                    d="M40.6069914,72.0014117 C37.086019,72.0014117 34.2317068,69.142117 34.2317068,65.6149982 C34.2317068,62.0878794 37.086019,59.2285847 40.6069914,59.2285847 L87.6247154,59.2285847 C91.1456879,59.2285847 94,62.0878794 94,65.6149982 C94,69.142117 91.1456879,72.0014117 87.6247154,72.0014117 L40.6069914,72.0014117 Z"
+                                                    id="Path-2" fill="#B3B3B3" />
+                                                <path
+                                                    d="M49.4124315,2.02335002 C51.8178981,-0.552320454 55.852269,-0.686893945 58.4234511,1.72277172 C60.9946333,4.13243738 61.1289722,8.17385083 58.7235056,10.7495213 L15.9282277,56.5728697 C11.2773659,61.551984 11.7867168,69.5737689 17.1459309,74.8291832 L36.9094236,94.2091099 C39.4255514,96.6764051 39.4686234,100.719828 37.0056277,103.240348 C34.5426319,105.760868 30.5062548,105.804016 27.990127,103.33672 L8.22654289,83.9567041 C-1.92467414,74.0021005 -2.93603527,58.0741402 6.61751533,47.846311 L49.4124315,2.02335002 Z"
+                                                    id="Stroke-3" fill="#000000" />
+                                            </g>
+
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg></span>
+                    <span class="sp-link-name">LeetCode</span>
+                    <span class="sp-link-url">{{ student.LeetCode }}</span>
+                </a>
+                {% else %}
+                <div class="sp-link-card">
+                    <span class="sp-link-icon"><svg xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 94 110.92" width="27"
+                            height="27">
+                            <defs />
+                            <g id="LeetCode’s-new-logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                <g transform="translate(-812.000000, -3714.000000)" id="logo_english_dark">
+                                    <g transform="translate(812.000000, 3714.000000)">
+                                        <g id="Logo_English">
+                                            <g id="Group-10">
+                                                <path
+                                                    d="M67.5068339,83.0664138 C70.0005384,80.5763786 74.0371402,80.5828822 76.5228362,83.0809398 C79.0085322,85.5789975 79.00204,89.6226456 76.5083355,92.1126808 L65.4351451,103.169577 C55.2192332,113.370744 38.5604663,113.518673 28.1722578,103.513204 C28.112217,103.455678 23.486583,98.9201326 8.22702585,83.9570195 C-1.92478479,74.0028895 -2.93614945,58.0748736 6.61697549,47.8463644 L24.4286944,28.7745461 C33.9100043,18.6218594 51.3874487,17.5122246 62.2279907,26.2789232 L78.4052912,39.3620235 C81.1448956,41.5776292 81.5728103,45.5984975 79.3610655,48.3428842 C77.1493207,51.0872709 73.1354592,51.5159327 70.3958548,49.300327 L54.2186634,36.2173149 C48.5492813,31.6325105 38.631911,32.2621597 33.7398535,37.5006265 L15.9279056,56.5726899 C11.2772073,61.552182 11.7865613,69.5740156 17.1461283,74.8292186 C28.3515339,85.8169393 36.9874071,94.2846214 36.9973988,94.294225 C42.3981571,99.4959838 51.130862,99.418438 56.43358,94.1233737 L67.5068339,83.0664138 Z"
+                                                    id="Combined-Shape" fill="#FFA116" fill-rule="nonzero" />
+                                                <path
+                                                    d="M40.6069914,72.0014117 C37.086019,72.0014117 34.2317068,69.142117 34.2317068,65.6149982 C34.2317068,62.0878794 37.086019,59.2285847 40.6069914,59.2285847 L87.6247154,59.2285847 C91.1456879,59.2285847 94,62.0878794 94,65.6149982 C94,69.142117 91.1456879,72.0014117 87.6247154,72.0014117 L40.6069914,72.0014117 Z"
+                                                    id="Path-2" fill="#B3B3B3" />
+                                                <path
+                                                    d="M49.4124315,2.02335002 C51.8178981,-0.552320454 55.852269,-0.686893945 58.4234511,1.72277172 C60.9946333,4.13243738 61.1289722,8.17385083 58.7235056,10.7495213 L15.9282277,56.5728697 C11.2773659,61.551984 11.7867168,69.5737689 17.1459309,74.8291832 L36.9094236,94.2091099 C39.4255514,96.6764051 39.4686234,100.719828 37.0056277,103.240348 C34.5426319,105.760868 30.5062548,105.804016 27.990127,103.33672 L8.22654289,83.9567041 C-1.92467414,74.0021005 -2.93603527,58.0741402 6.61751533,47.846311 L49.4124315,2.02335002 Z"
+                                                    id="Stroke-3" fill="#000000" />
+                                            </g>
+
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg></span><span class="sp-link-name">LeetCode</span><span class="sp-link-url sp-muted">Not
+                        added</span>
+                </div>
+                {% endif %}
+
+                {% if student.HackerRank %}
+                <a class="sp-link-card" href="{{ student.HackerRank }}" target="_blank" rel="noopener noreferrer">
+                    <span class="sp-link-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                            <rect width="200" height="200" fill="#0E141E" />
+                            <path d="M 29 64 h 20 v 26 h 20 v -26 h 20 v 72 h -20 v -26 h -20 v 26 h -20 z"
+                                fill="#FFFFFF" />
+                            <rect x="99" y="64" width="72" height="72" fill="#00EA64" />
+                        </svg>
+                    </span>
+                    <span class="sp-link-name">HackerRank</span>
+                    <span class="sp-link-url">{{ student.HackerRank }}</span>
+                </a>
+                {% else %}
+                <div class="sp-link-card">
+                    <span class="sp-link-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                            <rect width="200" height="200" fill="#0E141E" />
+                            <path d="M 29 64 h 20 v 26 h 20 v -26 h 20 v 72 h -20 v -26 h -20 v 26 h -20 z"
+                                fill="#FFFFFF" />
+                            <rect x="99" y="64" width="72" height="72" fill="#00EA64" />
+                        </svg>
+                    </span><span class="sp-link-name">HackerRank</span>
+                    <span class="sp-link-url sp-muted">Not added</span>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+
+
+        <!-- DOCUMENTS -->
+        <section class="sp-card sp-documents">
+            <div class="sp-cert-header">
+                <h3 class="sp-section-title" style="border-bottom:0;padding-bottom:0;margin-bottom:0;">
+                    <span class="sp-title-icon"><svg width="30px" height="30px" viewBox="0 0 48 48"
+                            xmlns="http://www.w3.org/2000/svg" fill="#000000" stroke="#000000" stroke-width="2">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <defs>
+                                    <style>
+                                        .a {
+                                            fill: none;
+                                            stroke: #6b42f5;
+                                            stroke-linecap: round;
+                                            stroke-linejoin: round;
+                                        }
+                                    </style>
+                                </defs>
+                                <path class="a"
+                                    d="M14,4.5H10.5a2,2,0,0,0-2,2v35a2,2,0,0,0,2,2h27a2,2,0,0,0,2-2V6.5a2,2,0,0,0-2-2H24">
+                                </path>
+                                <path class="a"
+                                    d="M12,4.5l1.4142-1.4142A2,2,0,0,1,14.8284,2.5H23a1,1,0,0,1,1,1v25l-5-5-5,5V4.5">
+                                </path>
+                                <line class="a" x1="14" y1="38" x2="34" y2="38"></line>
+                                <line class="a" x1="24" y1="10" x2="34" y2="10"></line>
+                                <line class="a" x1="24" y1="17" x2="34" y2="17"></line>
+                                <line class="a" x1="24" y1="24" x2="34" y2="24"></line>
+                                <line class="a" x1="14" y1="31" x2="34" y2="31"></line>
+                            </g>
+                        </svg></span>
+                    Documents
+                </h3>
+
+            </div>
+
+            <div class="sp-doc-grid">
+
+                <div class="sp-resume-card">
+                    <div class="sp-doc-label">Resume</div>
+                    <div class="sp-file-row">
+                        <div class="sp-file-icon">PDF</div>
+                        <div style="min-width:0;flex:1;">
+                            <div class="sp-file-name">{{ student.resume_path.split('_')[2:] | join('_') if
+                                student.resume_path else 'No resume uploaded' }}</div>
+                            <div class="sp-file-meta">
+                                Resume status:
+                                <strong
+                                    style="color:{% if student.resume_status == 'Verified' %}#128448{% elif student.resume_status == 'Rejected' %}#c9363e{% else %}#a76b00{% endif %};">
+                                    {{ student.resume_status or 'Pending' }}
+                                </strong>
+                            </div>
+                        </div>
+                        {% if student.resume_path %}
+                        <div style="margin-top:14px;">
+                            <form method="GET" action="{{ url_for('student.Student_Profile') }}" style="display:inline;">
+                                <button type="submit" name="Download" value="download_resume" class="sp-primary-btn">↓
+                                    Download
+                                    Resume</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="sp-file-row" style="padding: 0;">
+                        <div class="sp-file-remark">
+                            <div class="sp-remark-content">
+                                <span
+                                    style="width: 30px; height: 30px; flex: 0 0 30px; border-radius: 8px; display: grid; place-items: center; background: #fff3ec; color: #4773df; font-size: 13px; font-weight: 800;">
+                                    <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                        </g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path
+                                                d="M10.7905 15.17C10.5905 15.17 10.4005 15.09 10.2605 14.95L7.84055 12.53C7.55055 12.24 7.55055 11.76 7.84055 11.47C8.13055 11.18 8.61055 11.18 8.90055 11.47L10.7905 13.36L15.0905 9.06003C15.3805 8.77003 15.8605 8.77003 16.1505 9.06003C16.4405 9.35003 16.4405 9.83003 16.1505 10.12L11.3205 14.95C11.1805 15.09 10.9905 15.17 10.7905 15.17Z"
+                                                fill="#ff7800"></path>
+                                            <path
+                                                d="M12.0009 22.75C11.3709 22.75 10.7409 22.54 10.2509 22.12L8.67086 20.76C8.51086 20.62 8.11086 20.48 7.90086 20.48H6.18086C4.70086 20.48 3.50086 19.28 3.50086 17.8V16.09C3.50086 15.88 3.36086 15.49 3.22086 15.33L1.87086 13.74C1.05086 12.77 1.05086 11.24 1.87086 10.27L3.22086 8.68C3.36086 8.52 3.50086 8.13 3.50086 7.92V6.2C3.50086 4.72 4.70086 3.52 6.18086 3.52H7.91086C8.12086 3.52 8.52086 3.37 8.68086 3.24L10.2609 1.88C11.2409 1.04 12.7709 1.04 13.7509 1.88L15.3309 3.24C15.4909 3.38 15.8909 3.52 16.1009 3.52H17.8009C19.2809 3.52 20.4809 4.72 20.4809 6.2V7.9C20.4809 8.11 20.6309 8.51 20.7709 8.67L22.1309 10.25C22.9709 11.23 22.9709 12.76 22.1309 13.74L20.7709 15.32C20.6309 15.48 20.4809 15.88 20.4809 16.09V17.79C20.4809 19.27 19.2809 20.47 17.8009 20.47H16.1009C15.8909 20.47 15.4909 20.62 15.3309 20.75L13.7509 22.11C13.2609 22.54 12.6309 22.75 12.0009 22.75ZM6.18086 5.02C5.53086 5.02 5.00086 5.55 5.00086 6.2V7.91C5.00086 8.48 4.73086 9.21 4.36086 9.64L3.01086 11.23C2.66086 11.64 2.66086 12.35 3.01086 12.76L4.36086 14.35C4.73086 14.79 5.00086 15.51 5.00086 16.08V17.79C5.00086 18.44 5.53086 18.97 6.18086 18.97H7.91086C8.49086 18.97 9.22086 19.24 9.66086 19.62L11.2409 20.98C11.6509 21.33 12.3709 21.33 12.7809 20.98L14.3609 19.62C14.8009 19.25 15.5309 18.97 16.1109 18.97H17.8109C18.4609 18.97 18.9909 18.44 18.9909 17.79V16.09C18.9909 15.51 19.2609 14.78 19.6409 14.34L21.0009 12.76C21.3509 12.35 21.3509 11.63 21.0009 11.22L19.6409 9.64C19.2609 9.2 18.9909 8.47 18.9909 7.89V6.2C18.9909 5.55 18.4609 5.02 17.8109 5.02H16.1109C15.5309 5.02 14.8009 4.75 14.3609 4.37L12.7809 3.01C12.3709 2.66 11.6509 2.66 11.2409 3.01L9.66086 4.38C9.22086 4.75 8.48086 5.02 7.91086 5.02H6.18086Z"
+                                                fill="#ff7800"></path>
+                                        </g>
+                                    </svg>
+                                </span>
+                                Resume Status: <span
+                                    style="color:{% if student.resume_status == 'Verified' %}#128448{% elif student.resume_status == 'Rejected' %}#c9363e{% else %}#a76b00{% endif %};">
+                                    {{ student.resume_status or 'Pending' }} </span>
+                            </div>
+                            <div class="sp-remark-content">
+                                <span
+                                    style="width: 30px; height: 30px; flex: 0 0 30px; border-radius: 8px; display: grid; place-items: center; background: #fdefe7; color: #4773df; font-size: 13px; font-weight: 800;">
+                                    <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 122.88 122.09" fill="#ff7800" height="25" width="25">
+                                        <title>comment-bubble</title>
+                                        <path
+                                            d="M31.23,113.89,30,115.11a5.2,5.2,0,0,1-9-3.48V99.45H19.39A9,9,0,0,1,13,96.79a9.28,9.28,0,0,1-1.82-2.61h-.44A10.75,10.75,0,0,1,0,83.45V10.73A10.68,10.68,0,0,1,2.8,3.56l.36-.4A10.72,10.72,0,0,1,10.73,0h94.41A10.81,10.81,0,0,1,115.7,8.79a9.2,9.2,0,0,1,4.51,2.47,9.05,9.05,0,0,1,2.67,6.4V90.38a9.08,9.08,0,0,1-9.07,9.07h-54L37.39,120.93a3.54,3.54,0,0,1-6.16-2.37v-4.67ZM27.94,60.37a3.54,3.54,0,0,1,0-7.07H76.87a3.54,3.54,0,1,1,0,7.07Zm0-23a3.54,3.54,0,0,1,0-7.07h60a3.54,3.54,0,0,1,0,7.07ZM26.1,111.63,49.71,89h55.43a5.55,5.55,0,0,0,5.54-5.53V10.73a5.58,5.58,0,0,0-5.54-5.53H10.73A5.59,5.59,0,0,0,5.2,10.73V83.45A5.57,5.57,0,0,0,10.73,89H26.1v22.65Z" />
+                                    </svg>
+                                </span>
+                                Resume remark: {{ student.resume_remark or 'Pending' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sp-Certification-card">
+
+                    <div class="sp-doc-label">Certifications</div>
+                    {% if student.Certification %}
+                    {% for Certificate in student.Certification.split(',') %}
+                    <div class="sp-cert-list">
+
+                        <div class="sp-cert-item">
+                            <div class="sp-file-icon" style="width:36px;height:36px;font-size:10px;">PDF</div>
+                            <div class="sp-cert-name">{{ Certificate }}</div>
+
+                            <div>
+                                <form method="POST" action="{{ url_for('student.student_download_certifications') }}"
+                                    style="display:inline; margin:0;">
+                                    <button type="submit" name="name" value="{{Certificate}}"
+                                        class="sp-btn">Download</button>
+                                    <input type="hidden" name="id" value="{{current_user.user_id}}">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="sp-cert-list">
+                        <div class="sp-cert-item">
+                            <div class="sp-cert-name sp-muted">No certifications uploaded.</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- UPDATE PROFILE BUTTON -->
+        <div style="display:flex;justify-content:center;margin-top:18px;">
+            <form method="POST" action="{{ url_for('student.Student_Profile') }}">
+                <button type="submit" name="action" value="go_to_update" class="sp-primary-btn">✎ Update
+                    Profile</button>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+
+    <!-- ================= EDIT MODE ================= -->
+    <div class="fixed-top-section">
+
+        <div style="display: flex; justify-content: center;">
+            <div>
+                <h1 class="sp-page-title">Update Profile</h1>
+            </div>
+        </div>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <form method="POST" action="{{ url_for('student.Student_Profile', mode='Update') }}" enctype="multipart/form-data">
+
+            <section class="sp-card sp-edit-card">
+
+                <div class="sp-edit-section">
+                    <h3 class="sp-section-title">
+                        <span class="sp-title-icon"><svg width="20" height="20" viewBox="0 0 12 12"
+                                enable-background="new 0 0 12 12" id="Слой_1" version="1.1" xml:space="preserve"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                fill="#000000">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <g>
+                                        <path
+                                            d="M9.3005371,6.5351563C8.4776001,7.4294434,7.3084106,8,6,8S3.5223999,7.4294434,2.6994629,6.5351563 C1.3145142,7.2350464,0.5,8.6131592,0.5,10.5V12h11v-1.5C11.5,8.6131592,10.6854858,7.2350464,9.3005371,6.5351563z"
+                                            fill="#6b42f5"></path>
+                                        <circle cx="6" cy="3.5" fill="#6b42f5" r="3.5"></circle>
+                                    </g>
+                                </g>
+                            </svg></span>
+                        Personal Information
+                    </h3>
+
+                    <div class="sp-form-grid">
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Name</label>
+                            <input class="sp-form-input" type="text" value="{{ name }}" name="name">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Mobile Number</label>
+                            <input class="sp-form-input" type="text" value="{{ student.mobile_number or '' }}"
+                                name="mobile_number">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "mobile_number_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Gender</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Gender or '' }}" name="Gender">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Date of Birth</label>
+                            <input class="sp-form-input" type="date" value="{{ student.DOB or '' }}" name="DOB">
+                        </div>
+
+                        <div class="sp-form-group full">
+                            <label class="sp-form-label">Address</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Address or '' }}" name="Address">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">City</label>
+                            <input class="sp-form-input" type="text" value="{{ student.City or '' }}" name="City">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">State</label>
+                            <input class="sp-form-input" type="text" value="{{ student.State or '' }}" name="State">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Pin Code</label>
+                            <input class="sp-form-input" type="text" value="{{ student.pin_code or '' }}"
+                                name="pin_code">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">University Roll Number</label>
+                            <input class="sp-form-input" type="text" value="{{ student.University_Roll_Number or '' }}"
+                                name="University_Roll_Number">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "roll_number_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+                <div class="sp-edit-section">
+                    <h3 class="sp-section-title">
+                        <span class="sp-title-icon" style="background:#eaf8f0;color:#15945a;"><svg width="25px"
+                                height="25px" viewBox="0 0 64 64" id="TwoTone" xmlns="http://www.w3.org/2000/svg"
+                                fill="#000000">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <title></title>
+                                    <desc></desc>
+                                    <g data-name="Stroke copy 3" id="Stroke_copy_3">
+                                        <path
+                                            d="M57,11V43.34l-4.73-1.26a32,32,0,0,0-20.13,1.21l-.14.05-.14-.05a32,32,0,0,0-20.13-1.21L7,43.34V11H3V51H24a3,3,0,0,1,3,3H37a3,3,0,0,1,3-3H61V11Z"
+                                            style="fill:#79bd9a"></path>
+                                        <polygon points="21 58 17 55 13 58 13 43 21 43 21 58" style="fill:#cff09e">
+                                        </polygon>
+                                        <path
+                                            d="M11.73,42.08,7,43.34v4l4.73-1.26a32,32,0,0,1,20.13,1.21l.14.05v-4l-.14-.05A32,32,0,0,0,11.73,42.08Z"
+                                            style="fill:#a8dba8"></path>
+                                        <path
+                                            d="M32.14,43.29l-.14.05v4l.14-.05a32,32,0,0,1,20.13-1.21L57,47.34v-4l-4.73-1.26A32,32,0,0,0,32.14,43.29Z"
+                                            style="fill:#a8dba8"></path>
+                                        <path
+                                            d="M21.36,36a10,10,0,0,1-9.63-10v-19L7,8.34v35l4.73-1.26a32,32,0,0,1,20.13,1.21l.14.05v-5l-.14-.05A31.82,31.82,0,0,0,21.36,36Z"
+                                            style="fill:#cff09e"></path>
+                                        <path
+                                            d="M46.17,36.07A10,10,0,0,1,37,26V6.78a31,31,0,0,0-4.86,1.51L32,8.34v35l.14-.05a32,32,0,0,1,20.13-1.21L57,43.34v-5l-4.73-1.26A32.64,32.64,0,0,0,46.17,36.07Z"
+                                            style="fill:#cff09e"></path>
+                                    </g>
+                                    <g data-name="Stroke Close copy 3" id="Stroke_Close_copy_3">
+                                        <path
+                                            d="M61,10H58V8.34a1,1,0,0,0-.74-1L52.52,6.11A33.28,33.28,0,0,0,32,7.28,33.28,33.28,0,0,0,11.48,6.11L6.74,7.38a1,1,0,0,0-.74,1V10H3a1,1,0,0,0-1,1V51a1,1,0,0,0,1,1h9v6a1,1,0,0,0,.55.89,1,1,0,0,0,1-.09L17,56.25l3.4,2.55a1,1,0,0,0,.6.2.91.91,0,0,0,.45-.11A1,1,0,0,0,22,58V52h2a2,2,0,0,1,2,2,1,1,0,0,0,1,1H37a1,1,0,0,0,1-1,2,2,0,0,1,2-2H61a1,1,0,0,0,1-1V11A1,1,0,0,0,61,10ZM11.48,45.11,8,46V44.11l4-1.06a31.2,31.2,0,0,1,19,1V45.9A33.24,33.24,0,0,0,11.48,45.11ZM33,44a31.2,31.2,0,0,1,19-1l4,1.06V46l-3.48-.93A33.33,33.33,0,0,0,33,45.92Zm19-36,4,1.06V42l-3.48-.93A33.21,33.21,0,0,0,33,41.9V9A31.2,31.2,0,0,1,52,8.05ZM8,9.11l4-1.06A31.2,31.2,0,0,1,31,9V41.9a33.24,33.24,0,0,0-19.52-.79L8,42ZM4,50V12H6V47.34a1,1,0,0,0,.39.8,1,1,0,0,0,.61.2,1.15,1.15,0,0,0,.26,0L12,47.05h0v3Zm16,6-2.4-1.8a1,1,0,0,0-1.2,0L14,56V46.6A30.27,30.27,0,0,1,20,46Zm40-6H40a4,4,0,0,0-3.87,3H27.87A4,4,0,0,0,24,50H22V46.08a30.71,30.71,0,0,1,9.49,2.14l.14.05a1,1,0,0,0,.87-.07v0A31.16,31.16,0,0,1,52,47.05l4.73,1.26a1,1,0,0,0,1.26-1V12h2Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M14.19,22.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,21.76,1,1,0,0,0,14.19,22.56Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M14.19,16.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,15.76,1,1,0,0,0,14.19,16.56Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M38,16.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M38,22.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M38,34.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M38,28.6l.19,0a30.69,30.69,0,0,1,11.62,0,1,1,0,0,0,.38-2,32.84,32.84,0,0,0-12.38,0,1,1,0,0,0,.19,2Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M14.19,28.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,27.76,1,1,0,0,0,14.19,28.56Z"
+                                            style="fill:#3b8686"></path>
+                                        <path
+                                            d="M14.19,34.56a30.69,30.69,0,0,1,11.62,0l.19,0a1,1,0,0,0,.19-2,32.84,32.84,0,0,0-12.38,0A1,1,0,0,0,13,33.76,1,1,0,0,0,14.19,34.56Z"
+                                            style="fill:#3b8686"></path>
+                                    </g>
+                                </g>
+                            </svg></span>
+                        Academic Information
+                    </h3>
+
+                    <div class="sp-form-grid">
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Branch</label>
+                            <select class="sp-form-select" name="branch" id="branch">
+                                <option value="" disabled {% if not student.branch %}selected{% endif %}>Select an
+                                    option
+                                </option>
+                                <option value="Electrical" {% if student.branch=='Electrical' %}selected{% endif %}>
+                                    Electrical</option>
+                                <option value="IT" {% if student.branch=='IT' %}selected{% endif %}>IT</option>
+                                <option value="CSE" {% if student.branch=='CSE' %}selected{% endif %}>CSE</option>
+                                <option value="Mechanical" {% if student.branch=='Mechanical' %}selected{% endif %}>
+                                    Mechanical</option>
+                                <option value="Chemical" {% if student.branch=='Chemical' %}selected{% endif %}>Chemical
+                                </option>
+                                <option value="Electronics" {% if student.branch=='Electronics' %}selected{% endif %}>
+                                    Electronics</option>
+                                <option value="Petrochemical" {% if student.branch=='Petrochemical' %}selected{% endif
+                                    %}>
+                                    Petrochemical</option>
+                                <option value="Civil" {% if student.branch=='Civil' %}selected{% endif %}>Civil</option>
+                            </select>
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Graduation Year</label>
+                            <input class="sp-form-input" type="text" value="{{ student.graduation_year or '' }}"
+                                name="graduation_year">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">CGPA</label>
+                            <input class="sp-form-input" type="text" value="{{ student.cgpa or '' }}" name="cgpa">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Semester</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Semester or '' }}"
+                                name="Semester">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">10th Percentage</label>
+                            <input class="sp-form-input" type="text" value="{{ student.tenth_Percentage or '' }}"
+                                name="tenth_Percentage">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">12th Percentage</label>
+                            <input class="sp-form-input" type="text" value="{{ student.twelth_Percentage or '' }}"
+                                name="twelth_Percentage">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Diploma Percentage (Optional)</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Diploma_Percentage or '' }}"
+                                name="Diploma_Percentage">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Total Backlogs</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Total_Backlogs or '' }}"
+                                name="Total_Backlogs">
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Active Backlogs</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Active_Backlogs or '' }}"
+                                name="Active_Backlogs">
+                        </div>
+
+                        <div class="sp-form-group full">
+                            <label class="sp-form-label">Skills</label>
+                            <input class="sp-form-input" type="text" value="{{ student.skills or '' }}" name="skills"
+                                placeholder="Python, SQL, Flask, PostgreSQL">
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="sp-edit-section">
+                    <h3 class="sp-section-title">
+                        <span class="sp-title-icon"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                viewBox="0 0 24 24" fill="none" stroke="#6b42f5" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg></span>
+                        Professional Links
+                    </h3>
+
+                    <div class="sp-form-grid">
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">LinkedIn</label>
+                            <input class="sp-form-input" type="text" value="{{ student.LinkedIn or '' }}"
+                                name="LinkedIn">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "LinkedIn_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">GitHub</label>
+                            <input class="sp-form-input" type="text" value="{{ student.GitHub or '' }}" name="GitHub">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "GitHub_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Portfolio Website</label>
+                            <input class="sp-form-input" type="text" value="{{ student.Portfolio_Website or '' }}"
+                                name="Portfolio_Website">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "Portfolio_Website_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">LeetCode</label>
+                            <input class="sp-form-input" type="text" value="{{ student.LeetCode or '' }}"
+                                name="LeetCode">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "LeetCode_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">HackerRank</label>
+                            <input class="sp-form-input" type="text" value="{{ student.HackerRank or '' }}"
+                                name="HackerRank">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            {% if category in [ "HackerRank_error"] %}
+                            <div class="sp-alert">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="sp-edit-section">
+                    <h3 class="sp-section-title">
+                        <span class="sp-title-icon"><svg width="30px" height="30px" viewBox="0 0 48 48"
+                                xmlns="http://www.w3.org/2000/svg" fill="#000000" stroke="#000000" stroke-width="2">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <defs>
+                                        <style>
+                                            .a {
+                                                fill: none;
+                                                stroke: #6b42f5;
+                                                stroke-linecap: round;
+                                                stroke-linejoin: round;
+                                            }
+                                        </style>
+                                    </defs>
+                                    <path class="a"
+                                        d="M14,4.5H10.5a2,2,0,0,0-2,2v35a2,2,0,0,0,2,2h27a2,2,0,0,0,2-2V6.5a2,2,0,0,0-2-2H24">
+                                    </path>
+                                    <path class="a"
+                                        d="M12,4.5l1.4142-1.4142A2,2,0,0,1,14.8284,2.5H23a1,1,0,0,1,1,1v25l-5-5-5,5V4.5">
+                                    </path>
+                                    <line class="a" x1="14" y1="38" x2="34" y2="38"></line>
+                                    <line class="a" x1="24" y1="10" x2="34" y2="10"></line>
+                                    <line class="a" x1="24" y1="17" x2="34" y2="17"></line>
+                                    <line class="a" x1="24" y1="24" x2="34" y2="24"></line>
+                                    <line class="a" x1="14" y1="31" x2="34" y2="31"></line>
+                                </g>
+                            </svg></span>
+                        Documents
+                    </h3>
+
+                    <div class="sp-form-grid">
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Resume (PDF)</label>
+                            <input class="sp-file-input" type="file" name="resume_file" accept=".pdf,application/pdf">
+                            {% if student.resume_path %}
+                            <div style="font-size:11px;color:#778198;">Current: {{ student.resume_path }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">Certification (PDF)</label>
+                            <input class="sp-file-input" type="file" name="Certification" accept=".pdf,application/pdf">
+                            {% if student.Certification %}
+                            <div style="font-size:11px;color:#778198;">Current: {{ student.Certification }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                {% if category in [ "resume_extention_error", "Resume_file_size_error",
+                "Certification_extention_error", "Certification_file_size_error"] %}
+                <div class="sp-alert">{{ message }}</div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <div class="sp-form-actions">
+                    <a href="{{ url_for('student.Student_Profile', mode='View') }}" class="sp-secondary-btn">Cancel</a>
+                    <button type="submit" class="sp-primary-btn">Save Changes</button>
+                </div>
+
+            </section>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

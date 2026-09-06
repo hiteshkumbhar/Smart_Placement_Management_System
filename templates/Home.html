@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Placement Management System</title>
+
+   <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #152d63;
+        min-height: 100vh;
+        overflow-x: hidden;
+
+        background:
+            radial-gradient(
+                circle at 50% 35%,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(232, 243, 255, 0.9) 42%,
+                rgba(205, 225, 250, 0.95) 100%
+            );
+    }
+
+
+    /* ==========================================
+       HEADER
+    ========================================== */
+
+    .header {
+        height: 105px;
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 14px 40px;
+
+        background: linear-gradient(
+            110deg,
+            #12386f,
+            #0c2857
+        );
+
+        position: relative;
+        z-index: 10;
+    }
+
+
+    /* ==========================================
+       LOGO / BRAND
+    ========================================== */
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+
+        text-decoration: none;
+        color: white;
+    }
+
+    .logo {
+        width: 70px;
+        height: 78px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo svg {
+        width: 70px;
+        height: 78px;
+    }
+
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .brand-title {
+        font-size: 30px;
+        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .brand-subtitle {
+        font-size: 20px;
+        line-height: 1.15;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+
+    /* ==========================================
+       NAVIGATION
+    ========================================== */
+
+    .navigation {
+        display: flex;
+        align-items: center;
+        gap: 42px;
+    }
+
+    .navigation a {
+        text-decoration: none;
+        color: white;
+
+        font-size: 17px;
+        font-weight: 600;
+
+        position: relative;
+        padding: 9px 0;
+
+        transition: 0.2s ease;
+    }
+
+    .navigation a:hover {
+        color: #65adff;
+    }
+
+    .navigation .home-link::after {
+        content: "";
+
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -5px;
+
+        height: 3px;
+        border-radius: 10px;
+
+        background: #258cff;
+    }
+
+    .register-button {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        width: 130px;
+        height: 48px;
+
+        border-radius: 7px;
+
+        background: linear-gradient(
+            135deg,
+            #248bf1,
+            #1680ed
+        );
+
+        color: white !important;
+
+        box-shadow:
+            0 5px 12px rgba(0, 0, 0, 0.15);
+
+        transition: 0.2s ease;
+    }
+
+    .register-button:hover {
+        transform: translateY(-2px);
+    }
+
+
+    /* ==========================================
+       MAIN
+    ========================================== */
+
+    .main {
+        position: relative;
+
+        min-height: calc(100vh - 105px);
+
+        padding-top: 48px;
+        padding-bottom: 55px;
+
+        overflow: hidden;
+    }
+
+
+    /* ==========================================
+       DECORATIVE CIRCLES
+    ========================================== */
+
+    .circle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .circle-one {
+        width: 34px;
+        height: 34px;
+
+        left: 46px;
+        top: 390px;
+
+        background: rgba(255, 255, 255, 0.55);
+    }
+
+    .circle-two {
+        width: 34px;
+        height: 34px;
+
+        right: 50px;
+        top: 100px;
+
+        background: rgba(255, 255, 255, 0.55);
+    }
+
+
+    /* ==========================================
+       DOT PATTERN
+    ========================================== */
+
+    .dots {
+        position: absolute;
+
+        display: grid;
+        grid-template-columns: repeat(6, 5px);
+        gap: 11px;
+
+        opacity: 0.75;
+    }
+
+    .dots span {
+        width: 5px;
+        height: 5px;
+
+        background: white;
+        border-radius: 50%;
+    }
+
+    .dots-left {
+        left: 48px;
+        top: 65px;
+    }
+
+    .dots-right {
+        right: 27px;
+        top: 285px;
+    }
+
+
+    /* ==========================================
+       WAVES
+    ========================================== */
+
+    .wave {
+        position: absolute;
+
+        left: -5%;
+        width: 110%;
+        height: 300px;
+
+        pointer-events: none;
+
+        opacity: 0.65;
+    }
+
+    .wave-one {
+        top: 230px;
+
+        background:
+            radial-gradient(
+                ellipse at 50% 100%,
+                rgba(158, 197, 242, 0.45) 0%,
+                rgba(158, 197, 242, 0.25) 35%,
+                transparent 70%
+            );
+
+        border-radius: 50% 50% 0 0;
+
+        transform: rotate(-5deg);
+    }
+
+    .wave-two {
+        top: 390px;
+
+        background:
+            radial-gradient(
+                ellipse at 50% 0%,
+                rgba(170, 205, 246, 0.42) 0%,
+                rgba(170, 205, 246, 0.18) 42%,
+                transparent 70%
+            );
+
+        border-radius: 50%;
+
+        transform: rotate(4deg);
+    }
+
+
+    /* ==========================================
+       HERO
+    ========================================== */
+
+    .hero {
+        position: relative;
+        z-index: 2;
+
+        text-align: center;
+
+        max-width: 850px;
+
+        margin: 0 auto 30px;
+    }
+
+    .hero h1 {
+        font-size: 44px;
+        line-height: 1.15;
+
+        font-weight: 700;
+
+        color: #102f69;
+
+        letter-spacing: -0.8px;
+    }
+
+    .hero-line {
+        width: 85px;
+        height: 4px;
+
+        border-radius: 10px;
+
+        background: #2187ef;
+
+        margin: 18px auto 18px;
+    }
+
+    .hero p {
+        max-width: 650px;
+
+        margin: auto;
+
+        font-size: 20px;
+        line-height: 1.4;
+
+        color: #3e4654;
+    }
+
+
+    /* ==========================================
+       CARDS CONTAINER
+    ========================================== */
+
+    .cards-container {
+        position: relative;
+        z-index: 5;
+
+        max-width: 1080px;
+
+        margin: 32px auto 0;
+
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 28px;
+    }
+
+
+    /* ==========================================
+       CARD
+    ========================================== */
+
+    .card {
+        min-height: 390px;
+
+        background: rgba(255, 255, 255, 0.94);
+
+        border-radius: 17px;
+
+        padding: 25px 34px 28px;
+
+        box-shadow:
+            0 12px 28px rgba(57, 93, 145, 0.12),
+            0 3px 7px rgba(57, 93, 145, 0.05);
+
+        backdrop-filter: blur(8px);
+
+        transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+
+        box-shadow:
+            0 18px 35px rgba(57, 93, 145, 0.17);
+    }
+
+
+    /* ==========================================
+       CARD HEADER
+    ========================================== */
+
+    .card-header {
+        display: flex;
+        align-items: center;
+
+        gap: 18px;
+
+        margin-bottom: 18px;
+    }
+
+    .icon-circle {
+        width: 76px;
+        height: 76px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex-shrink: 0;
+    }
+
+    .icon-circle svg {
+        width: 45px;
+        height: 45px;
+    }
+
+
+    /* Student */
+
+    .student .icon-circle {
+        background: #e2efff;
+    }
+
+
+    /* Recruiter */
+
+    .recruiter .icon-circle {
+        background: #e4f5e8;
+    }
+
+
+    /* Officer */
+
+    .officer .icon-circle {
+        background: #eee9fa;
+    }
+
+
+    /* ==========================================
+       CARD TITLE
+    ========================================== */
+
+    .card-title {
+        font-size: 21px;
+        line-height: 1.25;
+
+        font-weight: 700;
+
+        margin: 0;
+
+        color: #112f69;
+    }
+
+    .title-line {
+        width: 55px;
+        height: 3px;
+
+        border-radius: 10px;
+
+        margin-top: 12px;
+    }
+
+    .student .title-line {
+        background: #2385eb;
+    }
+
+    .recruiter .title-line {
+        background: #2b9c4b;
+    }
+
+    .officer .title-line {
+        background: #7650c8;
+    }
+
+
+    /* ==========================================
+       FEATURES
+    ========================================== */
+
+    .features {
+        list-style: none;
+
+        padding: 0;
+        margin: 0;
+
+        width: 100%;
+    }
+
+    .features li {
+        display: flex;
+        align-items: center;
+
+        min-height: 37px;
+
+        border-bottom: 1px solid #e1e5eb;
+
+        font-size: 16px;
+
+        color: #303b4d;
+    }
+
+    .features li:last-child {
+        border-bottom: none;
+    }
+
+    .check {
+        width: 19px;
+        height: 19px;
+
+        border-radius: 50%;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-right: 10px;
+
+        color: white;
+
+        font-size: 12px;
+        font-weight: bold;
+
+        flex-shrink: 0;
+    }
+
+    .student .check {
+        background: #2185eb;
+    }
+
+    .recruiter .check {
+        background: #2e9d4e;
+    }
+
+    .officer .check {
+        background: #7651c5;
+    }
+
+
+    /* ==========================================
+       GET STARTED BUTTON
+    ========================================== */
+
+    .start-button {
+        width: 100%;
+        height: 46px;
+
+        margin-top: 23px;
+
+        border-radius: 7px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 28px;
+
+        text-decoration: none;
+
+        color: white;
+
+        font-size: 17px;
+        font-weight: 600;
+
+        transition: 0.2s ease;
+    }
+
+    .student .start-button {
+        background: linear-gradient(
+            135deg,
+            #2187ef,
+            #1d7ee5
+        );
+    }
+
+    .recruiter .start-button {
+        background: linear-gradient(
+            135deg,
+            #2fa24d,
+            #23943f
+        );
+    }
+
+    .officer .start-button {
+        background: linear-gradient(
+            135deg,
+            #7650c9,
+            #6845b6
+        );
+    }
+
+    .start-button:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+    }
+
+    .arrow {
+        font-size: 26px;
+        font-weight: 300;
+        line-height: 1;
+    }
+
+
+    /* ==========================================
+       RESPONSIVE
+    ========================================== */
+
+    @media (max-width: 1100px) {
+
+        .header {
+            padding: 14px 25px;
+        }
+
+        .brand-title {
+            font-size: 27px;
+        }
+
+        .brand-subtitle {
+            font-size: 18px;
+        }
+
+        .navigation {
+            gap: 28px;
+        }
+
+        .hero h1 {
+            font-size: 40px;
+        }
+
+        .cards-container {
+            margin-left: 25px;
+            margin-right: 25px;
+        }
+
+        .card {
+            padding-left: 25px;
+            padding-right: 25px;
+        }
+    }
+
+
+    @media (max-width: 850px) {
+
+        .header {
+            height: auto;
+
+            flex-direction: column;
+
+            gap: 18px;
+
+            padding: 18px;
+        }
+
+        .navigation {
+            width: 100%;
+
+            justify-content: center;
+        }
+
+        .cards-container {
+            grid-template-columns: 1fr;
+
+            max-width: 500px;
+
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+
+    @media (max-width: 550px) {
+
+        .brand-title {
+            font-size: 22px;
+        }
+
+        .brand-subtitle {
+            font-size: 16px;
+        }
+
+        .logo,
+        .logo svg {
+            width: 58px;
+            height: 65px;
+        }
+
+        .navigation {
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .navigation a {
+            font-size: 15px;
+        }
+
+        .register-button {
+            width: 110px;
+            height: 42px;
+        }
+
+        .hero {
+            padding: 0 18px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+        }
+
+        .hero p {
+            font-size: 17px;
+        }
+
+        .cards-container {
+            margin-left: 18px;
+            margin-right: 18px;
+        }
+
+        .card {
+            padding: 22px;
+        }
+
+        .card-title {
+            font-size: 19px;
+        }
+
+        .features li {
+            font-size: 15px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
+    <header class="header">
+
+        <!-- Brand -->
+
+        <a href="#" class="brand">
+
+            <div class="logo">
+
+                <svg
+                    viewBox="0 0 200 185"
+                    xmlns="http://www.w3.org/2000/svg">
+
+                    <defs>
+                        <filter
+                            id="glow"
+                            x="-50%"
+                            y="-50%"
+                            width="200%"
+                            height="200%">
+
+                            <feGaussianBlur
+                                stdDeviation="1.5"
+                                result="blur"/>
+
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Shield -->
+
+                    <path
+                        d="
+                        M42 42
+                        C62 42 82 38 100 24
+                        C118 38 138 42 158 42
+                        C164 42 166 46 164 52
+                        C162 58 162 66 162 76
+                        V112
+                        C162 138 144 150 100 176
+                        C56 150 38 138 38 112
+                        V76
+                        C38 66 38 58 36 52
+                        C34 46 36 42 42 42
+                        Z"
+                        fill="none"
+                        stroke="white"
+                        stroke-width="5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+
+                    <!-- Graduation Cap -->
+
+                    <polygon
+                        points="58,79 100,61 142,79 100,97"
+                        fill="white"/>
+
+                    <!-- Cap Base -->
+
+                    <path
+                        d="
+                        M76 93
+                        V109
+                        C76 121 124 121 124 109
+                        V93
+                        L100 103
+                        Z"
+                        fill="white"/>
+
+                    <!-- Tassel -->
+
+                    <path
+                        d="M65 83 V109"
+                        stroke="white"
+                        stroke-width="4"
+                        stroke-linecap="round"/>
+
+                    <rect
+                        x="61"
+                        y="107"
+                        width="8"
+                        height="14"
+                        rx="4"
+                        fill="white"/>
+
+                </svg>
+
+            </div>
+
+
+            <div class="brand-text">
+
+                <span class="brand-title">
+                    Smart Placement Management System
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <!-- Navigation -->
+
+        <nav class="navigation">
+
+            <a
+                href="#"
+                class="home-link">
+                Home
+            </a>
+
+            <a href="#">
+                About Us
+            </a>
+
+            <a href="#">
+                Contact Us
+            </a>
+
+            <a
+                href="{{ url_for('Register') }}"
+                class="register-button">
+                Register
+            </a>
+
+        </nav>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ===================================================== -->
+
+    <main class="main">
+
+
+        <!-- Background decoration -->
+
+        <div class="circle circle-one"></div>
+        <div class="circle circle-two"></div>
+
+
+        <!-- Left dots -->
+
+        <div class="dots dots-left">
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+        </div>
+
+
+        <!-- Right dots -->
+
+        <div class="dots dots-right">
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+
+        </div>
+
+
+        <!-- Decorative waves -->
+
+        <div class="wave wave-one"></div>
+        <div class="wave wave-two"></div>
+
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
+
+        <section class="hero">
+
+            <h1>
+                Bridging the Gap<br>
+                Between Talent and Opportunity
+            </h1>
+
+            <div class="hero-line"></div>
+
+            <p>
+                Your streamlined solution for student profiles,<br>
+                recruiter engagements, and complete placement lifecycle.
+            </p>
+
+        </section>
+
+
+        <!-- =================================================
+             CARDS
+        ================================================== -->
+
+        <section class="cards-container">
+
+
+            <!-- =================================================
+                 STUDENT
+            ================================================== -->
+
+            <div class="card student">
+
+                <div class="card-header">
+
+                    <div class="icon-circle">
+
+                        <!-- Student Icon -->
+
+                        <svg fill="#1a5fb4" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 496 496" xml:space="preserve" width="45px" height="45px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <g> <path d="M414.56,319.478L352,305.574v-19.768c24.176-17.448,40-45.784,40-77.816v-48h8V94.614c0-3.16-0.304-6.328-0.8-9.496 L432,74.87v22.592c-9.288,3.312-16,12.112-16,22.528v24h48v-24c0-10.416-6.712-19.216-16-22.528V55.99 c0-8.312-5.328-15.552-13.248-18.016L329.656,5.134c-21.816-6.832-45.504-6.832-67.312,0L157.248,37.966 C149.328,40.438,144,47.678,144,55.99s5.328,15.552,13.248,18.016L192.8,85.118c-0.496,3.168-0.8,6.336-0.8,9.496v65.376h8v48 c0,32.032,15.824,60.368,40,77.816v19.768l-62.56,13.896c-0.464,0.104-0.968,0.256-1.44,0.376V183.99H0v224h42.8 c2.64,7.432,7.048,14.008,12.728,19.248l-8.592,68.752h18.36L88,488.422l22.704,7.568H120h9.064H496v-74.992 C496,371.87,462.512,330.134,414.56,319.478z M440,111.99c4.416,0,8,3.584,8,8v8h-16v-8C432,115.574,435.584,111.99,440,111.99z M162.016,58.734c-1.2-0.376-2.016-1.48-2.016-2.744s0.816-2.368,2.016-2.752l105.096-32.84c9.368-2.92,19.08-4.408,28.888-4.408 c9.808,0,19.52,1.488,28.888,4.408l105.096,32.848c1.2,0.376,2.016,1.48,2.016,2.744s-0.816,2.368-2.016,2.752l-105.096,32.84 c-18.736,5.84-39.048,5.84-57.784,0L162.016,58.734z M208,94.614c0-1.544,0.168-3.096,0.336-4.648l54.008,16.88 c10.904,3.416,22.224,5.144,33.656,5.144s22.752-1.728,33.656-5.144l54.016-16.872c0.16,1.552,0.328,3.104,0.328,4.64v49.376h-8 H216h-8V94.614z M216,207.99v-48h160v48c0,44.112-35.888,80-80,80S216,252.102,216,207.99z M296,319.046l-40-20v-3.896 c12.192,5.616,25.712,8.84,40,8.84c14.288,0,27.808-3.224,40-8.84v3.896L296,319.046z M330.768,319.558l-13.096,24l-9.52-12.696 L330.768,319.558z M283.856,330.854l-9.52,12.696l-13.096-24L283.856,330.854z M40,391.99H16v-192h144v192h-24 c0-26.472-21.528-48-48-48S40,365.518,40,391.99z M88,471.558l-22.832,7.608l5.312-42.536c5.44,2.144,11.336,3.36,17.52,3.36 s12.08-1.216,17.52-3.36l5.32,42.536L88,471.558z M88,423.99c-17.648,0-32-14.352-32-32s14.352-32,32-32s32,14.352,32,32 S105.648,423.99,88,423.99z M216,479.99h-24v-32h-16v32h-48.936l-6.592-52.752c5.688-5.24,10.096-11.816,12.728-19.248H176 v-63.296l40,73.336V479.99z M288,479.99h-56v-66.04l-43.888-80.456l55.744-12.392L288,402.03V479.99z M282.744,358.99 L296,341.318l13.256,17.672L296,383.286L282.744,358.99z M360,479.99h-56v-77.96l44.144-80.92l55.744,12.384L360,413.95V479.99z M480,479.99h-64v-32h-16v32h-24v-61.96l43.888-80.456c35.8,11.848,60.112,44.944,60.112,83.424V479.99z"></path> <rect x="96" y="215.99" width="48" height="16"></rect> <rect x="32" y="247.99" width="112" height="16"></rect> <rect x="32" y="279.99" width="112" height="16"></rect> <rect x="32" y="311.99" width="64" height="16"></rect> </g> </g> </g> </g></svg>
+
+                    </div>
+
+
+                    <div>
+
+                        <h2 class="card-title">
+                            For Students
+                        </h2>
+
+                        <div class="title-line"></div>
+
+                    </div>
+
+                </div>
+
+
+                <ul class="features">
+
+                    <li>
+                        <span class="check">✓</span>
+                        Build Profile
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Upload Resume
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Apply for Drives
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Track Interviews
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Get Placed
+                    </li>
+
+                </ul>
+
+
+                <a
+                    href="{{ url_for('Student_login') }}"
+                    class="start-button">
+
+                    <span>
+                        Get Started
+                    </span>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 RECRUITER
+            ================================================== -->
+
+            <div class="card recruiter">
+
+                <div class="card-header">
+
+                    <div class="icon-circle">
+
+                        <!-- Recruiter Icon -->
+<svg fill="#26a269" height="45px" width="45px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 495.485 495.485" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="XMLID_158_"> <path id="XMLID_162_" d="M387.998,105.937h-17.765c-22.969,0-41.605,18.629-41.605,41.605v3.052l52.523-37.304 c0.048-0.034,0.109-0.04,0.159-0.074c-0.05,0.04-0.099,0.049-0.142,0.088l-69.363,63.773l-71.121,30.29 c-10.505,4.464-15.397,16.605-10.93,27.108c3.359,7.862,10.997,12.578,19.036,12.578c2.7,0,5.444-0.534,8.073-1.664l74.398-31.676 c2.18-0.921,4.164-2.205,5.896-3.804l71.973-66.187c0.061-0.055,0.08-0.138,0.142-0.193c-0.061,0.064-0.08,0.144-0.13,0.209 L345.55,219.04c-1.841,2.179-4.081,3.803-6.539,4.859l-2.891,1.228l-7.492,3.187l0.031,242.372c0,13.698,11.112,24.8,24.8,24.8 c5.653,0,10.819-1.971,14.98-5.167c-3.18-5.861-5.164-12.48-5.164-19.633V322.901h16.536v147.784c0,13.698,11.107,24.8,24.8,24.8 c13.688,0,24.793-11.102,24.793-24.8c0,0,0.196-208.497,0.196-323.144C429.601,124.566,410.971,105.937,387.998,105.937z"></path> <path id="XMLID_161_" d="M379.13,96.635c26.704,0,48.323-21.625,48.323-48.313C427.454,21.625,405.835,0,379.13,0 c-26.684,0-48.321,21.625-48.321,48.322C330.809,75.01,352.447,96.635,379.13,96.635z"></path> <path id="XMLID_160_" d="M116.355,96.635c26.685,0,48.323-21.625,48.323-48.313C164.678,21.625,143.04,0,116.355,0 C89.653,0,68.034,21.625,68.034,48.322C68.034,75.01,89.653,96.635,116.355,96.635z"></path> <path id="XMLID_159_" d="M177.092,173.825l-55.15-53.198l44.916,34.664v-7.749c0-22.976-18.636-41.605-41.605-41.605H107.49 c-22.977,0-41.605,18.629-41.605,41.605c0,118.313,0.196,323.144,0.196,323.144c0,13.698,11.107,24.8,24.793,24.8 c13.693,0,24.8-11.102,24.8-24.8V322.901h16.536v147.784c0,7.153-1.99,13.772-5.17,19.633c4.169,3.196,9.332,5.167,14.987,5.167 c13.686,0,24.8-11.102,24.8-24.8l0.031-242.66l-16.504-11.737l-5.275-3.748c-0.307-0.224-0.602-0.5-0.841-0.783l-51.005-61.376 l57.089,55.063c1.295,1.234,2.733,2.309,4.299,3.175l68.13,37.954c-1.714-2.194-3.243-4.559-4.391-7.238 c-5.734-13.475-1.743-28.505,8.682-37.675L177.092,173.825z"></path> </g> </g></svg>
+                    </div>
+
+
+                    <div>
+
+                        <h2 class="card-title">
+                            For Recruiters
+                        </h2>
+
+                        <div class="title-line"></div>
+
+                    </div>
+
+                </div>
+
+
+                <ul class="features">
+
+                    <li>
+                        <span class="check">✓</span>
+                        Post Openings
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        View Applicants
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Schedule Rounds
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Provide Feedback
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Hire Talent
+                    </li>
+
+                </ul>
+
+
+                <a
+                    href="{{ url_for('Recruiter_login') }}"
+                    class="start-button">
+
+                    <span>
+                        Get Started
+                    </span>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 PLACEMENT OFFICER
+            ================================================== -->
+
+            <div class="card officer">
+
+                <div class="card-header">
+
+                    <div class="icon-circle" >
+
+                        <!-- Briefcase Icon -->
+
+<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 451.68" fill = "#4a1586"><path d="m269.13 380.42 7.07 44.83 37.72-91.14-49.96 14.51 18.49 18.49-13.32 13.31zm-31.92 42.31 7.15-41.81-13.77-13.81 17.57-17.62-47.64-14.76 36.69 88zm-86.43-273.1c15.59-9.22 43.71-15.3 75.01-17.66 6.7 11.66 16.58 19.35 28.91 23.86 12.53-4.71 22.41-12.57 29.07-23.86 29.15 2.23 56.16 7.94 73.65 17.66h2.61c3.92 0 2.64 20.55 3.14 25.97 3.6.99 6.2 3.39 7.98 6.62 5.54 10 1.82 27.54-2.11 37.5l-.04.13c-2.32 5.91-5.42 11.29-9.02 15.26-3.01 3.22-6.41 5.54-10.09 6.45-.7 2.27-1.49 4.63-2.06 6.95-4.1 13.81-7.32 24.68-15.84 35.48a84.995 84.995 0 0 1-5.96 6.78 69.96 69.96 0 0 1-4.46 4.34c.37 3.97.12 20.1.12 25.27 2.03-.99 4.42-1.2 6.7-.29C430.04 361.11 511.92 366.03 512 451.68H0c3.76-97.14 88.17-94 180.14-129.36 1.78-.66 5.17-2.36 6.99-2.64v-24.44c0-.91.24-1.78.62-2.53-.87-.78-1.7-1.61-2.48-2.4-7.24-7.44-12.29-14.47-16.71-24.31-3.02-6.7-5.42-13.94-8.19-22.13l-1.45-4.26c-3.14-.41-6.08-1.86-8.72-4.01-3.31-2.73-6.16-6.7-8.48-11.29-5.54-10.91-12.61-39.08.99-47.59 1.08-.71 2.28-1.2 3.6-1.53.83-8.19-2.4-25.81 4.47-25.56zM310.48 304c-10.87 6.83-21.58 11.79-34.32 14.68-23.94 5.59-46.23.5-67.61-10.58-3.39-1.78-6.78-3.73-10.22-5.92v20.31l56.12 17.37 56.03-16.26V304zM145.85 133.83v-21.96l-17.74-13.6c-25.43-28.21-20.3-27.38 6.66-34.95C174.14 52.24 200.85 28.3 224.05 13c26.31-17.33 34.45-17.33 60.75 0 23.16 15.3 49.92 39.24 89.24 50.32 26.97 7.57 32.09 6.74 6.7 34.95L363 111.87v21.96c-24.07-9.1-48.26-15.13-72.45-18.15 2.52-9.43 3.6-14.27 2.98-26.88-11.29 1.03-24.44-3.31-38.96-12.53-12.57 9.76-25.55 12.61-38.79 11.95-.37 12.94.83 17.91 3.35 27.33-24.48 2.98-48.96 9.06-73.28 18.28zm25.35 37.3-3.39 20.02c-.33 1.98-2.69 3.02-4.26 1.9l-6.28-4.01c-2.36-1.53-6.04-4.72-8.36-.99-4.13 6.7.79 24.07 4.02 30.6 1.57 3.1 3.35 5.66 5.21 7.19 3.39 2.69 4.5-.33 8.14 1.62 3.11 1.69 3.81 5.87 4.88 8.97l1.29 3.8c2.48 7.45 4.75 14.07 7.4 20.06 5.5 12.28 12.86 21.05 23.49 29.16 11.33 8.6 24.06 14.47 38.04 17.12 10.26 1.9 20.76 1.9 31.02-.17a85.537 85.537 0 0 0 36.31-16.87c4.92-3.89 9.42-8.31 13.39-13.36 3.48-4.34 5.96-8.97 7.99-14.06 2.1-5.21 3.8-10.83 5.66-17.16 1.08-3.64 2.15-7.28 3.31-10.92 1.78-6.9 7.15-2.27 11.83-7.4 2.35-2.69 4.59-6.82 6.41-11.45 1.49-3.85 7.94-26.8.82-29.16-1.9-.83-4.79 1.53-6.28 2.56-3.44 2.28-5.05 3.35-10.47 4.97-3.51.99-3.63-2.77-3.8-5.01l-1.7-18.9c-49.91 21.71-121.49 21.09-164.67 1.49z"/></svg>
+                    </div>
+
+
+                    <div>
+
+                        <h2 class="card-title">
+                            For Placement<br>
+                            Officers
+                        </h2>
+
+                        <div class="title-line"></div>
+
+                    </div>
+
+                </div>
+
+
+                <ul class="features">
+
+                    <li>
+                        <span class="check">✓</span>
+                        Manage Students
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Verify Resumes
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Generate Reports
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        View Analytics
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Track Progress
+                    </li>
+
+                </ul>
+
+
+                <a
+                    href="{{ url_for('Placement_Officer_login') }}"
+                    class="start-button">
+
+                    <span>
+                        Get Started
+                    </span>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

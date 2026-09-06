@@ -1,0 +1,1034 @@
+{% extends "Recruiter_Base.html" %}
+{% block title %}Interviews | Recruiter Dashboard{% endblock %}
+{% block style %}
+{{ super() }}
+<style>
+    .topbar {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+        
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.2;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+    .fixed-top-section {
+        padding: 0px 24px;
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
+    }
+
+    .scrollable-bottom-section {
+        padding: 0px 24px 45px;
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        /* Ensures the flex child can scroll */
+    }
+
+    .interview-page {
+        padding: 0px 0px 40px;
+        height: 100vh;        
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; 
+    }
+
+    .page-header {
+        margin-bottom: 24px
+    }
+
+    .page-header h1 {
+        margin: 0 0 0px;
+        font-size: 30px;
+        font-weight: 700;
+        color: #111827
+    }
+
+    .page-header p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px
+    }
+
+    .section-card,
+    .feedback-panel {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 6px 22px rgba(15, 23, 42, .06);
+        overflow: hidden;
+        margin-bottom: 24px
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 22px;
+        background: #fafbfc;
+        border-bottom: 1px solid #eef0f3
+    }
+
+    .section-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        
+    }
+
+    .section-count {
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 12px;
+        font-weight: 700
+    }
+
+    .table-wrapper {
+        overflow-x: auto
+    }
+
+    .interview-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse
+    }
+
+    .interview-table th {
+        padding: 13px 16px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        text-align: left;
+        white-space: nowrap;
+        border-bottom: 1px solid #e5e7eb
+    }
+
+    .interview-table td {
+        padding: 16px;
+        color: #374151;
+        font-size: 13px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f2f5
+    }
+
+    .interview-table tbody tr:hover {
+        background: #fafbff
+    }
+
+    .company-name,
+    .student-name {
+        font-weight: 700;
+        color: #111827
+    }
+
+    .round-badge,
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700
+    }
+
+    .round-badge {
+        padding: 5px 9px;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 7px
+    }
+
+    .status-badge {
+        padding: 5px 10px
+    }
+
+    .pending {
+        background: #fff7ed;
+        color: #c2410c
+    }
+
+    .cleared {
+        background: #ecfdf5;
+        color: #15803d
+    }
+
+    .rejected {
+        background: #fef2f2;
+        color: #b91c1c
+    }
+
+    .meeting-link {
+        display: inline-block;
+        padding: 7px 10px;
+        border-radius: 7px;
+        background: #eff6ff;
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700
+    }
+
+    .meeting-link:hover {
+        background: #dbeafe
+    }
+
+    .feedback-text {
+        max-width: 100px;
+        color: #4b5563;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .feedback-button,
+    .submit-feedback,
+    .result-button {
+        border: 0;
+        border-radius: 7px;
+        padding: 8px 11px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer
+    }
+
+    .feedback-button,
+    .submit-feedback {
+        background: #4f46e5
+    }
+
+    .feedback-button:hover,
+    .submit-feedback:hover {
+        background: #4338ca
+    }
+
+    .result-actions {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap
+    }
+
+    .pass-button {
+        background: #16a34a
+    }
+
+    .pass-button:hover {
+        background: #15803d
+    }
+
+    .reject-button {
+        background: #dc2626
+    }
+
+    .reject-button:hover {
+        background: #b91c1c
+    }
+
+    .empty-state {
+        padding: 42px 20px;
+        text-align: center;
+        color: #94a3b8
+    }
+
+    .empty-state strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #475569
+    }
+
+    .feedback-panel {
+        padding: 22px
+    }
+
+    .feedback-panel h2 {
+        margin: 0 0 5px;
+        font-size: 18px;
+        color: #111827
+    }
+
+    .feedback-panel p {
+        margin: 0 0 16px;
+        color: #6b7280;
+        font-size: 13px
+    }
+
+    .feedback-form {
+        display: flex;
+        gap: 10px
+    }
+
+    .feedback-form input {
+        flex: 1;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none
+    }
+
+    .feedback-form input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .12)
+    }
+
+    .feedback-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .55);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px
+    }
+
+    .feedback-modal-overlay.show {
+        display: flex
+    }
+
+    .feedback-modal {
+        width: min(500px, 100%);
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
+        overflow: hidden
+    }
+
+    .feedback-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef0f3
+    }
+
+    .feedback-modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #111827
+    }
+
+    .feedback-modal-close {
+        border: 0;
+        background: transparent;
+        font-size: 25px;
+        line-height: 1;
+        color: #64748b;
+        cursor: pointer;
+        padding: 2px 6px
+    }
+
+    .feedback-modal-body {
+        padding: 20px
+    }
+
+    .feedback-modal-body p {
+        margin: 0 0 10px;
+        color: #6b7280;
+        font-size: 13px
+    }
+
+    .feedback-modal-body textarea {
+        width: 100%;
+        min-height: 130px;
+        resize: vertical;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        padding: 11px 12px;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box
+    }
+
+    .feedback-modal-body textarea:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .12)
+    }
+
+    .feedback-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        padding: 14px 20px;
+        background: #f8fafc;
+        border-top: 1px solid #eef0f3
+    }
+
+    .feedback-cancel {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #374151;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer
+    }
+
+    .feedback-modal-submit {
+        border: 0;
+        background: #4f46e5;
+        color: #fff;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer
+    }
+
+    .feedback-modal-submit:hover {
+        background: #4338ca
+    }
+
+    @media(max-width:768px) {
+        .interview-page {
+            padding: 18px 0
+        }
+
+        .page-header h1 {
+            font-size: 24px
+        }
+
+        .section-header {
+            padding: 15px
+        }
+
+        .feedback-form {
+            flex-direction: column
+        }
+
+        .feedback-form input,
+        .submit-feedback {
+            width: 100%
+        }
+    }
+	
+
+    .feedback {
+        min-width: 80px;
+        color: #59647a;
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+	
+	
+    /* =========================
+   View JD Button
+   ========================= */
+
+    .view-jd-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 7px 10px;
+        border: 1px solid #c7d2fe;
+        border-radius: 7px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .view-jd-btn:hover {
+        background: #e0e7ff;
+        border-color: #818cf8;
+    }
+
+
+    /* =========================
+   JD Floating Window
+   ========================= */
+
+    .jd-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(3px);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+
+    /* Small floating window */
+
+    .jd-modal {
+        width: min(520px, 95vw);
+        max-height: 75vh;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+        overflow: hidden;
+        animation: jdModalOpen 0.18s ease-out;
+    }
+
+
+    @keyframes jdModalOpen {
+        from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.97);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+
+    /* Modal Header */
+
+    .jd-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 15px 18px;
+
+        border-bottom: 1px solid #e5e7eb;
+
+        background: #f8fafc;
+    }
+
+
+    .jd-modal-title {
+        margin: 0;
+        color: #172554;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+
+    .jd-close-btn {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: #64748b;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+
+    .jd-close-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    /* Full JD */
+
+    .jd-full-description {
+        padding: 20px;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.7;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        overflow-y: auto;
+    }
+
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="interview-page">
+    <div class="fixed-top-section">
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                        </div>
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <div class="page-header">
+            <h1>Interview Management</h1>
+            <p>Review today's interviews, upcoming schedules, feedback and candidate results.</p>
+        </div>
+
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title"> <svg fill="#1a5fb4" width="35px" height="35px" viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z"></path></g></svg>&nbsp; Today's Interviews</h2><span class="section-count">Total: {{ today_interview|length
+                    }}&nbsp;interviews</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="interview-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Student</th>
+                            <th>Round</th>
+                            <th>Date & Time</th>
+                            <th>Interview Link</th>
+                            <th>Feedback</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview in today_interview %}<tr>
+                            <td><span class="company-name">{{ interview[0] }}</span></td>
+                            <td>{{ interview[1] }}</td>
+                            <td><span class="student-name">{{ interview[2] }}</span></td>
+                            <td><span class="round-badge">{{ interview[3].round_name }}</span></td>
+                            <td>{{ interview[3].date }}</td>
+                            <td>{% if interview[3].link %}<a class="meeting-link" href="{{ interview[3].link }}"
+                                    target="_blank" rel="noopener">Join Interview</a>{% else %}<span
+                                    class="status-badge pending">No link</span>{% endif %}</td>
+                            <td>{% if interview[3].feedback is none %}<button type="button" class="feedback-button"
+                                    onclick="openFeedbackModal('{{ interview[3].id }}')">Add Feedback</button>{% else %}
+                                
+<div class="feedback">
+                                    <button type="button" class="view-jd-btn"
+                                        onclick="openJD('{{ interview[3].id }}')">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        View
+                                    </button>
+                                    
+                                </div> {% endif %}</td>
+                            <td>{% if interview[3].result is none %}<div class="result-actions">
+                                    <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}"><input
+                                            type="hidden" value="{{ interview[3].id }}" name="round_id"><button
+                                            type="submit" name="result" value="Cleared"
+                                            class="result-button pass-button">Pass</button>
+                                    </form>
+                                    <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}"><input
+                                            type="hidden" value="{{ interview[3].id }}" name="round_id"><button
+                                            type="submit" name="result" value="Rejected"
+                                            class="result-button reject-button">Reject</button></form>
+                                </div>{% elif interview[3].result == 'Cleared' %}<span
+                                    class="status-badge cleared">Cleared</span>{% elif interview[3].result == 'Rejected'
+                                %}<span class="status-badge rejected">Rejected</span>{% else %}<span
+                                    class="status-badge">{{
+                                    interview[3].result }}</span>{% endif %}</td>
+                        </tr>{% else %}<tr>
+                            <td colspan="8">
+                                <div class="empty-state"><strong>No interviews scheduled for today</strong>Your today's
+                                    interview schedule will appear here.</div>
+                            </td>
+                        </tr>{% endfor %}
+                    </tbody>
+                </table>
+				
+{% for interview in today_interview %}
+            {% if interview[3].feedback %}
+            <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
+                onclick="closeJDOutside(event, '{{ interview[3].id }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview[3].id }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview[3].feedback }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title"><svg fill="#9141ac" width="35px" height="35px" viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z"></path></g></svg>
+                    &nbsp; Upcoming Interviews
+                </h2>
+                <span class="section-count">Total: {{
+                    upcoming_interview|length
+                    }}&nbsp;interviews</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="interview-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Student</th>
+                            <th>Round</th>
+                            <th>Date & Time</th>
+                            <th>Interview Link</th>
+                            <th>Feedback</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview in upcoming_interview %}<tr>
+                            <td><span class="company-name">{{ interview[0] }}</span></td>
+                            <td>{{ interview[1] }}</td>
+                            <td><span class="student-name">{{ interview[2] }}</span></td>
+                            <td><span class="round-badge">{{ interview[3].round_name }}</span></td>
+                            <td>{{ interview[3].date }}</td>
+                            <td>{% if interview[3].link %}<a class="meeting-link" href="{{ interview[3].link }}"
+                                    target="_blank" rel="noopener">Join Interview</a>{% else %}<span
+                                    class="status-badge pending">No link</span>{% endif %}</td>
+                            <td>{% if interview[3].feedback is none %}<span
+                                    class="status-badge pending">Pending</span>{%
+                                else %}<div class="feedback">
+                                    <button type="button" class="view-jd-btn"
+                                        onclick="openJD('{{ interview[3].id }}')">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        View
+                                    </button>
+                                    
+                                </div>{% endif %}</td>
+                            <td>{% if interview[3].result is none %}<span class="status-badge pending">Pending</span>{%
+                                elif
+                                interview[3].result == 'Cleared' %}<span class="status-badge cleared">Cleared</span>{%
+                                elif
+                                interview[3].result == 'Rejected' %}<span
+                                    class="status-badge rejected">Rejected</span>{%
+                                else %}<span class="status-badge">{{ interview[3].result }}</span>{% endif %}</td>
+                        </tr>{% else %}<tr>
+                            <td colspan="8">
+                                <div class="empty-state"><strong>No upcoming interviews</strong>Upcoming interview
+                                    schedules
+                                    will appear here.</div>
+                            </td>
+                        </tr>{% endfor %}
+                    </tbody>
+                </table>
+				{% for interview in upcoming_interview %}
+            {% if interview[3].feedback %}
+            <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
+                onclick="closeJDOutside(event, '{{ interview[3].id }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview[3].id }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview[3].feedback }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div id="feedbackModal" class="feedback-modal-overlay" onclick="closeFeedbackModal(event)" aria-hidden="true">
+        <div class="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle"
+            onclick="event.stopPropagation()">
+            <div class="feedback-modal-header">
+                <h2 id="feedbackModalTitle">Add Interview Feedback</h2>
+                <button type="button" class="feedback-modal-close" onclick="closeFeedbackModal()"
+                    aria-label="Close">&times;</button>
+            </div>
+            <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                <div class="feedback-modal-body">
+                    <p>Enter your feedback for this interview round.</p>
+                    <input type="hidden" id="feedbackRoundId" name="round_id" value="">
+                    <textarea name="feedback" placeholder="Enter candidate feedback..." required></textarea>
+                </div>
+                <div class="feedback-modal-footer">
+                    <button type="button" class="feedback-cancel" onclick="closeFeedbackModal()">Cancel</button>
+                    <button type="submit" value="submit_feedback" name="mode" class="feedback-modal-submit">Submit
+                        Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openFeedbackModal(roundId) {
+        document.getElementById('feedbackRoundId').value = roundId;
+        const modal = document.getElementById('feedbackModal');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        const textarea = modal.querySelector('textarea');
+        setTimeout(() => textarea.focus(), 50);
+    }
+
+    function closeFeedbackModal(event) {
+        if (event && event.target !== event.currentTarget) return;
+        const modal = document.getElementById('feedbackModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeFeedbackModal();
+    });
+	
+	
+    function openJD(jobId) {
+
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+
+    }
+
+
+    function closeJD(jobId) {
+
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "";
+        }
+
+    }
+
+
+    function closeJDOutside(event, jobId) {
+
+        if (event.target === event.currentTarget) {
+            closeJD(jobId);
+        }
+
+    }
+
+
+    /* Close using Escape key */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            document.querySelectorAll(".jd-overlay").forEach(function (modal) {
+
+                modal.style.display = "none";
+
+            });
+
+            document.body.style.overflow = "";
+
+        }
+
+    });
+
+</script>
+
+
+{% endblock %}

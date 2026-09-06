@@ -1,0 +1,933 @@
+{% extends "Placement_office_Base.html" %}
+{% block title %}Students | Placement Officer{% endblock %}
+
+{% block style %}
+{{ super() }}
+<style>
+    :root {
+        --student-primary: #2563eb;
+        --student-primary-dark: #1d4ed8;
+        --student-bg: #f5f7fb;
+        --student-card: #ffffff;
+        --student-text: #172033;
+        --student-muted: #667085;
+        --student-border: #e7eaf0;
+        --student-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    }
+
+
+    .topbar {
+        height: 82px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .top-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-menu summary {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 7px 5px 5px;
+        border-radius: 14px;
+        user-select: none;
+    }
+
+    .profile-menu summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .profile-menu summary:hover,
+    .profile-menu[open] summary {
+        background: #fff;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #6b42f5, #2d7df6);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+    }
+
+    .profilepic {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 800;
+        border: 3px solid #fff;
+        box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
+        overflow: hidden;
+    }
+
+    .profile-name {
+        font-size: 14px;
+        font-weight: 750;
+        color: var(--text);
+        line-height: 1.5;
+    }
+
+    .profile-role {
+        font-size: 11px;
+        color: var(--muted);
+    }
+
+    .chevron {
+        font-size: 13px;
+        margin-left: 3px;
+        color: #54566c;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 58px;
+        width: 300px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 18px 45px rgba(35, 27, 89, .17);
+        z-index: 100;
+    }
+
+    .profile-dropdown::before {
+        content: "";
+        position: absolute;
+        right: 35px;
+        top: -7px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border-left: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+        transform: rotate(45deg);
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 5px 14px;
+    }
+
+    .profile-summary .avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 20px;
+    }
+
+    .profile-summary strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .profile-summary small {
+        display: block;
+        color: var(--muted);
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .profile-action {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #282a43;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-action:hover {
+        background: #f4f2ff;
+        color: var(--primary);
+    }
+
+    .profile-action .action-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #f1efff;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+    }
+
+    .profile-divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .logout-action {
+        color: #e7274f;
+    }
+
+    .logout-action .action-icon {
+        background: #fff0f3;
+    }
+
+
+    .fixed-top-section {
+        flex-shrink: 0;
+    }
+
+    .scrollable-bottom-section {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: 5px;
+    }
+
+
+    .students-page {
+        height: 100vh;
+        padding: 0px 28px 0px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        background: var(--student-bg);
+    }
+
+    .students-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .students-title h1 {
+        margin: 0 0 7px;
+        color: var(--student-text);
+        font-size: 28px;
+        font-weight: 750;
+        letter-spacing: -0.5px;
+    }
+
+    .students-title p {
+        margin: 0;
+        color: var(--student-muted);
+        font-size: 14px;
+    }
+
+    .student-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border: 1px solid #dbe5ff;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2452b8;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .student-count-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #2563eb;
+    }
+
+    .students-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 7px;
+    }
+
+    .search-form {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        gap: 7px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        width: 320px;
+        height: 44px;
+        overflow: hidden;
+        border: 1px solid var(--student-border);
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .search-box:focus-within {
+        border-color: #9bb8ff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    .search-icon {
+        width: 18px;
+        height: 18px;
+        margin-left: 13px;
+        flex: 0 0 auto;
+        color: #8a94a6;
+    }
+
+    .search-box input {
+        width: 100%;
+        height: 100%;
+        padding: 0 10px;
+        border: 0;
+        outline: 0;
+        color: var(--student-text);
+        background: transparent;
+        font-size: 14px;
+    }
+
+    .search-box input::placeholder {
+        color: #98a2b3;
+    }
+
+    .search-submit,
+    .filter-button,
+    .reset-button,
+    .view-button {
+        border: 0;
+        cursor: pointer;
+        font-family: inherit;
+        transition: .2s ease;
+    }
+
+    .search-submit {
+        height: 44px;
+        margin-right: 6px;
+        padding: 0 13px;
+        border-radius: 8px;
+        background: #eef4ff;
+        color: var(--student-primary-dark);
+        font-size: 13px;
+        border: 1px solid #bdc5db;
+        font-weight: 650;
+    }
+
+    .search-submit:hover {
+        background: #dfeaff;
+    }
+
+    .filter-container {
+        position: relative;
+    }
+
+    .filter-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 15px;
+        border: 1px solid var(--student-border);
+        border-radius: 11px;
+        background: #fff;
+        color: #344054;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+        font-size: 14px;
+        font-weight: 650;
+    }
+
+    .filter-button:hover,
+    .filter-button.active {
+        border-color: #b8caf5;
+        background: #f7faff;
+        color: var(--student-primary-dark);
+    }
+
+    .filter-button svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .filter-popup {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        z-index: 1000;
+        display: none;
+        width: 315px;
+        padding: 20px;
+        border: 1px solid var(--student-border);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, .14);
+    }
+
+    .filter-popup.show {
+        display: block;
+        animation: filterIn .16s ease-out;
+    }
+
+    @keyframes filterIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .filter-header h3 {
+        margin: 0 0 4px;
+        color: var(--student-text);
+        font-size: 17px;
+    }
+
+    .filter-header p {
+        margin: 0;
+        color: var(--student-muted);
+        font-size: 12px;
+    }
+
+    .filter-group {
+        margin-bottom: 15px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 7px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .filter-group select {
+        box-sizing: border-box;
+        width: 100%;
+        height: 40px;
+        padding: 0 11px;
+        border: 1px solid #d9dee8;
+        border-radius: 9px;
+        outline: none;
+        background: #fff;
+        color: #344054;
+        font-size: 13px;
+    }
+
+    .filter-group select:focus {
+        border-color: #8daeff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .apply-button,
+    .reset-button {
+        flex: 1;
+        height: 40px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 650;
+        border: none;
+    }
+
+    .apply-button {
+        background: var(--student-primary);
+        color: #fff;
+    }
+
+    .apply-button:hover {
+        background: var(--student-primary-dark);
+    }
+
+    .reset-button {
+        border: 1px solid #d9dee8;
+        background: #fff;
+        color: #475467;
+    }
+
+    .reset-button:hover {
+        background: #f8fafc;
+    }
+
+    .students-card {
+        overflow: hidden;
+        border: 1px solid var(--student-border);
+        border-top-right-radius: 16px;
+        border-top-left-radius: 16px;
+        background: var(--student-card);
+box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
+
+    .table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px;
+    }
+
+    .table-header h2 {
+        margin: 0;
+        color: var(--student-text);
+        font-size: 16px;
+    }
+
+    .table-header span {
+        color: var(--student-muted);
+        font-size: 12px;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+
+    }
+
+    .students-table {
+        width: 100%;
+        min-width: 720px;
+        border-collapse: collapse;
+    }
+
+    .students-table th {
+        padding: 13px 20px;
+        border-bottom: 1px solid var(--student-border);
+        background: #fafbfc;
+        color: #667085;
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: .55px;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .students-table td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eef0f4;
+        color: #344054;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .students-table tbody tr {
+        transition: background .15s ease;
+    }
+
+    .students-table tbody tr:hover {
+        background: #f8faff;
+    }
+
+    .students-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .student-cell {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 190px;
+    }
+
+    .student-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        border-radius: 50%;
+        background: #eaf1ff;
+        color: #2452b8;
+        font-size: 14px;
+        font-weight: 750;
+        text-transform: uppercase;
+    }
+
+    .student-name {
+        color: #172033;
+        font-weight: 650;
+    }
+
+    .muted-cell {
+        color: #667085;
+    }
+
+    .year-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 7px;
+        background: #f2f4f7;
+        color: #475467;
+        font-size: 12px;
+        font-weight: 650;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-pending {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .status-verified {
+        background: #eaf8f0;
+        color: #18864b;
+    }
+
+    .status-rejected {
+        background: #fff0f0;
+        color: #d13d3d;
+    }
+
+    .status-default {
+        background: #f2f4f7;
+        color: #667085;
+    }
+
+    .view-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #eef4ff;
+        color: #2452b8;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .view-button:hover {
+        background: #dfeaff;
+        color: #1d4ed8;
+    }
+
+    .view-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .empty-state {
+        padding: 55px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 12px;
+        border-radius: 50%;
+        background: #f2f4f7;
+        color: #667085;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 5px;
+        color: var(--student-text);
+        font-size: 15px;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: var(--student-muted);
+        font-size: 13px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="students-page">
+
+    <div class="fixed-top-section">
+
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
+                        <div class="avatar">
+                            {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                        </div>
+
+                        <div>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Placement officer'
+                                }}
+                            </div>
+                            <div class="profile-role">Placement officer</div>
+                        </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'P')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Placement officer' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Placement officer account'
+                                    }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
+                            <span class="action-icon">↪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </header>
+
+        <div class="students-header">
+            <div class="students-title">
+                <h1>Student Management</h1>
+
+            </div>
+
+            <div class="students-toolbar">
+                <form class="search-form" method="GET" action="{{ url_for('Placement_officer.Placement_officer_student') }}">
+                    <div class="search-box">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m20 20-3.5-3.5"></path>
+                        </svg>
+                        <input name="Search" type="text" placeholder="Search students..." aria-label="Search students">
+                    </div>
+                    <button class="search-submit" type="submit">Search</button>
+                </form>
+
+                <form method="GET" action="{{ url_for('Placement_officer.Placement_officer_student') }}">
+                    <div class="filter-container">
+                        <button type="button" class="filter-button" id="filterButton" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="4 5 20 5 14 12 14 19 10 21 10 12 4 5"></polygon>
+                            </svg>
+                            Filters
+                        </button>
+
+                        <div class="filter-popup" id="filterPopup">
+                            <div class="filter-header">
+                                <div>
+                                    <h3>Filter Students</h3>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label for="resume-status">Resume status</label>
+                                <select name="status" id="resume-status">
+                                    <option value="">All</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Verified">Verified</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Reuploaded">Reuploaded</option>                                    
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label for="graduation-year">Graduation year</label>
+                                <select name="graduation_year" id="graduation-year">
+                                    <option value="">All</option>
+                                    {% for year in graduation_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label for="branch">Branch</label>
+                                <select name="branch" id="branch">
+                                    <option value="">All</option>
+                                    {% for branch in branches %}
+                                    <option value="{{ branch }}">{{ branch }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="filter-actions">
+                                <button type="button" class="reset-button" id="resetFilters">Reset</button>
+                                <button type="submit" class="apply-button">Apply Filters</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="scrollable-bottom-section">
+
+        <div class="students-card">
+            <div class="table-header">
+                <div>
+                    <h2>Students</h2>
+                </div>
+                <div class="student-count">
+                    <span class="student-count-dot"></span>
+                    {{ students|length }} student{% if students|length != 1 %}s{% endif %}
+                </div>
+            </div>
+
+        <div class="table-wrapper">
+            {% if students %}
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>Student name</th>
+                        <th>Branch</th>
+                        <th>Graduation Year</th>
+                        <th>Resume Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for student in students %}
+                    {% set student_name = student.user.name or 'Student' %}
+                    {% set status = student.resume_status or 'Pending' %}
+                    {% set status_class = 'status-' ~ status|lower if status|lower in ['pending', 'verified',
+                    'rejected'] else 'status-default' %}
+
+                    <tr>
+                        <td>
+                            <div class="student-cell">
+                                <span class="student-name">{{ student_name }}</span>
+                            </div>
+                        </td>
+
+                        <td class="muted-cell">{{ student.branch or '—' }}</td>
+
+                        <td>
+                            <span class="year-badge">{{ student.graduation_year or '—' }}</span>
+                        </td>
+
+                        <td>
+                            <span class="status-badge {{ status_class }}">
+                                <span class="status-dot"></span>
+                                {{ status }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <form method="POST" action="{{ url_for('Placement_officer.Placement_officer_student') }}">
+                                <input type="hidden" name="Student_details" value="{{ student.id }}">
+                                <input type="hidden" name="mode" value="view_details">
+                                <button type="submit" class="view-button">
+                                    View Details
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M5 12h14"></path>
+                                        <path d="m13 6 6 6-6 6"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <h3>No students found</h3>
+                <p>Try changing your search or filter criteria.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    const filterButton = document.getElementById("filterButton");
+    const filterPopup = document.getElementById("filterPopup");
+    const resetFilters = document.getElementById("resetFilters");
+
+    filterButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        const isOpen = filterPopup.classList.toggle("show");
+        filterButton.classList.toggle("active", isOpen);
+        filterButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    filterPopup.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
+    document.addEventListener("click", function () {
+        filterPopup.classList.remove("show");
+        filterButton.classList.remove("active");
+        filterButton.setAttribute("aria-expanded", "false");
+    });
+
+    resetFilters.addEventListener("click", function () {
+        document.getElementById("resume-status").value = "";
+        document.getElementById("graduation-year").value = "";
+        document.getElementById("branch").value = "";
+    });
+</script>
+{% endblock %}
