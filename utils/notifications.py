@@ -2,37 +2,52 @@ import os
 from flask import current_app, render_template_string
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import datetime
-import resend
 
+from brevo import Brevo
+from brevo.transactional_emails import (
+    SendTransacEmailRequestSender,
+    SendTransacEmailRequestToItem,
+)
 def send_email(to_email, subject, html_content):
 
-    resend.api_key = os.getenv("RESEND_API_KEY")
+    api_key = os.getenv("BREVO_API_KEY")
 
-    params = {
-        "from": "onboarding@resend.dev",
-        "to": [to_email],
-        "subject": subject,
-        "html": html_content
-    }
+    client = Brevo(api_key=api_key)
 
     try:
-        email = resend.Emails.send(params)
+
+        response = client.transactional_emails.send_transac_email(
+            subject=subject,
+
+            html_content=html_content,
+
+            sender=SendTransacEmailRequestSender(
+                name="Smart Placement Management",
+                email="smartplacement2026@gmail.com"
+            ),
+
+            to=[
+                SendTransacEmailRequestToItem(
+                    email=to_email
+                )
+            ]
+        )
 
         current_app.logger.info(
             "Email sent successfully: %s",
-            email
+            response.message_id
         )
 
         return True
 
     except Exception as e:
+
         current_app.logger.error(
             "Email sending failed: %r",
             e
         )
 
         return False
-
 
 
 def notifications(mode):
@@ -194,12 +209,13 @@ def notifications(mode):
             Login to post this Job Drive.
             """
 
-            return send_email(
+            send_email(
                 email,
                 'New Job Drive',
                 html_message
             )
 
+        return True
     elif mode[0] == 'Student_applied_Placement_officer':
         emails = mode[1]
         for email in emails:
@@ -208,25 +224,28 @@ def notifications(mode):
 
             {mode[2]} has applied for {mode[3].title} role in {mode[4]}.
             """
-            return send_email(
+            send_email(
                 email,
                 'Student applied',
                 html_message
             )
+        return True
+
 
     elif mode[0] == 'Student_opted_out_Placement_officer':
         emails = mode[1]
         for email in emails:
             html_message = f"""
             Dear Placement officer,
-
+                
             {mode[2]} has opted out from {mode[3].title} role in {mode[4]}.
             """
-            return send_email(
+            send_email(
                 email,
                 'Student Opted out',
                 html_message
             )
+        return True
 
     elif mode[0] == 'student_shortlisted_placement_officer':
         emails = mode[1]
@@ -236,11 +255,13 @@ def notifications(mode):
 
             {mode[2]} is shortlisted for the role of {mode[4]} in {mode[3]}.
             """
-            return send_email(
+            send_email(
                 email,
                 'Student shortlisted',
                 html_message
             )
+        return True
+
     elif mode[0] == 'student_selected_placement_officer':
         emails = mode[1]
         for email in emails:
@@ -251,11 +272,12 @@ def notifications(mode):
 
             {mode[2]} is selected for the role of {mode[4]} in {mode[3]}.
             """
-            return send_email(
+            send_email(
                 email,
                 'Selected',
                 html_message
             )
+        return True
 
     elif mode[0] == 'student_rejected_placement_officer':
         emails = mode[1]
@@ -264,11 +286,12 @@ def notifications(mode):
             Dear Placement officer,
             {mode[2]} is rejected for the role of {mode[4]} in {mode[3]}.
             """
-            return send_email(
+            send_email(
                 email,
                 'Rejected',
                 html_message
             )
+        return True
 
     elif mode[0] == 'student_interview_scheduled_placement_officer':
         emails = mode[1]
@@ -284,11 +307,12 @@ def notifications(mode):
             Round Name: {mode[5]}
             Interview Date and time: {date_obj.strftime("%d-%m-%Y %I:%M %p")}
             """
-            return send_email(
+            send_email(
                 email,
                 'Interview scheduled',
                 html_message
             )
+        return True
 
     elif mode[0] == 'student_cleared_placement_officer':
         emails = mode[1]
@@ -298,11 +322,13 @@ def notifications(mode):
 
             {mode[2]} has cleared {mode[5]} {'round' if 'round' not in mode[5].lower() else ''} of {mode[4]} role in {mode[3]}
             """
-            return send_email(
+            send_email(
                 email,
                 'Interview round cleared',
                 html_message
             )
+        return True
+
     elif mode[0] == 'student_rejected_round_placement_officer':
         emails = mode[1]
         for email in emails:
@@ -311,11 +337,13 @@ def notifications(mode):
 
             {mode[2]} is rejected in {mode[5]} {'round' if 'round' not in mode[5].lower() else ''} of {mode[4]} role in {mode[3]}
             """
-            return send_email(
+            send_email(
                 email,
                 'Rejected',
                 html_message
             )
+        return True
+
     elif mode[0] == 'Student_resume_reuploaded':
         emails = mode[1]
         for email in emails:
@@ -324,11 +352,13 @@ def notifications(mode):
 
             {mode[2]} has reuploaded updated resume. Kindly verify.
             """
-            return send_email(
+            send_email(
                 email,
                 'Resume reuploaded',
                 html_message
             )
+        return True
+
     elif mode[0] == 'Student_applied_Recruiter':
         email = mode[1]
         email_html_template = """
@@ -355,10 +385,9 @@ def notifications(mode):
             mode=mode
         )
 
-        return send_email(
+        send_email(
             email,
             '5 New Applicants',
             final_email_html
         )
-
-
+    return True
