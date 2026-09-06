@@ -74,9 +74,9 @@ def notifications(mode):
         email = mode[1]
         html_message = f"""
         Congratulations!
-        \n\n
+        <br><br>
         Your resume has been verified.
-\n\n
+        <br><br>
         You are now eligible to apply for placement drives."""
         return send_email(
             email,
