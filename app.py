@@ -206,6 +206,6 @@ def Register():
     return render_template('Register.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
 
