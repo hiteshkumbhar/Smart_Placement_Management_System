@@ -1017,7 +1017,7 @@
                             </div>
                             <div>
                                 <div class="sp-contact-label">Date of Birth</div>
-                                <div class="sp-contact-value">{{ student.DOB.strf("%d-%m-%Y") if student.DOB is not none else 'Not specified' }}</div>
+                                <div class="sp-contact-value">{{ student.DOB.strftime('%d-%m-%Y') if student.DOB is not none else 'Not specified' }}</div>
                             </div>
                         </div>
 
@@ -1154,7 +1154,7 @@
                             </span>
                             <div>
                                 <div class="sp-field-label">Date of Birth</div>
-                                <div class="sp-field-value">{{ student.DOB.strf("%d-%m-%Y") if student.DOB is not none else 'Not specified' }}</div>
+                                <div class="sp-field-value">{{ student.DOB.strftime('%d-%m-%Y') if student.DOB is not none else 'Not specified' }}</div>
                             </div>
                         </div>
                         <div class="sp-field">
