@@ -1602,7 +1602,7 @@
                             </g>
                         </svg></span>
                     <span class="sp-link-name">LinkedIn</span>
-                    <span class="sp-link-url">{{ student.LinkedIn }}</span>
+                    <span class="sp-link-url">{{ student.LinkedIn if 'https://' in student.LinkedIn else 'https://' + student.LinkedIn }}</span>
                 </a>
                 {% else %}
                 <div class="sp-link-card">
