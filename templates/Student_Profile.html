@@ -1621,7 +1621,7 @@
                 {% endif %}
 
                 {% if student.GitHub %}
-                <a class="sp-link-card" href="{{ student.GitHub }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card" href="{{ student.GitHub if 'https://' in student.GitHub else 'https://' + student.GitHub }}" target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 20 20" version="1.1"
                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             fill="#000000">
@@ -1674,7 +1674,7 @@
                 {% endif %}
 
                 {% if student.Portfolio_Website %}
-                <a class="sp-link-card" href="{{ student.Portfolio_Website }}" target="_blank"
+                <a class="sp-link-card" href="{{ student.Portfolio_Website if 'https://' in student.Portfolio_Website else 'https://' + student.Portfolio_Website }}" target="_blank"
                     rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 64 64"
                             xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#6b42f5" fill="none">
@@ -1723,7 +1723,7 @@
                 {% endif %}
 
                 {% if student.LeetCode %}
-                <a class="sp-link-card" href="{{ student.LeetCode }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card" href="{{ student.LeetCode if 'https://' in student.LeetCode else 'https://' + student.LeetCode }}" target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 94 110.92" width="27"
                             height="27">
@@ -1784,7 +1784,7 @@
                 {% endif %}
 
                 {% if student.HackerRank %}
-                <a class="sp-link-card" href="{{ student.HackerRank }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card" href="{{ student.HackerRank if 'https://' in student.HackerRank else 'https://' + student.HackerRank }}" target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
                             <rect width="200" height="200" fill="#0E141E" />
