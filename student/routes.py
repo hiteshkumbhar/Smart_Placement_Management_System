@@ -217,12 +217,12 @@ def Student_Job_Drive():
 
         Student = Students.query.filter_by(user_id=current_user.user_id).first()
 
-        search_term = f"%{request.form.get('search')}%"
+        search_term = f"%{request.args.get('search')}%"
 
         if Student.job_drive is not None:
             eligible_drives = [x.strip() for x in Student.job_drive.split(',')]
-            print(request.form.get('search'))
-            if request.form.get('search'):
+            print(request.args.get('search'))
+            if request.args.get('search'):
                 eligible_jobs = Job_Drives.query.filter(Job_Drives.status == 'Expired', or_(Job_Drives.company.company_name.ilike(search_term), Job_Drives.title.ilike(search_term))).all()
             else:
                 eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives),Job_Drives.status == 'Expired').all()
