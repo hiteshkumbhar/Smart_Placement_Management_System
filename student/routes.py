@@ -31,13 +31,11 @@ def Student_Dashboard():
         value = getattr(student, field, None)
         if value is not None and str(value).strip() != "":
             filled_fields += 1
-            print(field)
     for field in student_optional_fields:
         value = getattr(student, field, None)
         if value is not None and str(value).strip() != "":
             filled_fields += 1
             break
-    print('filled',filled_fields,'total',total_fields)
     percentage = round((filled_fields / total_fields) * 100)
 
     resume_status = student.resume_status
@@ -214,18 +212,13 @@ def Student_Job_Drive():
         else:
             job.status = 'Active'
             db.session.commit()
-
     if request.args.get('filter') == 'Expired':
-
         Student = Students.query.filter_by(user_id=current_user.user_id).first()
-
         search_term = f"%{request.args.get('search')}%"
-
         if Student.job_drive is not None:
             eligible_drives = [x.strip() for x in Student.job_drive.split(',')]
-            print(request.args.get('search'))
             if request.args.get('search'):
-                eligible_jobs = Job_Drives.query.filter(Job_Drives.status == 'Expired', or_(Job_Drives.company.company_name.ilike(search_term), Job_Drives.title.ilike(search_term))).all()
+                eligible_jobs = Job_Drives.query.join(Companies).filter(Job_Drives.status == 'Expired',Job_Drives.id.in_(eligible_drives), or_(Companies.company_name.ilike(search_term), Job_Drives.title.ilike(search_term))).all()
             else:
                 eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives),Job_Drives.status == 'Expired').all()
         else:
@@ -319,7 +312,11 @@ def Student_Job_Drive():
     Student = Students.query.filter_by(user_id=current_user.user_id).first()
     if Student.job_drive is not None:
         eligible_drives = [x.strip() for x in Student.job_drive.split(',')]
-        eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives),Job_Drives.status == 'Active').all()
+        if request.args.get('search'):
+            search_term = f"%{request.args.get('search')}%"
+            eligible_jobs = Job_Drives.query.join(Companies).filter(Job_Drives.status == 'Active', Job_Drives.id.in_(eligible_drives), or_(Companies.company_name.ilike(search_term),Job_Drives.title.ilike(search_term))).all()
+        else:
+            eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives),Job_Drives.status == 'Active').all()
     else:
         eligible_jobs = []
     job = []
@@ -521,7 +518,6 @@ def student_download_certifications():
     if current_user.role != "student":
         abort(403)  # Forbidden
     name = request.form.get('name')
-    print(name)
     filename = f"Cert_{request.form.get('id')}_{db.session.query(Users.name).filter(Users.user_id == request.form.get('id')).scalar()}_{name.strip()}"
     RESUME_FOLDER = os.path.join(current_app.root_path, "static", "Docs", "student", "certifications")
     return send_from_directory(directory=RESUME_FOLDER, path=secure_filename(filename), as_attachment=True, download_name=name)
