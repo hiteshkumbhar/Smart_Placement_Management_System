@@ -216,20 +216,26 @@ def Student_Job_Drive():
     if request.args.get('filter') == 'Expired':
 
         Student = Students.query.filter_by(user_id=current_user.user_id).first()
+
+        search_term = f"%{request.form.get('search')}%"
+
         if Student.job_drive is not None:
             eligible_drives = [x.strip() for x in Student.job_drive.split(',')]
-            eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives),Job_Drives.status == 'Expired').all()
+            if request.form.get('search'):
+                eligible_jobs = Job_Drives.query.filter(Job_Drives.status == 'Expired', or_(Job_Drives.company.company_name.ilike(search_term), Job_Drives.title.ilike(search_term)).all()
+            else:
+                eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives),Job_Drives.status == 'Expired').all()
         else:
             eligible_jobs = []
         job = []
-
+        
+            
         for i in eligible_jobs:
             job.append(
                 [i.id, db.session.query(Companies.company_name).filter(Companies.id == i.company_id).scalar(), i.title,
                  i.package, i.location, i.deadline, i.description,i.status])
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
-
-        return render_template('Student_Job_Drive.html', job=job, student = student)
+        
+        return render_template('Student_Job_Drive.html', job=job, student = Student)
 
     if request.method == 'POST':
 
