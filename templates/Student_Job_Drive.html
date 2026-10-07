@@ -296,6 +296,12 @@
         display: block;
     }
 
+    .job-drives-heading form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
     /* Filter */
     .job-filter {
 
@@ -781,21 +787,17 @@
             </section>
             <section class="job-drives-heading">
                 <h1>Job Drives</h1>
-                <form method='GET' action="{{url_for('student.Student_Job_Drive')}}">
-                    <div class="search">
-                        <span class="icon">🔍</span>
-                        <input type="text" name="search" id="searchInput" placeholder="Search Comapny..." />
-                    </div>
-                </form>
-                <form class="job-filter" method="GET" action="{{ url_for('student.Student_Job_Drive') }}">
-                    <select id="job-drive-status" name="filter" onchange="this.form.submit()">
-                        <option value="Active" {% if request.args.get('filter') !='Expired' %}selected{% endif %}>Active
-                        </option>
-                        <option value="Expired" {% if request.args.get('filter')=='Expired' %}selected{% endif %}>
-                            Expired
-                        </option>
-                    </select>
-                </form>
+               <form method="GET" action="{{ url_for('student.Student_Job_Drive') }}">
+                   <div class="search">
+                       <span class="icon">🔍</span>
+                       <input type="text" name="search" id="searchInput" placeholder="Search Company..." value="{{ request.args.get('search', '') }}" />
+                   </div>
+                   <div class="job-filter">
+                       <select id="job-drive-status" name="filter" onchange="this.form.submit()" >
+                           <option value="Active" {% if request.args.get('filter', 'Active') == 'Active' %}selected{% endif %}> Active </option>
+                           <option value="Expired" {% if request.args.get('filter') == 'Expired' %}selected{% endif %}> Expired </option> </select>
+                   </div>
+               </form>
             </section>
         </div>
         <div class="scrollable-bottom-section">
