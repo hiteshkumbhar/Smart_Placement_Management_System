@@ -7,6 +7,8 @@ import datetime
 from zoneinfo import ZoneInfo
 from . import student_bp
 from utils.notifications import notifications
+from sqlalchemy import or_
+
 
 @student_bp.route('/Student_Dashboard')
 @login_required
