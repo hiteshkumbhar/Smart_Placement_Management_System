@@ -135,6 +135,47 @@
         font-size: 11px;
     }
 
+    /* ---------------- Search --------------- */
+
+    .search {
+        /* The search box container */
+        display: flex;
+        /* Use flex so icon + input sit in a row */
+        align-items: center;
+        /* Vertically center */
+        gap: 8px;
+        /* Space between icon and input */
+        background: #fff;
+        /* White background */
+        border: 1px solid #c5c2c2;
+        /* Light gray border */
+        border-radius: 8px;
+        /* Rounded corners */
+        padding: 8px 12px;
+        /* Inner spacing */
+        width: 260px;
+        /* Fixed width */
+    }
+
+    .search input {
+        border: none;
+        /* No border (the box already has one) */
+        outline: none;
+        /* Remove blue focus outline */
+        width: 100%;
+        /* Fill the search box */
+        font-size: 16px;
+        /* Readable text size */
+        background: transparent;
+        /* Show the parent's white background */
+    }
+
+    .search .icon {
+        color: #9ca3af;
+    }
+
+    /* The 🔍 icon color (gray) */
+
     .profile-action {
         display: flex;
         align-items: center;
@@ -740,6 +781,12 @@
             </section>
             <section class="job-drives-heading">
                 <h1>Job Drives</h1>
+                <form method='GET' action="{{url_for('student.Student_Job_Drive')}}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" name="search" id="searchInput" placeholder="Search Comapny..." />
+                    </div>
+                </form>
                 <form class="job-filter" method="GET" action="{{ url_for('student.Student_Job_Drive') }}">
                     <select id="job-drive-status" name="filter" onchange="this.form.submit()">
                         <option value="Active" {% if request.args.get('filter') !='Expired' %}selected{% endif %}>Active
