@@ -235,10 +235,10 @@
         padding: 0px 20px 0px;
         box-sizing: border-box;
         color: #17233f;
-        height: 100vh; 
-        display: flex; 
-        flex-direction: column; 
-        overflow: hidden; 
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .interview-page * {
@@ -251,10 +251,10 @@
     }
 
     .scrollable-bottom-section {
-        padding: 5px;
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
+    padding: 5px 5px 10px 5px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
     }
 
     .interview-header {
@@ -294,14 +294,18 @@
     }
 
     .interview-section {
-        background: #fff;
-        border: 1px solid #edf0f6;
-        border-radius: 16px;
-        padding: 22px 22px 18px;
-        margin-bottom: 22px;
-        box-shadow: 0px 0px 5px rgb(209, 209, 209);
-        overflow: hidden;
-    }
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #edf0f6;
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 5px rgb(209, 209, 209);
+}
 
     .section-heading {
         display: flex;
@@ -405,11 +409,13 @@
     }
 
     .table-scroll {
-        width: 100%;
-        overflow-x: auto;
-        border: 1px solid #e9ecf3;
-        border-radius: 11px;
-    }
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid #e9ecf3;
+    border-radius: 11px;
+}
 
     .interview-table {
         width: 100%;
@@ -599,8 +605,8 @@
         align-items: center;
         justify-content: center;
     }
-	
-	
+
+
     /* =========================
    View JD Button
    ========================= */
@@ -728,40 +734,6 @@
         color: #929aac !important;
     }
 
-    .interview-tip {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 20px 22px;
-        margin-top: 6px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #f5f2ff, #faf9ff);
-        border: 1px solid #e9e3ff;
-    }
-
-    .tip-icon {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: #7055dc;
-        color: #fff;
-        font-size: 20px;
-    }
-
-    .interview-tip strong {
-        display: block;
-        margin-bottom: 4px;
-        color: #6250ca;
-        font-size: 15px;
-    }
-
-    .interview-tip span {
-        color: #68738a;
-        font-size: 13px;
-    }
 
     .company-logo {
         height: 42px;
@@ -772,6 +744,48 @@
         justify-content: center;
 
     }
+     /* Filter */
+    .job-filter {
+
+        flex-shrink: 0;
+        /* NEW: Prevent filter from squishing */
+    }
+
+
+    .job-filter select {
+        width: 185px;
+        height: 42px;
+        padding: 0 38px 0 14px;
+        border: 1px solid #8bb0f5;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        color: #23385e;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .job-filter select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    .interview-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .interview-controls .search {
+        width: 280px;
+        margin: 0;
+    }
+
+    .interview-controls .job-filter {
+        flex-shrink: 0;
+    }
+
 
     @media (max-width: 768px) {
         .interview-page {
@@ -790,9 +804,6 @@
             align-items: flex-start;
         }
 
-        .interview-tip {
-            align-items: flex-start;
-        }
     }
 </style>
 {%endblock%}
@@ -867,179 +878,193 @@
                 <h1>My Interviews</h1>
                 <p>Track your interview journey and results</p>
             </div>
-
+            <div class="interview-controls">
+                <div class="search">
+                    <span class="icon">🔍</span>
+                    <input type="text" id="interview-search" placeholder="Search today's interviews...">
+                </div>
+                <div class="job-filter">
+                    <select id="interview-filter" onchange="filterInterviews(this.value)">
+                        <option value="today">Today's Interview</option>
+                        <option value="past">Past Interviews</option>
+                        <option value="upcoming">Upcoming Interviews</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
-        <div class="scrollable-bottom-section">
+    <div class="scrollable-bottom-section">
 
-    <!-- Today's Interview -->
-    <section class="interview-section today-section">
-        <div class="section-heading">
-            <div class="section-title">
-                <div class="section-icon"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <g filter="url(#filter0_d_15_286)">
-                                <path
-                                    d="M3 8.26667V19C3 19.5523 3.44772 20 4 20H20C20.5523 20 21 19.5523 21 19V8.26667M3 8.26667V5C3 4.44772 3.44772 4 4 4H20C20.5523 4 21 4.44772 21 5V8.26667M3 8.26667H21"
-                                    stroke="#ff7800" stroke-linejoin="round"></path>
+        <!-- Today's Interview -->
+        <section id="today-interviews" class="interview-section today-section">
+                <div class="section-heading">
+                <div class="section-title">
+                    <div class="section-icon"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <g filter="url(#filter0_d_15_286)">
+                                    <path
+                                        d="M3 8.26667V19C3 19.5523 3.44772 20 4 20H20C20.5523 20 21 19.5523 21 19V8.26667M3 8.26667V5C3 4.44772 3.44772 4 4 4H20C20.5523 4 21 4.44772 21 5V8.26667M3 8.26667H21"
+                                        stroke="#ff7800" stroke-linejoin="round"></path>
+                                </g>
+                                <g filter="url(#filter1_d_15_286)">
+                                    <circle cx="12" cy="14" r="2" stroke="#ff7800" stroke-linejoin="round"></circle>
+                                </g>
+                                <g filter="url(#filter2_d_15_286)">
+                                    <path d="M7 2V5" stroke="#ff7800" stroke-linecap="round" stroke-linejoin="round">
+                                    </path>
+                                </g>
+                                <g filter="url(#filter3_d_15_286)">
+                                    <path d="M17 2V5" stroke="#ff7800" stroke-linecap="round" stroke-linejoin="round">
+                                    </path>
+                                </g>
+                                <defs>
+                                    <filter id="filter0_d_15_286" x="1.5" y="3.5" width="21" height="19"
+                                        filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                        <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                        <feColorMatrix in="SourceAlpha" type="matrix"
+                                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                        </feColorMatrix>
+                                        <feOffset dy="1"></feOffset>
+                                        <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                        </feColorMatrix>
+                                        <feBlend mode="normal" in2="BackgroundImageFix"
+                                            result="effect1_dropShadow_15_286">
+                                        </feBlend>
+                                        <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                            result="shape"></feBlend>
+                                    </filter>
+                                    <filter id="filter1_d_15_286" x="8.5" y="11.5" width="7" height="7"
+                                        filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                        <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                        <feColorMatrix in="SourceAlpha" type="matrix"
+                                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                        </feColorMatrix>
+                                        <feOffset dy="1"></feOffset>
+                                        <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                        </feColorMatrix>
+                                        <feBlend mode="normal" in2="BackgroundImageFix"
+                                            result="effect1_dropShadow_15_286">
+                                        </feBlend>
+                                        <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                            result="shape"></feBlend>
+                                    </filter>
+                                    <filter id="filter2_d_15_286" x="5.5" y="1.5" width="3" height="6"
+                                        filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                        <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                        <feColorMatrix in="SourceAlpha" type="matrix"
+                                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                        </feColorMatrix>
+                                        <feOffset dy="1"></feOffset>
+                                        <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                        </feColorMatrix>
+                                        <feBlend mode="normal" in2="BackgroundImageFix"
+                                            result="effect1_dropShadow_15_286">
+                                        </feBlend>
+                                        <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                            result="shape"></feBlend>
+                                    </filter>
+                                    <filter id="filter3_d_15_286" x="15.5" y="1.5" width="3" height="6"
+                                        filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                        <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                        <feColorMatrix in="SourceAlpha" type="matrix"
+                                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
+                                        </feColorMatrix>
+                                        <feOffset dy="1"></feOffset>
+                                        <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
+                                        </feColorMatrix>
+                                        <feBlend mode="normal" in2="BackgroundImageFix"
+                                            result="effect1_dropShadow_15_286">
+                                        </feBlend>
+                                        <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
+                                            result="shape"></feBlend>
+                                    </filter>
+                                </defs>
                             </g>
-                            <g filter="url(#filter1_d_15_286)">
-                                <circle cx="12" cy="14" r="2" stroke="#ff7800" stroke-linejoin="round"></circle>
-                            </g>
-                            <g filter="url(#filter2_d_15_286)">
-                                <path d="M7 2V5" stroke="#ff7800" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </g>
-                            <g filter="url(#filter3_d_15_286)">
-                                <path d="M17 2V5" stroke="#ff7800" stroke-linecap="round" stroke-linejoin="round">
-                                </path>
-                            </g>
-                            <defs>
-                                <filter id="filter0_d_15_286" x="1.5" y="3.5" width="21" height="19"
-                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                                    <feColorMatrix in="SourceAlpha" type="matrix"
-                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
-                                    </feColorMatrix>
-                                    <feOffset dy="1"></feOffset>
-                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
-                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
-                                    </feColorMatrix>
-                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
-                                    </feBlend>
-                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
-                                        result="shape"></feBlend>
-                                </filter>
-                                <filter id="filter1_d_15_286" x="8.5" y="11.5" width="7" height="7"
-                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                                    <feColorMatrix in="SourceAlpha" type="matrix"
-                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
-                                    </feColorMatrix>
-                                    <feOffset dy="1"></feOffset>
-                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
-                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
-                                    </feColorMatrix>
-                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
-                                    </feBlend>
-                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
-                                        result="shape"></feBlend>
-                                </filter>
-                                <filter id="filter2_d_15_286" x="5.5" y="1.5" width="3" height="6"
-                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                                    <feColorMatrix in="SourceAlpha" type="matrix"
-                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
-                                    </feColorMatrix>
-                                    <feOffset dy="1"></feOffset>
-                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
-                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
-                                    </feColorMatrix>
-                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
-                                    </feBlend>
-                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
-                                        result="shape"></feBlend>
-                                </filter>
-                                <filter id="filter3_d_15_286" x="15.5" y="1.5" width="3" height="6"
-                                    filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                                    <feColorMatrix in="SourceAlpha" type="matrix"
-                                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha">
-                                    </feColorMatrix>
-                                    <feOffset dy="1"></feOffset>
-                                    <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
-                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0">
-                                    </feColorMatrix>
-                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_15_286">
-                                    </feBlend>
-                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_15_286"
-                                        result="shape"></feBlend>
-                                </filter>
-                            </defs>
-                        </g>
-                    </svg></div>
-                <h2>Today's Interview</h2>
+                        </svg></div>
+                    <h2>Today's Interview</h2>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span class="count-badge">Total: {{ Todays_interview|length }}</span>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <form method='POST' action="{{url_for('student.Student_interview')}}">
-                    <div class="search">
-                        <span class="icon">🔍</span>
-                        <input type="text" name="today_search" id="searchInput" placeholder="Search by comapny..." />
-                    </div>
-                </form>
-                <span class="count-badge">Total: {{ Todays_interview|length }}</span>
-            </div>
-        </div>
 
-        <div class="table-scroll">
-            <table class="interview-table">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Role</th>
-                        <th>Interview Round</th>
-                        <th>Interview Date and Time</th>
-                        <th>Link</th>
-                        <th>Result</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for interview_round in Todays_interview %}
-                    <tr>
-                        <td>
-                            <div class="company-cell">
-                                <div class="company-logo">
-                                    {% if interview_round[7] %}
-                                    <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
-                                        alt="Company Logo" class="company-logo" style="height:45px;">
-                                    {% else %}
-                                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
-                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                                        </g>
-                                        <g id="SVGRepo_iconCarrier">
-                                            <path
-                                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
-                                            </path>
-                                        </g>
-                                    </svg>
-                                    {% endif %}
+            <div class="table-scroll">
+                <table id="today-table" class="interview-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Interview Round</th>
+                            <th>Interview Date and Time</th>
+                            <th>Link</th>
+                            <th>Result</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview_round in Todays_interview %}
+                        <tr>
+                            <td>
+                                <div class="company-cell">
+                                    <div class="company-logo">
+                                        {% if interview_round[7] %}
+                                        <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
+                                            alt="Company Logo" class="company-logo" style="height:45px;">
+                                        {% else %}
+                                        <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                            </g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <path
+                                                    d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                                </path>
+                                            </g>
+                                        </svg>
+                                        {% endif %}
+                                    </div>
+                                    <span>{{ interview_round[0] }}</span>
                                 </div>
-                                <span>{{ interview_round[0] }}</span>
-                            </div>
-                        </td>
-                        <td>{{ interview_round[1] }}</td>
-                        <td>{{ interview_round[2] }}</td>
-                        <td class="date-cell">
-                            <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
-                        </td>
-                        <td>
-                            {% if interview_round[4] %}
-                            <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
-                                rel="noopener noreferrer">Join</a>
-                            {% else %}
-                            <span class="no-link">Not available</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% set result = interview_round[5]|string|lower %}
-                            {% if result in ['selected', 'cleared'] %}
-                            <span class="result-badge result-selected">{{ interview_round[5] }}</span>
-                            {% elif result in ['rejected', 'failed', 'not selected'] %}
-                            <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
-                            {% elif result in ['', 'none', 'pending', 'not decided'] %}
-                            <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5] else
-                                '—' }}</span>
-                            {% else %}
-                            <span class="result-badge result-default">{{ interview_round[5] }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-								<div class="feedback">{% if interview_round[6] %}
+                            </td>
+                            <td>{{ interview_round[1] }}</td>
+                            <td>{{ interview_round[2] }}</td>
+                            <td class="date-cell">
+                                <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
+                            </td>
+                            <td>
+                                {% if interview_round[4] %}
+                                <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
+                                    rel="noopener noreferrer">Join</a>
+                                {% else %}
+                                <span class="no-link">Not available</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set result = interview_round[5]|string|lower %}
+                                {% if result in ['selected', 'cleared'] %}
+                                <span class="result-badge result-selected">{{ interview_round[5] }}</span>
+                                {% elif result in ['rejected', 'failed', 'not selected'] %}
+                                <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
+                                {% elif result in ['', 'none', 'pending', 'not decided'] %}
+                                <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5]
+                                    else
+                                    '—' }}</span>
+                                {% else %}
+                                <span class="result-badge result-default">{{ interview_round[5] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="feedback">{% if interview_round[6] %}
                                     <button type="button" class="view-jd-btn"
                                         onclick="openJD('{{ interview_round[8] }}')">
                                         <i class="fa-solid fa-file-lines"></i>
@@ -1048,18 +1073,18 @@
                                     {% else %}
                                     —
                                     {% endif %}
-                                </div>                        
-							</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="empty-row">No interview scheduled for today.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-		{% for interview_round in Todays_interview %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-row">No interview scheduled for today.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% for interview_round in Todays_interview %}
             {% if interview_round[6] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
                 onclick="closeJDOutside(event, '{{ interview_round[8] }}')">
@@ -1076,123 +1101,121 @@
             </div>
             {% endif %}
             {% endfor %}
-    </section>
+        </section>
 
-    <!-- Upcoming Interviews -->
-    <section class="interview-section upcoming-section">
-        <div class="section-heading">
-            <div class="section-title">
-                <div class="section-icon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
-                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve"
-                        width="25px" height="25px" fill="#33d17a">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <g>
+        <!-- Upcoming Interviews -->
+        <section id="upcoming-interviews" class="interview-section upcoming-section">
+                <div class="section-heading">
+                <div class="section-title">
+                    <div class="section-icon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve"
+                            width="25px" height="25px" fill="#33d17a">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
                                 <g>
-                                    <path style="fill:#33d17a;"
-                                        d="M3.73,3.771h0.708c0.26,0,0.471-0.166,0.471-0.374V0.373C4.909,0.166,4.7,0,4.438,0H3.73 C3.47,0,3.258,0.167,3.258,0.373v3.024C3.258,3.605,3.47,3.771,3.73,3.771z">
-                                    </path>
-                                    <path style="fill:#33d17a;"
-                                        d="M11.132,3.771h0.707c0.263,0,0.471-0.166,0.471-0.374V0.373C12.31,0.166,12.102,0,11.839,0h-0.707 c-0.26,0-0.471,0.167-0.471,0.373v3.024C10.662,3.605,10.872,3.771,11.132,3.771z">
-                                    </path>
-                                    <path style="fill:#33d17a;"
-                                        d="M14.751,1.443h-1.876v2.316c0,0.517-0.465,0.938-1.037,0.938h-0.707 c-0.572,0-1.038-0.421-1.038-0.938V1.443h-4.62v2.316c0,0.517-0.465,0.938-1.038,0.938H3.73c-0.57,0-1.037-0.421-1.037-0.938 V1.443H0.816c-0.312,0-0.566,0.255-0.566,0.568v12.994c0,0.313,0.254,0.566,0.347,0.566h13.938c0.53,0,0.786-0.253,0.786-0.566 V2.009C15.32,1.698,15.064,1.443,14.751,1.443z M14.447,14.287c0,0.564-0.486,0.515-0.486,0.515H8.88c0,0,3.107-1.557,5.567-3.768 C14.447,11.034,14.447,13.635,14.447,14.287z M14.554,9.474c-0.213,0.841-0.684,1.815-1.543,1.178 c-1.252-0.927-2.486-1.714-2.645,0.15c-0.131,1.57-3.033,3.705-3.665,4.151H1.193c-0.099,0-0.177-0.079-0.177-0.177v-8.01 c0-0.099,0.079-0.178,0.177-0.178h13.184c0.097,0,0.178,0.079,0.178,0.178L14.554,9.474L14.554,9.474z">
-                                    </path>
-                                    <rect x="3.258" y="7.97" style="fill:#33d17a;" width="2.202" height="2.201"></rect>
-                                    <rect x="6.88" y="7.97" style="fill:#33d17a;" width="2.2" height="2.201"></rect>
-                                    <rect x="3.258" y="11.309" style="fill:#33d17a;" width="2.202" height="2.201">
-                                    </rect>
-                                    <path style="fill:#33d17a;"
-                                        d="M6.88,13.51h0.637c0.465-0.436,1.168-1.157,1.563-1.652v-0.549h-2.2V13.51z">
-                                    </path>
-                                    <path style="fill:#33d17a;"
-                                        d="M10.386,9.008c0.222-0.217,0.489-0.283,0.729-0.283c0.453,0,0.952,0.253,1.471,0.596V7.97h-2.2 V9.008z">
-                                    </path>
+                                    <g>
+                                        <path style="fill:#33d17a;"
+                                            d="M3.73,3.771h0.708c0.26,0,0.471-0.166,0.471-0.374V0.373C4.909,0.166,4.7,0,4.438,0H3.73 C3.47,0,3.258,0.167,3.258,0.373v3.024C3.258,3.605,3.47,3.771,3.73,3.771z">
+                                        </path>
+                                        <path style="fill:#33d17a;"
+                                            d="M11.132,3.771h0.707c0.263,0,0.471-0.166,0.471-0.374V0.373C12.31,0.166,12.102,0,11.839,0h-0.707 c-0.26,0-0.471,0.167-0.471,0.373v3.024C10.662,3.605,10.872,3.771,11.132,3.771z">
+                                        </path>
+                                        <path style="fill:#33d17a;"
+                                            d="M14.751,1.443h-1.876v2.316c0,0.517-0.465,0.938-1.037,0.938h-0.707 c-0.572,0-1.038-0.421-1.038-0.938V1.443h-4.62v2.316c0,0.517-0.465,0.938-1.038,0.938H3.73c-0.57,0-1.037-0.421-1.037-0.938 V1.443H0.816c-0.312,0-0.566,0.255-0.566,0.568v12.994c0,0.313,0.254,0.566,0.347,0.566h13.938c0.53,0,0.786-0.253,0.786-0.566 V2.009C15.32,1.698,15.064,1.443,14.751,1.443z M14.447,14.287c0,0.564-0.486,0.515-0.486,0.515H8.88c0,0,3.107-1.557,5.567-3.768 C14.447,11.034,14.447,13.635,14.447,14.287z M14.554,9.474c-0.213,0.841-0.684,1.815-1.543,1.178 c-1.252-0.927-2.486-1.714-2.645,0.15c-0.131,1.57-3.033,3.705-3.665,4.151H1.193c-0.099,0-0.177-0.079-0.177-0.177v-8.01 c0-0.099,0.079-0.178,0.177-0.178h13.184c0.097,0,0.178,0.079,0.178,0.178L14.554,9.474L14.554,9.474z">
+                                        </path>
+                                        <rect x="3.258" y="7.97" style="fill:#33d17a;" width="2.202" height="2.201">
+                                        </rect>
+                                        <rect x="6.88" y="7.97" style="fill:#33d17a;" width="2.2" height="2.201"></rect>
+                                        <rect x="3.258" y="11.309" style="fill:#33d17a;" width="2.202" height="2.201">
+                                        </rect>
+                                        <path style="fill:#33d17a;"
+                                            d="M6.88,13.51h0.637c0.465-0.436,1.168-1.157,1.563-1.652v-0.549h-2.2V13.51z">
+                                        </path>
+                                        <path style="fill:#33d17a;"
+                                            d="M10.386,9.008c0.222-0.217,0.489-0.283,0.729-0.283c0.453,0,0.952,0.253,1.471,0.596V7.97h-2.2 V9.008z">
+                                        </path>
+                                    </g>
                                 </g>
                             </g>
-                        </g>
-                    </svg></div>
-                <h2>Upcoming Interviews</h2>
+                        </svg></div>
+                    <h2>Upcoming Interviews</h2>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <form method='POST' action="{{url_for('student.Student_interview')}}">
-                    <div class="search">
-                        <span class="icon">🔍</span>
-                        <input type="text" name="upcoming_search" id="searchInput" placeholder="Search by comapny..." />
-                    </div>
-                </form>
-                <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
-            </div>
-        </div>
 
-        <div class="table-scroll">
-            <table class="interview-table">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Role</th>
-                        <th>Interview Round</th>
-                        <th>Interview Date and Time</th>
-                        <th>Link</th>
-                        <th>Result</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for interview_round in upcoming_interviews %}
-                    <tr>
-                        <td>
-                            <div class="company-cell">
-                                <div class="company-logo">
-                                    {% if interview_round[7] %}
-                                    <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
-                                        alt="Company Logo" class="company-logo" style="height:45px;">
-                                    {% else %}
-                                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
-                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                                        </g>
-                                        <g id="SVGRepo_iconCarrier">
-                                            <path
-                                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
-                                            </path>
-                                        </g>
-                                    </svg>
-                                    {% endif %}
+            <div class="table-scroll">
+                <table id="upcoming-table" class="interview-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Interview Round</th>
+                            <th>Interview Date and Time</th>
+                            <th>Link</th>
+                            <th>Result</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview_round in upcoming_interviews %}
+                        <tr>
+                            <td>
+                                <div class="company-cell">
+                                    <div class="company-logo">
+                                        {% if interview_round[7] %}
+                                        <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
+                                            alt="Company Logo" class="company-logo" style="height:45px;">
+                                        {% else %}
+                                        <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                            </g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <path
+                                                    d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                                </path>
+                                            </g>
+                                        </svg>
+                                        {% endif %}
+                                    </div>
+                                    <span>{{ interview_round[0]}}</span>
                                 </div>
-                                <span>{{ interview_round[0]}}</span>
-                            </div>
-                        </td>
-                        <td>{{ interview_round[1] }}</td>
-                        <td>{{ interview_round[2] }}</td>
-                        <td class="date-cell">
-                            <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
-                        </td>
-                        <td>
-                            {% if interview_round[4] %}
-                            <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
-                                rel="noopener noreferrer">Join</a>
-                            {% else %}
-                            <span class="no-link">Not available</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% set result = interview_round[5]|string|lower %}
-                            {% if result in ['selected', 'passed'] %}
-                            <span class="result-badge result-selected">{{ interview_round[5] }}</span>
-                            {% elif result in ['rejected', 'failed', 'not selected'] %}
-                            <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
-                            {% elif result in ['', 'none', 'pending', 'not decided'] %}
-                            <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5] else
-                                '—' }}</span>
-                            {% else %}
-                            <span class="result-badge result-default">{{ interview_round[5] }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-								<div class="feedback">{% if interview_round[6] %}
+                            </td>
+                            <td>{{ interview_round[1] }}</td>
+                            <td>{{ interview_round[2] }}</td>
+                            <td class="date-cell">
+                                <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
+                            </td>
+                            <td>
+                                {% if interview_round[4] %}
+                                <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
+                                    rel="noopener noreferrer">Join</a>
+                                {% else %}
+                                <span class="no-link">Not available</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set result = interview_round[5]|string|lower %}
+                                {% if result in ['selected', 'passed'] %}
+                                <span class="result-badge result-selected">{{ interview_round[5] }}</span>
+                                {% elif result in ['rejected', 'failed', 'not selected'] %}
+                                <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
+                                {% elif result in ['', 'none', 'pending', 'not decided'] %}
+                                <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5]
+                                    else
+                                    '—' }}</span>
+                                {% else %}
+                                <span class="result-badge result-default">{{ interview_round[5] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="feedback">{% if interview_round[6] %}
                                     <button type="button" class="view-jd-btn"
                                         onclick="openJD('{{ interview_round[8] }}')">
                                         <i class="fa-solid fa-file-lines"></i>
@@ -1201,18 +1224,18 @@
                                     {% else %}
                                     —
                                     {% endif %}
-                                </div>                         
-						</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="empty-row">No upcoming interviews found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-		{% for interview_round in upcoming_interviews %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-row">No upcoming interviews found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% for interview_round in upcoming_interviews %}
             {% if interview_round[6] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
                 onclick="closeJDOutside(event, '{{ interview_round[8] }}')">
@@ -1229,114 +1252,111 @@
             </div>
             {% endif %}
             {% endfor %}
-    </section>
+        </section>
 
 
-    <!-- Past Interviews -->
-    <section class="interview-section past-section">
-        <div class="section-heading">
-            <div class="section-title">
-                <div class="section-icon"><svg width="25px" height="25px" viewBox="0 0 48 48"
-                        xmlns="http://www.w3.org/2000/svg" fill="#6b42f5">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <title>time-history</title>
-                            <g id="Layer_2" data-name="Layer 2">
-                                <g id="invisible_box" data-name="invisible box">
-                                    <rect width="48" height="48" fill="none"></rect>
-                                </g>
-                                <g id="icons_Q2" data-name="icons Q2">
-                                    <path
-                                        d="M46,24A22,22,0,0,1,4.3,33.7a2,2,0,0,1,.5-2.6,2,2,0,0,1,3,.7A18,18,0,1,0,10.6,12h5.3A2.1,2.1,0,0,1,18,13.7,2,2,0,0,1,16,16H6a2,2,0,0,1-2-2V4.1A2.1,2.1,0,0,1,5.7,2,2,2,0,0,1,8,4V8.9A22,22,0,0,1,46,24Z">
-                                    </path>
-                                    <path
-                                        d="M34,32a1.7,1.7,0,0,1-1-.3L22,25.1V14a2,2,0,0,1,4,0v8.9l9,5.4a1.9,1.9,0,0,1,.7,2.7A1.9,1.9,0,0,1,34,32Z">
-                                    </path>
+        <!-- Past Interviews -->
+        <section id="past-interviews" class="interview-section past-section">
+                <div class="section-heading">
+                <div class="section-title">
+                    <div class="section-icon"><svg width="25px" height="25px" viewBox="0 0 48 48"
+                            xmlns="http://www.w3.org/2000/svg" fill="#6b42f5">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <title>time-history</title>
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="invisible_box" data-name="invisible box">
+                                        <rect width="48" height="48" fill="none"></rect>
+                                    </g>
+                                    <g id="icons_Q2" data-name="icons Q2">
+                                        <path
+                                            d="M46,24A22,22,0,0,1,4.3,33.7a2,2,0,0,1,.5-2.6,2,2,0,0,1,3,.7A18,18,0,1,0,10.6,12h5.3A2.1,2.1,0,0,1,18,13.7,2,2,0,0,1,16,16H6a2,2,0,0,1-2-2V4.1A2.1,2.1,0,0,1,5.7,2,2,2,0,0,1,8,4V8.9A22,22,0,0,1,46,24Z">
+                                        </path>
+                                        <path
+                                            d="M34,32a1.7,1.7,0,0,1-1-.3L22,25.1V14a2,2,0,0,1,4,0v8.9l9,5.4a1.9,1.9,0,0,1,.7,2.7A1.9,1.9,0,0,1,34,32Z">
+                                        </path>
+                                    </g>
                                 </g>
                             </g>
-                        </g>
-                    </svg></div>
-                <h2>Past Interviews</h2>
+                        </svg></div>
+                    <h2>Past Interviews</h2>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span class="count-badge">Total: {{ Past_interviews|length }}</span>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <form method='POST' action="{{url_for('student.Student_interview')}}">
-                    <div class="search">
-                        <span class="icon">🔍</span>
-                        <input type="text" name="past_search" id="searchInput" placeholder="Search by comapny..." />
-                    </div>
-                </form>
-                <span class="count-badge">Total: {{ Past_interviews|length }}</span>
-            </div>
-        </div>
 
-        <div class="table-scroll">
-            <table class="interview-table">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Role</th>
-                        <th>Interview Round</th>
-                        <th>Interview Date and Time</th>
-                        <th>Link</th>
-                        <th>Result</th>
-                        <th>Feedback</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for interview_round in Past_interviews %}
-                    <tr>
-                        <td>
-                            <div class="company-cell">
-                                <div class="company-logo">
-                                    {% if interview_round[7] %}
-                                    <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
-                                        alt="Company Logo" class="company-logo" style="height:45px;">
-                                    {% else %}
-                                    <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
-                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                                        </g>
-                                        <g id="SVGRepo_iconCarrier">
-                                            <path
-                                                d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
-                                            </path>
-                                        </g>
-                                    </svg>
-                                    {% endif %}
+            <div class="table-scroll">
+                <table id="past-table" class="interview-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Interview Round</th>
+                            <th>Interview Date and Time</th>
+                            <th>Link</th>
+                            <th>Result</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview_round in Past_interviews %}
+                        <tr>
+                            <td>
+                                <div class="company-cell">
+                                    <div class="company-logo">
+                                        {% if interview_round[7] %}
+                                        <img src="{{ url_for('static', filename='Images/company/logo/' + interview_round[7]) }}"
+                                            alt="Company Logo" class="company-logo" style="height:45px;">
+                                        {% else %}
+                                        <svg fill="#000000" width="50px" height="50px" viewBox="0 0 50 50"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                            </g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <path
+                                                    d="M8 2L8 6L4 6L4 48L46 48L46 14L30 14L30 6L26 6L26 2 Z M 10 4L24 4L24 8L28 8L28 46L19 46L19 39L15 39L15 46L6 46L6 8L10 8 Z M 10 10L10 12L12 12L12 10 Z M 14 10L14 12L16 12L16 10 Z M 18 10L18 12L20 12L20 10 Z M 22 10L22 12L24 12L24 10 Z M 10 15L10 19L12 19L12 15 Z M 14 15L14 19L16 19L16 15 Z M 18 15L18 19L20 19L20 15 Z M 22 15L22 19L24 19L24 15 Z M 30 16L44 16L44 46L30 46 Z M 32 18L32 20L34 20L34 18 Z M 36 18L36 20L38 20L38 18 Z M 40 18L40 20L42 20L42 18 Z M 10 21L10 25L12 25L12 21 Z M 14 21L14 25L16 25L16 21 Z M 18 21L18 25L20 25L20 21 Z M 22 21L22 25L24 25L24 21 Z M 32 22L32 24L34 24L34 22 Z M 36 22L36 24L38 24L38 22 Z M 40 22L40 24L42 24L42 22 Z M 32 26L32 28L34 28L34 26 Z M 36 26L36 28L38 28L38 26 Z M 40 26L40 28L42 28L42 26 Z M 10 27L10 31L12 31L12 27 Z M 14 27L14 31L16 31L16 27 Z M 18 27L18 31L20 31L20 27 Z M 22 27L22 31L24 31L24 27 Z M 32 30L32 32L34 32L34 30 Z M 36 30L36 32L38 32L38 30 Z M 40 30L40 32L42 32L42 30 Z M 10 33L10 37L12 37L12 33 Z M 14 33L14 37L16 37L16 33 Z M 18 33L18 37L20 37L20 33 Z M 22 33L22 37L24 37L24 33 Z M 32 34L32 36L34 36L34 34 Z M 36 34L36 36L38 36L38 34 Z M 40 34L40 36L42 36L42 34 Z M 32 38L32 40L34 40L34 38 Z M 36 38L36 40L38 40L38 38 Z M 40 38L40 40L42 40L42 38 Z M 10 39L10 44L12 44L12 39 Z M 22 39L22 44L24 44L24 39 Z M 32 42L32 44L34 44L34 42 Z M 36 42L36 44L38 44L38 42 Z M 40 42L40 44L42 44L42 42Z">
+                                                </path>
+                                            </g>
+                                        </svg>
+                                        {% endif %}
+                                    </div>
+                                    <span>{{ interview_round[0] }}</span>
                                 </div>
-                                <span>{{ interview_round[0] }}</span>
-                            </div>
-                        </td>
-                        <td>{{ interview_round[1] }}</td>
-                        <td>{{ interview_round[2] }}</td>
-                        <td class="date-cell">
-                            <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
-                        </td>
-                        <td>
-                            {% if interview_round[4] %}
-                            <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
-                                rel="noopener noreferrer">Join</a>
-                            {% else %}
-                            <span class="no-link">Not available</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% set result = interview_round[5]|string|lower %}
-                            {% if result in ['selected', 'passed'] %}
-                            <span class="result-badge result-selected">{{ interview_round[5] }}</span>
-                            {% elif result in 'rejected' %}
-                            <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
-                            {% elif result in ['', 'none', 'pending'] %}
-                            <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5] else
-                                '—' }}</span>
-                            {% else %}
-                            <span class="result-badge result-default">{{ interview_round[5] }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="feedback">{% if interview_round[6] %}
+                            </td>
+                            <td>{{ interview_round[1] }}</td>
+                            <td>{{ interview_round[2] }}</td>
+                            <td class="date-cell">
+                                <span class="date-line">{{ interview_round[3].strftime("%d-%m-%Y %I:%M %p") }}</span>
+                            </td>
+                            <td>
+                                {% if interview_round[4] %}
+                                <a class="join-link" href="{{ interview_round[4] }}" target="_blank"
+                                    rel="noopener noreferrer">Join</a>
+                                {% else %}
+                                <span class="no-link">Not available</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set result = interview_round[5]|string|lower %}
+                                {% if result in ['selected', 'passed'] %}
+                                <span class="result-badge result-selected">{{ interview_round[5] }}</span>
+                                {% elif result in 'rejected' %}
+                                <span class="result-badge result-rejected">{{ interview_round[5] }}</span>
+                                {% elif result in ['', 'none', 'pending'] %}
+                                <span class="result-badge result-pending">{{ interview_round[5] if interview_round[5]
+                                    else
+                                    '—' }}</span>
+                                {% else %}
+                                <span class="result-badge result-default">{{ interview_round[5] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="feedback">{% if interview_round[6] %}
                                     <button type="button" class="view-jd-btn"
                                         onclick="openJD('{{ interview_round[8] }}')">
                                         <i class="fa-solid fa-file-lines"></i>
@@ -1345,18 +1365,18 @@
                                     {% else %}
                                     —
                                     {% endif %}
-                                </div> 
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="empty-row">No past interviews found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-		{% for interview_round in Past_interviews %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-row">No past interviews found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% for interview_round in Past_interviews %}
             {% if interview_round[6] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
                 onclick="closeJDOutside(event, '{{ interview_round[8] }}')">
@@ -1373,21 +1393,99 @@
             </div>
             {% endif %}
             {% endfor %}
-    </section>
+        </section>
 
-
-    <div class="interview-tip">
-        <div class="tip-icon">!</div>
-        <div>
-            <strong>Interview Tip</strong>
-            <span>Join your interview 5–10 minutes early and make sure your internet connection is working
-                properly.</span>
-        </div>
     </div>
-</div>
 </div>
 
 <script>
+
+    function filterInterviews(filter) {
+
+    const todaySection = document.getElementById("today-interviews");
+    const pastSection = document.getElementById("past-interviews");
+    const upcomingSection = document.getElementById("upcoming-interviews");
+
+    const searchBox = document.getElementById("interview-search");
+
+    // Hide all sections
+    todaySection.style.display = "none";
+    pastSection.style.display = "none";
+    upcomingSection.style.display = "none";
+
+    // Show selected section
+    if (filter === "today") {
+
+        todaySection.style.display = "flex";
+        searchBox.placeholder = "Search today's interviews...";
+
+    }
+    else if (filter === "past") {
+
+        pastSection.style.display = "flex";
+        searchBox.placeholder = "Search past interviews...";
+
+    }
+    else if (filter === "upcoming") {
+
+        upcomingSection.style.display = "flex";
+        searchBox.placeholder = "Search upcoming interviews...";
+
+    }
+
+    // Clear search whenever filter changes
+    searchBox.value = "";
+
+    // Show all rows again
+    document.querySelectorAll(".interview-table tbody tr").forEach(row => {
+        row.style.display = "";
+    });
+}
+
+document.getElementById("interview-search").addEventListener("input", function () {
+
+    const searchValue = this.value.toLowerCase().trim();
+
+    const selectedFilter = document.getElementById("interview-filter").value;
+
+    let tableId;
+
+    if (selectedFilter === "today") {
+        tableId = "today-table";
+    }
+    else if (selectedFilter === "past") {
+        tableId = "past-table";
+    }
+    else if (selectedFilter === "upcoming") {
+        tableId = "upcoming-table";
+    }
+
+    const table = document.getElementById(tableId);
+
+    if (!table) return;
+
+    const rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+
+        const rowText = row.textContent.toLowerCase();
+
+        if (rowText.includes(searchValue)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+
+    });
+
+});
+
+
+    // Show Today's Interviews when page loads
+    document.addEventListener("DOMContentLoaded", function () {
+        filterInterviews("today");
+    });
+
 
     function openJD(jobId) {
 
