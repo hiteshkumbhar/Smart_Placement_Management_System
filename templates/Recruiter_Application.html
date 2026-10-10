@@ -70,7 +70,7 @@
         border: 3px solid #fff;
         box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
         overflow: hidden;
-        
+
     }
 
     .profile-name {
@@ -602,6 +602,46 @@
             grid-template-columns: 1fr
         }
     }
+
+
+    /* ---------------- Search --------------- */
+
+    .search {
+        /* The search box container */
+        display: flex;
+        /* Use flex so icon + input sit in a row */
+        align-items: center;
+        /* Vertically center */
+        gap: 8px;
+        /* Space between icon and input */
+        background: #fff;
+        /* White background */
+        border: 1px solid #c5c2c2;
+        /* Light gray border */
+        border-radius: 8px;
+        /* Rounded corners */
+        padding: 8px 12px;
+        /* Inner spacing */
+        width: 260px;
+        /* Fixed width */
+    }
+
+    .search input {
+        border: none;
+        /* No border (the box already has one) */
+        outline: none;
+        /* Remove blue focus outline */
+        width: 100%;
+        /* Fill the search box */
+        font-size: 16px;
+        /* Readable text size */
+        background: transparent;
+        /* Show the parent's white background */
+    }
+
+    .search .icon {
+        color: #9ca3af;
+    }
 </style>
 {% endblock %}
 
@@ -650,9 +690,12 @@
                 <h1>Job Applications</h1>
                 <p class="subtitle">Manage applicants and review candidates for your placement drives.</p>
             </div>
-            {% if Jobs %}
-            <div class="drive-count">Total: {{ Jobs|length }} Drive{% if Jobs|length != 1 %}s{% endif %}</div>
-            {% endif %}
+            <form method="GET" action="{{ url_for('Recruiter.Recruiter_Application') }}" class="search-form">
+                <div class="search">
+                    <span class="icon">🔍</span>
+                    <input type="text" name="search" id="searchInput" placeholder="Search job title " value="{{ request.args.get('search', '') }}" />
+                </div>
+            </form>
         </div>
     </div>
     <div class="scrollable-bottom-section">
@@ -664,7 +707,7 @@
                     <div class="company-row">
                         {% if job[2] %}
                         <img src="{{ url_for('static', filename='Images/company/logo/' + job[2]) }}" alt="Company Logo"
-                        style="max-height: 46px; max-width: 46px;">
+                            style="max-height: 46px; max-width: 46px;">
                         {% else %}
                         <div class="company-avatar">{{ job[0][0]|upper if job[0] else 'C' }}</div>
                         {% endif %}
@@ -734,69 +777,69 @@
 
             {% endfor %}
         </div>
-        </div>
-        {% else %}
-        <div class="empty-state">
-            <div class="empty-icon">📋</div>
-            <h2>No Job Drives Found</h2>
-            <p>There are currently no job drives available for applicant management.</p>
-        </div>
-        {% endif %}
     </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h2>No Job Drives Found</h2>
+        <p>There are currently no job drives available for applicant management.</p>
+    </div>
+    {% endif %}
+</div>
 
 
-    <script>
+<script>
 
-        function openJD(jobId) {
+    function openJD(jobId) {
 
-            const modal = document.getElementById("jdModal" + jobId);
+        const modal = document.getElementById("jdModal" + jobId);
 
-            if (modal) {
-                modal.style.display = "flex";
-                document.body.style.overflow = "hidden";
-            }
-
+        if (modal) {
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
         }
 
+    }
 
-        function closeJD(jobId) {
 
-            const modal = document.getElementById("jdModal" + jobId);
+    function closeJD(jobId) {
 
-            if (modal) {
+        const modal = document.getElementById("jdModal" + jobId);
+
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "";
+        }
+
+    }
+
+
+    function closeJDOutside(event, jobId) {
+
+        if (event.target === event.currentTarget) {
+            closeJD(jobId);
+        }
+
+    }
+
+
+    /* Close using Escape key */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            document.querySelectorAll(".jd-overlay").forEach(function (modal) {
+
                 modal.style.display = "none";
-                document.body.style.overflow = "";
-            }
+
+            });
+
+            document.body.style.overflow = "";
 
         }
 
+    });
 
-        function closeJDOutside(event, jobId) {
-
-            if (event.target === event.currentTarget) {
-                closeJD(jobId);
-            }
-
-        }
-
-
-        /* Close using Escape key */
-
-        document.addEventListener("keydown", function (event) {
-
-            if (event.key === "Escape") {
-
-                document.querySelectorAll(".jd-overlay").forEach(function (modal) {
-
-                    modal.style.display = "none";
-
-                });
-
-                document.body.style.overflow = "";
-
-            }
-
-        });
-
-    </script>
-    {% endblock %}
+</script>
+{% endblock %}
