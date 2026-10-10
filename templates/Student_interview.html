@@ -251,10 +251,10 @@
     }
 
     .scrollable-bottom-section {
-    padding: 5px 5px 10px 5px;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+        padding: 5px 5px 10px 5px;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
     }
 
     .interview-header {
@@ -294,18 +294,18 @@
     }
 
     .interview-section {
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid #edf0f6;
-    border-radius: 16px;
-    padding: 22px 22px 18px;
-    margin-bottom: 20px;
-    box-shadow: 0px 0px 5px rgb(209, 209, 209);
-}
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #edf0f6;
+        border-radius: 16px;
+        padding: 22px 22px 18px;
+        margin-bottom: 20px;
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
+    }
 
     .section-heading {
         display: flex;
@@ -409,13 +409,13 @@
     }
 
     .table-scroll {
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    border: 1px solid #e9ecf3;
-    border-radius: 11px;
-}
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        border: 1px solid #e9ecf3;
+        border-radius: 11px;
+    }
 
     .interview-table {
         width: 100%;
@@ -744,7 +744,8 @@
         justify-content: center;
 
     }
-     /* Filter */
+
+    /* Filter */
     .job-filter {
 
         flex-shrink: 0;
@@ -878,18 +879,22 @@
                 <h1>My Interviews</h1>
                 <p>Track your interview journey and results</p>
             </div>
-            <div class="interview-controls">
-                <div class="search">
-                    <span class="icon">🔍</span>
-                    <input type="text" id="interview-search" placeholder="Search today's interviews...">
-                </div>
-                <div class="job-filter">
-                    <select id="interview-filter" onchange="filterInterviews(this.value)">
-                        <option value="today">Today's Interview</option>
-                        <option value="past">Past Interviews</option>
-                        <option value="upcoming">Upcoming Interviews</option>
-                    </select>
-                </div>
+            <div>
+                <form method="POST" id="interview-search-form" class="interview-controls" action="{{ url_for('student.Student_interview') }}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="interview-search" name="today_search"
+                            placeholder="Search today's interviews...">
+                    </div>
+
+                    <div class="job-filter">
+                        <select id="interview-filter" onchange="filterInterviews(this.value)">
+                            <option value="today">Today's Interview</option>
+                            <option value="past">Past Interviews</option>
+                            <option value="upcoming">Upcoming Interviews</option>
+                        </select>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -897,7 +902,7 @@
 
         <!-- Today's Interview -->
         <section id="today-interviews" class="interview-section today-section">
-                <div class="section-heading">
+            <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -1105,7 +1110,7 @@
 
         <!-- Upcoming Interviews -->
         <section id="upcoming-interviews" class="interview-section upcoming-section">
-                <div class="section-heading">
+            <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15.571 15.571" xml:space="preserve"
@@ -1257,7 +1262,7 @@
 
         <!-- Past Interviews -->
         <section id="past-interviews" class="interview-section past-section">
-                <div class="section-heading">
+            <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon"><svg width="25px" height="25px" viewBox="0 0 48 48"
                             xmlns="http://www.w3.org/2000/svg" fill="#6b42f5">
@@ -1400,92 +1405,54 @@
 
 <script>
 
-    function filterInterviews(filter) {
-
+function filterInterviews(filter) {
+    sessionStorage.setItem("selectedInterviewFilter", filter);
     const todaySection = document.getElementById("today-interviews");
     const pastSection = document.getElementById("past-interviews");
     const upcomingSection = document.getElementById("upcoming-interviews");
 
     const searchBox = document.getElementById("interview-search");
 
-    // Hide all sections
-    todaySection.style.display = "none";
-    pastSection.style.display = "none";
-    upcomingSection.style.display = "none";
+    // Show only the selected section
+    todaySection.style.display = filter === "today" ? "" : "none";
+    pastSection.style.display = filter === "past" ? "" : "none";
+    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
 
-    // Show selected section
+    // Set the backend field name and placeholder
     if (filter === "today") {
-
-        todaySection.style.display = "flex";
+        searchBox.name = "today_search";
         searchBox.placeholder = "Search today's interviews...";
-
-    }
-    else if (filter === "past") {
-
-        pastSection.style.display = "flex";
+    } else if (filter === "past") {
+        searchBox.name = "past_search";
         searchBox.placeholder = "Search past interviews...";
-
-    }
-    else if (filter === "upcoming") {
-
-        upcomingSection.style.display = "flex";
+    } else if (filter === "upcoming") {
+        searchBox.name = "upcoming_search";
         searchBox.placeholder = "Search upcoming interviews...";
-
     }
-
-    // Clear search whenever filter changes
-    searchBox.value = "";
-
-    // Show all rows again
-    document.querySelectorAll(".interview-table tbody tr").forEach(row => {
-        row.style.display = "";
-    });
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
 
-document.getElementById("interview-search").addEventListener("input", function () {
+    const filterDropdown = document.getElementById("interview-filter");
+    filterDropdown.value = savedFilter;
 
-    const searchValue = this.value.toLowerCase().trim();
-
-    const selectedFilter = document.getElementById("interview-filter").value;
-
-    let tableId;
-
-    if (selectedFilter === "today") {
-        tableId = "today-table";
-    }
-    else if (selectedFilter === "past") {
-        tableId = "past-table";
-    }
-    else if (selectedFilter === "upcoming") {
-        tableId = "upcoming-table";
-    }
-
-    const table = document.getElementById(tableId);
-
-    if (!table) return;
-
-    const rows = table.querySelectorAll("tbody tr");
-
-    rows.forEach(row => {
-
-        const rowText = row.textContent.toLowerCase();
-
-        if (rowText.includes(searchValue)) {
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
-        }
-
-    });
-
+    filterInterviews(savedFilter);
 });
+    function updateSearchField() {
+        const filter = document.getElementById("interview-filter");
+        const searchBox = document.getElementById("interview-search");
 
-
-    // Show Today's Interviews when page loads
-    document.addEventListener("DOMContentLoaded", function () {
-        filterInterviews("today");
-    });
-
+        if (filter.value === "today") {
+            searchBox.name = "today_search";
+            searchBox.placeholder = "Search today's interviews...";
+        } else if (filter.value === "past") {
+            searchBox.name = "past_search";
+            searchBox.placeholder = "Search past interviews...";
+        } else if (filter.value === "upcoming") {
+            searchBox.name = "upcoming_search";
+            searchBox.placeholder = "Search upcoming interviews...";
+        }
+    }
 
     function openJD(jobId) {
 
