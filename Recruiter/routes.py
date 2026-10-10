@@ -6,6 +6,7 @@ import os
 import datetime
 from . import Recruiter_bp
 from utils.notifications import notifications
+from sqlalchemy import or_
 
 @Recruiter_bp.route('/Recruiter_Dashboard')
 @login_required
@@ -55,8 +56,14 @@ def Job_drive():
             job.status = 'Active'
             db.session.commit()
 
+    search = request.args.get("search", "").strip()
+
     if request.args.get('filter') == 'Expired':
-        job_drives_results = Job_Drives.query.filter_by(status='Expired', creater_id = current_user.user_id)
+        if search:
+            job_drives_results = Job_Drives.query.join(Companies, Job_Drives.company_id == Companies.id).filter(or_(Companies.company_name.ilike(f"%{search}%"), Job_Drives.title.ilike(f"%{search}%"),Job_Drives.location.ilike(f"%{search}%")), Job_Drives.status == 'Expired', Job_Drives.creater_id == current_user.user_id)
+        else:
+            job_drives_results = Job_Drives.query.filter_by(status='Expired', creater_id = current_user.user_id)
+
         jobs = []
         for job in job_drives_results:
             company = Companies.query.filter_by(id=job.company_id).first()
@@ -64,20 +71,11 @@ def Job_drive():
 
         return render_template('Job_drive.html', Jobs=jobs)
 
-    search = request.args.get("search", "").strip()
-    search_by = request.args.get("search_by", "company_name")
 
     query = Job_Drives.query.filter(Job_Drives.status != 'Closed')
 
     if search:
-        if search_by == "company_name":
-            query = query.join(Companies, Job_Drives.company_id == Companies.id).filter(
-                Companies.company_name.ilike(f"%{search}%"), Job_Drives.creater_id == current_user.user_id)
-        elif search_by == "title":
-            query = query.filter(Job_Drives.title.ilike(f"%{search}%"), Job_Drives.creater_id == current_user.user_id)
-        elif search_by == "Location":
-            query = query.filter(Job_Drives.location.ilike(f"%{search}%"), Job_Drives.creater_id == current_user.user_id)
-
+        query = query.join(Companies, Job_Drives.company_id == Companies.id).filter(or_(Companies.company_name.ilike(f"%{search}%"), Job_Drives.title.ilike(f"%{search}%"), Job_Drives.location.ilike(f"%{search}%")), Job_Drives.creater_id == current_user.user_id)
         # Fixed: Use Job_Drives (capital D) for the model column
         job_drives_results = query.order_by(Job_Drives.title).all()
 
