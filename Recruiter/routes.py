@@ -113,7 +113,14 @@ def Schedule_Interview():
 def Recruiter_Application():
     if current_user.role != "Recruiter":
         abort(403)  # Forbidden
-    Job_drives = Job_Drives.query.filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed' )
+
+    search = request.args.get("search", "").strip()
+
+    if search:
+        Job_drives = Job_Drives.query.join(Companies,Job_Drives.company_id == Companies.id).filter(Job_Drives.title.ilike(f"%{search}%"),Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed')
+    else:
+        Job_drives = Job_Drives.query.filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed' )
+
     jobs = []
     for job in Job_drives:
         company = Companies.query.filter_by(id=job.company_id).first()
@@ -338,6 +345,12 @@ def Student_Profile_Recruiter():
 def Recruiter_Interview():
     if current_user.role != "Recruiter":
         abort(403)
+
+    today_search = request.args.get('today_search', '').strip()
+    upcoming_search = request.args.get('upcoming_search', '').strip()
+
+    print(today_search, upcoming_search)
+
     if request.method == 'POST':
         round_id = request.form.get('round_id')
         mode = request.form.get('mode','')
@@ -391,10 +404,21 @@ def Recruiter_Interview():
 
     today_interview = []
     upcoming_interview = []
+
     for round in interview_rounds:
         if round.date.date() == datetime.date.today():
-            today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+            if today_search:
+                print('today:',today_search, round.Application.Job_Drive.title, round.Application.student.user.name)
+                if today_search.lower() in round.Application.Job_Drive.title.lower() or today_search.lower() in round.Application.student.user.name.lower():
+                    today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+            else:
+                today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
         elif round.date.date() >= datetime.date.today():
-            upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+            if upcoming_search:
+                print('upcoming:',upcoming_search, round.Application.Job_Drive.title, round.Application.student.user.name)
+                if upcoming_search.lower() in round.Application.Job_Drive.title.lower() or upcoming_search.lower() in round.Application.student.user.name.lower():
+                    upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+            else:
+                upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
 
     return render_template('Recruiter_Interview.html', today_interview = today_interview, upcoming_interview = upcoming_interview)
