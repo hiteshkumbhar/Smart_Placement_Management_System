@@ -190,7 +190,7 @@ def Student_interview():
         else:
             if past_search:
                 if past_search.lower() in r.Application.Job_Drive.company.company_name.lower():
-                    Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name,r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path. r.id])
+                    Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name,r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
             else:
                 Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
 
