@@ -225,14 +225,15 @@
 
     /* ===== Student Interview Page ===== */
     .interview-page {
-        flex: 1;
+        width: 100%;
         min-width: 0;
+        box-sizing: border-box;
         height: 100vh;
-        margin: 0 auto;
-        padding: 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        flex: 1;
+        margin: 0 auto;
         color: #17233f;
     }
 
@@ -278,6 +279,8 @@
     }
 
     .interview-section {
+        height: 100%;
+        min-height: 0;
         background: #fff;
         border: 1px solid #edf0f6;
         border-radius: 16px;
@@ -285,6 +288,8 @@
         margin-bottom: 22px;
         box-shadow: 0 8px 28px rgba(31, 43, 73, 0.07);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .section-heading {
@@ -390,7 +395,9 @@
 
     .table-scroll {
         width: 100%;
-        overflow-x: auto;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
         border: 1px solid #e9ecf3;
         border-radius: 11px;
     }
@@ -764,13 +771,56 @@
     }
 
     .scrollable-bottom-section {
-        padding: 0px 24px 45px;
+        padding: 0px 24px 20px;
         flex: 1;
         /* Take up the remaining space */
-        overflow-y: auto;
+        overflow: hidden;
         /* Allow scrolling inside this section */
         min-height: 0;
         /* Ensures the flex child can scroll */
+    }
+
+
+    .interview-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .interview-controls .search {
+        width: 330px;
+        margin: 0;
+    }
+
+    .interview-controls .job-filter {
+        flex-shrink: 0;
+    }
+
+    /* Filter */
+    .job-filter {
+
+        flex-shrink: 0;
+        /* NEW: Prevent filter from squishing */
+    }
+
+
+    .job-filter select {
+        width: 185px;
+        height: 42px;
+        padding: 0 38px 0 14px;
+        border: 1px solid #8bb0f5;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        color: #23385e;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .job-filter select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
     }
 </style>
 {%endblock%}
@@ -828,14 +878,31 @@
                 <h1>Interviews</h1>
                 <p>Track interview journey and results</p>
             </div>
+            <div>
+                <form method="POST" id="interview-search-form" class="interview-controls"
+                    action="{{ url_for('Placement_officer.Placement_Officer_Interview') }}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="interview-search" name="today_search"
+                            placeholder="Search today's interviews...">
+                    </div>
+
+                    <div class="job-filter">
+                        <select id="interview-filter" onchange="filterInterviews(this.value)">
+                            <option value="today">Today's Interview</option>
+                            <option value="past">Past Interviews</option>
+                            <option value="upcoming">Upcoming Interviews</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <div class="scrollable-bottom-section">
 
-
         <!-- Today's Interview -->
-        <section class="interview-section today-section">
+        <section id="today-interviews" class="interview-section today-section">
             <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon">
@@ -931,20 +998,13 @@
                     </div>
                     <h2>Today's Interview</h2>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <form method='POST' action="{{url_for('Placement_officer.Placement_Officer_Interview')}}">
-                        <div class="search">
-                            <span class="icon">🔍</span>
-                            <input type="text" name="today_search" id="searchInput"
-                                placeholder="Search by comapny or student..." />
-                        </div>
-                    </form>
+                <div>
                     <span class="count-badge">Total: {{ Todays_interview |length }}</span>
                 </div>
             </div>
 
             <div class="table-scroll">
-                <table class="interview-table">
+                <table id="today-table" class="interview-table">
                     <thead>
                         <tr>
                             <th>Company</th>
@@ -1056,7 +1116,7 @@
         </section>
 
         <!-- Upcoming Interviews -->
-        <section class="interview-section upcoming-section">
+        <section id="upcoming-interviews" class="interview-section upcoming-section">
             <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon">
@@ -1095,20 +1155,13 @@
                     </div>
                     <h2>Upcoming Interviews</h2>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <form method='POST' action="{{url_for('Placement_officer.Placement_Officer_Interview')}}">
-                        <div class="search">
-                            <span class="icon">🔍</span>
-                            <input type="text" name="upcoming_search" id="searchInput"
-                                placeholder="Search by comapny or student..." />
-                        </div>
-                    </form>
+                <div>
                     <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
                 </div>
             </div>
 
             <div class="table-scroll">
-                <table class="interview-table">
+                <table id="upcoming-table" class="interview-table">
                     <thead>
                         <tr>
                             <th>Company</th>
@@ -1220,7 +1273,7 @@
 
 
         <!-- Past Interviews -->
-        <section class="interview-section past-section">
+        <section id="past-interviews" class="interview-section past-section">
             <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon">
@@ -1249,20 +1302,13 @@
                     <h2>Past Interviews</h2>
                 </div>
 
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <form method='POST' action="{{url_for('Placement_officer.Placement_Officer_Interview')}}">
-                        <div class="search">
-                            <span class="icon">🔍</span>
-                            <input type="text" name="past_search" id="searchInput"
-                                placeholder="Search by comapny or student..." />
-                        </div>
-                    </form>
+                <div>
                     <span class="count-badge">Total: {{ Past_interviews|length }}</span>
                 </div>
             </div>
 
             <div class="table-scroll">
-                <table class="interview-table">
+                <table id="past-table" class="interview-table">
                     <thead>
                         <tr>
                             <th>Company</th>
@@ -1378,6 +1424,39 @@
     </div>
 </div>
 <script>
+
+    function filterInterviews(filter) {
+        sessionStorage.setItem("selectedInterviewFilter", filter);
+        const todaySection = document.getElementById("today-interviews");
+        const pastSection = document.getElementById("past-interviews");
+        const upcomingSection = document.getElementById("upcoming-interviews");
+
+        const searchBox = document.getElementById("interview-search");
+
+        // Show only the selected section
+        todaySection.style.display = filter === "today" ? "" : "none";
+        pastSection.style.display = filter === "past" ? "" : "none";
+        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+
+        // Set the backend field name and placeholder
+        if (filter === "today") {
+            searchBox.name = "today_search";
+            searchBox.placeholder = "Search Company/ Job Title/ Student";
+        } else if (filter === "past") {
+            searchBox.name = "past_search";
+            searchBox.placeholder = "Search Company/ Job Title/ Student";
+        } else if (filter === "upcoming") {
+            searchBox.name = "upcoming_search";
+            searchBox.placeholder = "Search Company/ Job Title/ Student";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
+        const filterDropdown = document.getElementById("interview-filter");
+        filterDropdown.value = savedFilter;
+        filterInterviews(savedFilter);
+    });
 
     function openJD(jobId) {
 

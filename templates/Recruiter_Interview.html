@@ -68,7 +68,7 @@
         border: 3px solid #fff;
         box-shadow: 0 3px 12px rgba(79, 43, 234, .22);
         overflow: hidden;
-        
+
     }
 
     .profile-name {
@@ -190,21 +190,26 @@
     }
 
     .scrollable-bottom-section {
-        padding: 0px 24px 45px;
+        padding: 0px 24px 20px;
         flex: 1;
         /* Take up the remaining space */
-        overflow-y: auto;
+        overflow: hidden;
         /* Allow scrolling inside this section */
         min-height: 0;
         /* Ensures the flex child can scroll */
     }
 
     .interview-page {
-        padding: 0px 0px 40px;
-        height: 100vh;        
+        height: 100vh;
         display: flex;
         flex-direction: column;
-        overflow: hidden; 
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .interview-page * {
+        box-sizing: border-box;
+
     }
 
     .page-header {
@@ -224,7 +229,6 @@
         font-size: 14px
     }
 
-    .section-card,
     .feedback-panel {
         background: #fff;
         border: 1px solid #e5e7eb;
@@ -236,64 +240,97 @@
 
     .section-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 18px 22px;
-        background: #fafbfc;
-        border-bottom: 1px solid #eef0f3
+        justify-content: space-between;
+        gap: 15px;
+        padding: 0;
+        margin-bottom: 18px;
+        background: transparent;
+        border-bottom: none;
+        flex-shrink: 0;
     }
 
     .section-title {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: #111827;
         display: flex;
         align-items: center;
-        
+        gap: 12px;
+        margin: 0;
+        font-size: 19px;
+        font-weight: 750;
+        color: #9141ac;
+
     }
 
     .section-count {
-        padding: 5px 10px;
-        border-radius: 999px;
-        background: #eef2ff;
-        color: #4338ca;
+        padding: 7px 12px;
+        border-radius: 9px;
         font-size: 12px;
-        font-weight: 700
+        font-weight: 700;
+        white-space: nowrap;
+
+        color: #5e4bc9;
+        background: #f0edff;
     }
 
     .table-wrapper {
-        overflow-x: auto
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        border: 1px solid #e9ecf3;
+        border-radius: 11px;
     }
 
     .interview-table {
         width: 100%;
         min-width: 980px;
-        border-collapse: collapse
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+        text-align: left;
     }
 
     .interview-table th {
-        padding: 13px 16px;
-        background: #f8fafc;
-        color: #64748b;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: .5px;
-        text-align: left;
+        padding: 13px 12px;
+        background: #f7f7ff;
+        color: #27334d;
+        border-bottom: 1px solid #e5e8f0;
+
+        font-size: 12px;
+        font-weight: 750;
         white-space: nowrap;
-        border-bottom: 1px solid #e5e7eb
+        text-align: left;
+
+        position: sticky;
+        top: 0;
+        z-index: 2;
     }
 
+    .today-section .interview-table th {
+        background: #f2f4ff;
+    }
+
+    /* Upcoming table heading */
+    #upcoming-interviews .interview-table th {
+        background: #faf3fb;
+    }
+
+
     .interview-table td {
-        padding: 16px;
-        color: #374151;
+        padding: 16px 12px;
+        color: #3f4a61;
         font-size: 13px;
+        line-height: 1.45;
+        border-bottom: 1px solid #edf0f4;
         vertical-align: middle;
-        border-bottom: 1px solid #f0f2f5
     }
 
     .interview-table tbody tr:hover {
-        background: #fafbff
+        background: #fafaff;
+    }
+
+    .interview-table tbody tr:last-child td {
+        border-bottom: 0;
     }
 
     .company-name,
@@ -581,7 +618,7 @@
             width: 100%
         }
     }
-	
+
 
     .feedback {
         min-width: 80px;
@@ -592,8 +629,8 @@
         align-items: center;
         justify-content: center;
     }
-	
-	
+
+
     /* =========================
    View JD Button
    ========================= */
@@ -715,7 +752,146 @@
         overflow-y: auto;
     }
 
+    .interview-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: space-between;
+    }
 
+    .interview-controls .search {
+        width: 280px;
+        margin: 0;
+    }
+
+    .interview-controls .job-filter {
+        flex-shrink: 0;
+    }
+
+
+
+    /* ---------------- Search --------------- */
+
+    .search {
+        /* The search box container */
+        display: flex;
+        /* Use flex so icon + input sit in a row */
+        align-items: center;
+        /* Vertically center */
+        gap: 8px;
+        /* Space between icon and input */
+        background: #fff;
+        /* White background */
+        border: 1px solid #c5c2c2;
+        /* Light gray border */
+        border-radius: 8px;
+        /* Rounded corners */
+        padding: 8px 12px;
+        /* Inner spacing */
+        width: 260px;
+        /* Fixed width */
+    }
+
+    .search input {
+        border: none;
+        /* No border (the box already has one) */
+        outline: none;
+        /* Remove blue focus outline */
+        width: 100%;
+        /* Fill the search box */
+        font-size: 16px;
+        /* Readable text size */
+        background: transparent;
+        /* Show the parent's white background */
+    }
+
+    .search .icon {
+        color: #9ca3af;
+    }
+
+    /* Filter */
+    .job-filter {
+
+        flex-shrink: 0;
+        /* NEW: Prevent filter from squishing */
+    }
+
+
+    .job-filter select {
+        width: 185px;
+        height: 42px;
+        padding: 0 38px 0 14px;
+        border: 1px solid #8bb0f5;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        color: #23385e;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .job-filter select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    .interview-section {
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        background: #fff;
+        border: 1px solid #edf0f6;
+        border-radius: 16px;
+        padding: 22px 22px 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 5px rgb(209, 209, 209);
+    }
+
+    .today-section .section-icon {
+        background: #fff0e8;
+        color: #f36c32;
+    }
+
+    .section-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+}
+
+.today-icon {
+    background: #fff0e8;
+}
+
+.upcoming-icon {
+    background: #e9f8ee;
+}
+
+    /* Today's section accent */
+    .today-section .section-title {
+        color: #1a5fb4;
+    }
+
+    .today-section .section-count {
+        color: #1a5fb4;
+        background: #e9f0ff;
+    }
+
+    /* Upcoming section accent */
+    #upcoming-interviews .section-title {
+        color: #9141ac;
+    }
+
+    #upcoming-interviews .section-count {
+        color: #9141ac;
+        background: #f6eaf8;
+    }
 </style>
 {% endblock %}
 {% block main %}
@@ -758,17 +934,46 @@
                 </details>
             </div>
         </header>
-    </div>
-    <div class="scrollable-bottom-section">
 
         <div class="page-header">
-            <h1>Interview Management</h1>
+            <div class="interview-controls">
+                <h1>Interview Management</h1>
+                <form method="GET" id="interview-search-form"
+                    style="display: flex; gap: 10px; justify-content: space-between;"
+                    action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                    <div class="search">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="interview-search" name="today_search" placeholder="Search today's interviews...">
+                    </div>
+                    <div class="job-filter">
+                        <select id="interview-filter" onchange="filterInterviews(this.value)">
+                            <option value="today">Today's Interview</option>
+                            <option value="upcoming">Upcoming Interviews</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
             <p>Review today's interviews, upcoming schedules, feedback and candidate results.</p>
         </div>
+    </div>
 
-        <div class="section-card">
+    <div class="scrollable-bottom-section">
+        <section id="today-interviews" class="interview-section today-section">
+
             <div class="section-header">
-                <h2 class="section-title"> <svg fill="#1a5fb4" width="35px" height="35px" viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z"></path></g></svg>&nbsp; Today's Interviews</h2><span class="section-count">Total: {{ today_interview|length
+                <h2 class="section-title">
+                    <div class="section-icon today-icon"><svg fill="#1a5fb4" width="35px" height="35px" viewBox="-3 0 19 19"
+                            xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z">
+                                </path>
+                            </g>
+                        </svg></div>
+                    &nbsp; Today's Interviews
+                </h2><span class="section-count">Total: {{ today_interview|length
                     }}&nbsp;interviews</span>
             </div>
             <div class="table-wrapper">
@@ -796,65 +1001,76 @@
                                     target="_blank" rel="noopener">Join Interview</a>{% else %}<span
                                     class="status-badge pending">No link</span>{% endif %}</td>
                             <td>{% if interview[3].feedback is none %}<button type="button" class="feedback-button"
-                                    onclick="openFeedbackModal('{{ interview[3].id }}')">Add Feedback</button>{% else %}
-                                
-<div class="feedback">
-                                    <button type="button" class="view-jd-btn"
-                                        onclick="openJD('{{ interview[3].id }}')">
+                                    onclick="openFeedbackModal('{{ interview[3].id }}')">Add Feedback</button>{%
+                                else %}
+
+                                <div class="feedback">
+                                    <button type="button" class="view-jd-btn" onclick="openJD('{{ interview[3].id }}')">
                                         <i class="fa-solid fa-file-lines"></i>
                                         View
                                     </button>
-                                    
-                                </div> {% endif %}</td>
+
+                                </div> {% endif %}
+                            </td>
                             <td>{% if interview[3].result is none %}<div class="result-actions">
-                                    <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}"><input
-                                            type="hidden" value="{{ interview[3].id }}" name="round_id"><button
+                                    <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                                        <input type="hidden" value="{{ interview[3].id }}" name="round_id"><button
                                             type="submit" name="result" value="Cleared"
                                             class="result-button pass-button">Pass</button>
                                     </form>
-                                    <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}"><input
-                                            type="hidden" value="{{ interview[3].id }}" name="round_id"><button
+                                    <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                                        <input type="hidden" value="{{ interview[3].id }}" name="round_id"><button
                                             type="submit" name="result" value="Rejected"
-                                            class="result-button reject-button">Reject</button></form>
+                                            class="result-button reject-button">Reject</button>
+                                    </form>
                                 </div>{% elif interview[3].result == 'Cleared' %}<span
-                                    class="status-badge cleared">Cleared</span>{% elif interview[3].result == 'Rejected'
+                                    class="status-badge cleared">Cleared</span>{% elif interview[3].result ==
+                                'Rejected'
                                 %}<span class="status-badge rejected">Rejected</span>{% else %}<span
                                     class="status-badge">{{
                                     interview[3].result }}</span>{% endif %}</td>
                         </tr>{% else %}<tr>
                             <td colspan="8">
-                                <div class="empty-state"><strong>No interviews scheduled for today</strong>Your today's
+                                <div class="empty-state"><strong>No interviews scheduled for today</strong>Your
+                                    today's
                                     interview schedule will appear here.</div>
                             </td>
                         </tr>{% endfor %}
                     </tbody>
                 </table>
-				
-{% for interview in today_interview %}
-            {% if interview[3].feedback %}
-            <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
-                onclick="closeJDOutside(event, '{{ interview[3].id }}')">
-                <div class="jd-modal">
-                    <div class="jd-modal-header">
-                        <h3 class="jd-modal-title">Feedback</h3>
-                        <button type="button" class="jd-close-btn"
-                            onclick="closeJD('{{ interview[3].id }}')">&times;</button>
-                    </div>
-                    <div class="jd-full-description">
-                        {{ interview[3].feedback }}
+
+                {% for interview in today_interview %}
+                {% if interview[3].feedback %}
+                <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
+                    onclick="closeJDOutside(event, '{{ interview[3].id }}')">
+                    <div class="jd-modal">
+                        <div class="jd-modal-header">
+                            <h3 class="jd-modal-title">Feedback</h3>
+                            <button type="button" class="jd-close-btn"
+                                onclick="closeJD('{{ interview[3].id }}')">&times;</button>
+                        </div>
+                        <div class="jd-full-description">
+                            {{ interview[3].feedback }}
+                        </div>
                     </div>
                 </div>
+                {% endif %}
+                {% endfor %}
             </div>
-            {% endif %}
-            {% endfor %}
-
-
-            </div>
-        </div>
-
-        <div class="section-card">
+        </section>
+        <section id="upcoming-interviews" class="interview-section">
             <div class="section-header">
-                <h2 class="section-title"><svg fill="#9141ac" width="35px" height="35px" viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z"></path></g></svg>
+                <h2 class="section-title"> <div class="section-icon upcoming-icon"><svg fill="#9141ac" width="35px" height="35px" viewBox="-3 0 19 19"
+                        xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z">
+                            </path>
+                        </g>
+                    </svg>
+                    </div>
                     &nbsp; Upcoming Interviews
                 </h2>
                 <span class="section-count">Total: {{
@@ -888,12 +1104,11 @@
                             <td>{% if interview[3].feedback is none %}<span
                                     class="status-badge pending">Pending</span>{%
                                 else %}<div class="feedback">
-                                    <button type="button" class="view-jd-btn"
-                                        onclick="openJD('{{ interview[3].id }}')">
+                                    <button type="button" class="view-jd-btn" onclick="openJD('{{ interview[3].id }}')">
                                         <i class="fa-solid fa-file-lines"></i>
                                         View
                                     </button>
-                                    
+
                                 </div>{% endif %}</td>
                             <td>{% if interview[3].result is none %}<span class="status-badge pending">Pending</span>{%
                                 elif
@@ -911,25 +1126,25 @@
                         </tr>{% endfor %}
                     </tbody>
                 </table>
-				{% for interview in upcoming_interview %}
-            {% if interview[3].feedback %}
-            <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
-                onclick="closeJDOutside(event, '{{ interview[3].id }}')">
-                <div class="jd-modal">
-                    <div class="jd-modal-header">
-                        <h3 class="jd-modal-title">Feedback</h3>
-                        <button type="button" class="jd-close-btn"
-                            onclick="closeJD('{{ interview[3].id }}')">&times;</button>
-                    </div>
-                    <div class="jd-full-description">
-                        {{ interview[3].feedback }}
+                {% for interview in upcoming_interview %}
+                {% if interview[3].feedback %}
+                <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
+                    onclick="closeJDOutside(event, '{{ interview[3].id }}')">
+                    <div class="jd-modal">
+                        <div class="jd-modal-header">
+                            <h3 class="jd-modal-title">Feedback</h3>
+                            <button type="button" class="jd-close-btn"
+                                onclick="closeJD('{{ interview[3].id }}')">&times;</button>
+                        </div>
+                        <div class="jd-full-description">
+                            {{ interview[3].feedback }}
+                        </div>
                     </div>
                 </div>
+                {% endif %}
+                {% endfor %}
             </div>
-            {% endif %}
-            {% endfor %}
-            </div>
-        </div>
+        </section>
     </div>
     <div id="feedbackModal" class="feedback-modal-overlay" onclick="closeFeedbackModal(event)" aria-hidden="true">
         <div class="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle"
@@ -954,8 +1169,41 @@
         </div>
     </div>
 </div>
-
 <script>
+
+    function filterInterviews(filter) {
+        sessionStorage.setItem("selectedInterviewFilter", filter);
+        const todaySection = document.getElementById("today-interviews");
+        const upcomingSection = document.getElementById("upcoming-interviews");
+
+        const searchBox = document.getElementById("interview-search");
+
+        // Show only the selected section
+        todaySection.style.display = filter === "today" ? "" : "none";
+        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+
+        // Set the backend field name and placeholder
+        if (filter === "today") {
+            searchBox.name = "today_search";
+            searchBox.placeholder = "Search today's interviews...";
+        } else if (filter === "upcoming") {
+            searchBox.name = "upcoming_search";
+            searchBox.placeholder = "Search upcoming interviews...";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
+
+        // Only allow options that exist in the dropdown
+        if (savedFilter !== "today" && savedFilter !== "upcoming") {
+            savedFilter = "today";
+        }
+
+        document.getElementById("interview-filter").value = savedFilter;
+        filterInterviews(savedFilter);
+    });
+
     function openFeedbackModal(roundId) {
         document.getElementById('feedbackRoundId').value = roundId;
         const modal = document.getElementById('feedbackModal');
@@ -975,8 +1223,8 @@
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') closeFeedbackModal();
     });
-	
-	
+
+
     function openJD(jobId) {
 
         const modal = document.getElementById("jdModal" + jobId);
@@ -988,7 +1236,6 @@
 
     }
 
-
     function closeJD(jobId) {
 
         const modal = document.getElementById("jdModal" + jobId);
@@ -997,16 +1244,13 @@
             modal.style.display = "none";
             document.body.style.overflow = "";
         }
-
     }
-
 
     function closeJDOutside(event, jobId) {
 
         if (event.target === event.currentTarget) {
             closeJD(jobId);
         }
-
     }
 
 

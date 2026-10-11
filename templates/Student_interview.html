@@ -251,7 +251,7 @@
     }
 
     .scrollable-bottom-section {
-        padding: 5px 5px 10px 5px;
+        padding: 5px 5px 20px 5px;
         flex: 1;
         min-height: 0;
         overflow: hidden;
@@ -813,12 +813,9 @@
 
 <div class="interview-page">
     <div class="fixed-top-section">
-
         <div style="display: flex; justify-content: flex-end;">
             <header class="topbar">
-
                 <div class="top-actions">
-
                     <details class="profile-menu">
                         <summary>
                             {% if student.profile_pic is none %}
@@ -831,7 +828,6 @@
                                     style="width: 36px; height: 36px; object-fit: cover;">
                             </div>
                             {% endif %}
-
                             <div>
                                 <div class="profile-name">{{ current_user.name if current_user.name else 'Student' }}
                                 </div>
@@ -839,7 +835,6 @@
                             </div>
                             <span class="chevron">⌄</span>
                         </summary>
-
                         <div class="profile-dropdown">
                             <div class="profile-summary">
                                 {% if student.profile_pic is none %}
@@ -857,14 +852,11 @@
                                     <small>{{ current_user.email if current_user.email else 'Student account' }}</small>
                                 </div>
                             </div>
-
                             <a class="profile-action" href="{{ url_for('student.Student_Profile') }}">
                                 <span class="action-icon">👤</span>
                                 <span>My Profile</span>
                             </a>
-
                             <hr class="profile-divider">
-
                             <a class="profile-action logout-action" href="{{ url_for('logout') }}">
                                 <span class="action-icon">↪</span>
                                 <span>Logout</span>
@@ -880,7 +872,8 @@
                 <p>Track your interview journey and results</p>
             </div>
             <div>
-                <form method="POST" id="interview-search-form" class="interview-controls" action="{{ url_for('student.Student_interview') }}">
+                <form method="POST" id="interview-search-form" class="interview-controls"
+                    action="{{ url_for('student.Student_interview') }}">
                     <div class="search">
                         <span class="icon">🔍</span>
                         <input type="text" id="interview-search" name="today_search"
@@ -899,12 +892,12 @@
         </div>
     </div>
     <div class="scrollable-bottom-section">
-
         <!-- Today's Interview -->
         <section id="today-interviews" class="interview-section today-section">
             <div class="section-heading">
                 <div class="section-title">
-                    <div class="section-icon"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
+                    <div class="section-icon">
+                        <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                             <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -992,10 +985,11 @@
                                     </filter>
                                 </defs>
                             </g>
-                        </svg></div>
+                        </svg>
+                    </div>
                     <h2>Today's Interview</h2>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <div>
                     <span class="count-badge">Total: {{ Todays_interview|length }}</span>
                 </div>
             </div>
@@ -1146,7 +1140,7 @@
                         </svg></div>
                     <h2>Upcoming Interviews</h2>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <div>
                     <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
                 </div>
             </div>
@@ -1264,7 +1258,8 @@
         <section id="past-interviews" class="interview-section past-section">
             <div class="section-heading">
                 <div class="section-title">
-                    <div class="section-icon"><svg width="25px" height="25px" viewBox="0 0 48 48"
+                    <div class="section-icon">
+                        <svg width="25px" height="25px" viewBox="0 0 48 48"
                             xmlns="http://www.w3.org/2000/svg" fill="#6b42f5">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                             <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -1284,10 +1279,11 @@
                                     </g>
                                 </g>
                             </g>
-                        </svg></div>
+                        </svg>
+                    </div>
                     <h2>Past Interviews</h2>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <div>
                     <span class="count-badge">Total: {{ Past_interviews|length }}</span>
                 </div>
             </div>
@@ -1399,60 +1395,43 @@
             {% endif %}
             {% endfor %}
         </section>
-
     </div>
 </div>
 
 <script>
 
-function filterInterviews(filter) {
-    sessionStorage.setItem("selectedInterviewFilter", filter);
-    const todaySection = document.getElementById("today-interviews");
-    const pastSection = document.getElementById("past-interviews");
-    const upcomingSection = document.getElementById("upcoming-interviews");
+    function filterInterviews(filter) {
+        sessionStorage.setItem("selectedInterviewFilter", filter);
+        const todaySection = document.getElementById("today-interviews");
+        const pastSection = document.getElementById("past-interviews");
+        const upcomingSection = document.getElementById("upcoming-interviews");
 
-    const searchBox = document.getElementById("interview-search");
-
-    // Show only the selected section
-    todaySection.style.display = filter === "today" ? "" : "none";
-    pastSection.style.display = filter === "past" ? "" : "none";
-    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
-
-    // Set the backend field name and placeholder
-    if (filter === "today") {
-        searchBox.name = "today_search";
-        searchBox.placeholder = "Search today's interviews...";
-    } else if (filter === "past") {
-        searchBox.name = "past_search";
-        searchBox.placeholder = "Search past interviews...";
-    } else if (filter === "upcoming") {
-        searchBox.name = "upcoming_search";
-        searchBox.placeholder = "Search upcoming interviews...";
-    }
-}
-document.addEventListener("DOMContentLoaded", function () {
-    const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
-
-    const filterDropdown = document.getElementById("interview-filter");
-    filterDropdown.value = savedFilter;
-
-    filterInterviews(savedFilter);
-});
-    function updateSearchField() {
-        const filter = document.getElementById("interview-filter");
         const searchBox = document.getElementById("interview-search");
 
-        if (filter.value === "today") {
+        // Show only the selected section
+        todaySection.style.display = filter === "today" ? "" : "none";
+        pastSection.style.display = filter === "past" ? "" : "none";
+        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+
+        // Set the backend field name and placeholder
+        if (filter === "today") {
             searchBox.name = "today_search";
             searchBox.placeholder = "Search today's interviews...";
-        } else if (filter.value === "past") {
+        } else if (filter === "past") {
             searchBox.name = "past_search";
             searchBox.placeholder = "Search past interviews...";
-        } else if (filter.value === "upcoming") {
+        } else if (filter === "upcoming") {
             searchBox.name = "upcoming_search";
             searchBox.placeholder = "Search upcoming interviews...";
         }
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
+        const filterDropdown = document.getElementById("interview-filter");
+        filterDropdown.value = savedFilter;
+        filterInterviews(savedFilter);
+    });
 
     function openJD(jobId) {
 
@@ -1462,45 +1441,31 @@ document.addEventListener("DOMContentLoaded", function () {
             modal.style.display = "flex";
             document.body.style.overflow = "hidden";
         }
-
     }
 
-
     function closeJD(jobId) {
-
         const modal = document.getElementById("jdModal" + jobId);
-
         if (modal) {
             modal.style.display = "none";
             document.body.style.overflow = "";
         }
-
     }
 
-
     function closeJDOutside(event, jobId) {
-
         if (event.target === event.currentTarget) {
             closeJD(jobId);
         }
-
     }
-
 
     /* Close using Escape key */
 
     document.addEventListener("keydown", function (event) {
 
         if (event.key === "Escape") {
-
             document.querySelectorAll(".jd-overlay").forEach(function (modal) {
-
                 modal.style.display = "none";
-
             });
-
             document.body.style.overflow = "";
-
         }
 
     });

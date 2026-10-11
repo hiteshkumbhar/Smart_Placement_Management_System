@@ -792,11 +792,12 @@
                        <span class="icon">🔍</span>
                        <input type="text" name="search" id="searchInput" placeholder="Search Company..." value="{{ request.args.get('search', '') }}" />
                    </div>
-                   <div class="job-filter">
-                       <select id="job-drive-status" name="filter" onchange="this.form.submit()" >
-                           <option value="Active" {% if request.args.get('filter', 'Active') == 'Active' %}selected{% endif %}> Active </option>
-                           <option value="Expired" {% if request.args.get('filter') == 'Expired' %}selected{% endif %}> Expired </option> </select>
-                   </div>
+                    <div class="job-filter">
+                        <select id="job-drive-status" name="filter" onchange="this.form.submit()" >
+                            <option value="Active" {% if request.args.get('filter', 'Active') == 'Active' %}selected{% endif %}> Active </option>
+                            <option value="Expired" {% if request.args.get('filter') == 'Expired' %}selected{% endif %}> Expired </option> 
+                        </select>
+                    </div>
                </form>
             </section>
         </div>
