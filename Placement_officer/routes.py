@@ -15,6 +15,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.platypus.flowables import HRFlowable
+from sqlalchemy import or_
+
 
 
 @officer_bp.route('/Placement_officer_dashboard')
@@ -68,14 +70,27 @@ def Placement_officer_Recruiter_Job_drive():
         Job_drives = Job_Drives.query.filter(Job_Drives.posted == 'N', Job_Drives.status == 'Expired', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).all()
         jobs = []
         for job in Job_drives:
-            company = Companies.query.filter_by(id=job.company_id).first()
+            if request.args.get('search'):
+                if request.args.get('search').lower() in job.company.company_name.lower() or request.args.get('search').lower() in job.title.lower():
+                    company = Companies.query.filter_by(id=job.company_id).first()
+                else:
+                    continue
+            else:
+                company = Companies.query.filter_by(id=job.company_id).first()
             jobs.append([company.company_name, job, company.logo_path])
         return render_template('Placement_officer_Recruiter_Job_drive.html', Jobs=jobs)
 
     Job_drives = Job_Drives.query.filter(Job_Drives.posted=='N',Job_Drives.status == 'Active', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).all()
     jobs = []
     for job in Job_drives:
-        company = Companies.query.filter_by(id=job.company_id).first()
+        if request.args.get('search'):
+            if request.args.get('search').lower() in job.company.company_name.lower() or request.args.get(
+                'search').lower() in job.title.lower():
+                    company = Companies.query.filter_by(id=job.company_id).first()
+            else:
+                continue
+        else:
+            company = Companies.query.filter_by(id=job.company_id).first()
         jobs.append([company.company_name, job, company.logo_path])
     return render_template('Placement_officer_Recruiter_Job_drive.html',Jobs = jobs)
 
@@ -112,7 +127,13 @@ def Placement_officer_Job_drive():
     posted_jobs = Job_Drives.query.filter(Job_Drives.posted == 'Y', Job_Drives.status != 'Closed', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).all()
     jobs = []
     for job in posted_jobs:
-        company = Companies.query.filter_by(id=job.company_id).first()
+        if request.args.get('search'):
+            if request.args.get('search').lower() in job.company.company_name.lower() or request.args.get('search').lower() in job.title.lower():
+                company = Companies.query.filter_by(id=job.company_id).first()
+            else:
+                continue
+        else:
+            company = Companies.query.filter_by(id=job.company_id).first()
         jobs.append([company.company_name, job, company.logo_path])
     return render_template('Placement_officer_Job_drive.html', jobs = jobs, mode = mode)
 
@@ -137,19 +158,19 @@ def Placement_Officer_Interview():
     for r in rounds:
         if r.date.date() == datetime.date.today():
             if today_search:
-                if today_search.lower() in r.Application.Job_Drive.company.company_name.lower() or today_search.lower() in r.Application.student.user.name.lower():
+                if today_search.lower() in r.Application.Job_Drive.company.company_name.lower() or today_search.lower() in r.Application.student.user.name.lower() or today_search.lower() in r.Application.Job_Drive.title.lower():
                     Todays_interview.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
             else:
                 Todays_interview.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
         elif r.date.date() > datetime.date.today():
             if upcoming_search:
-                if upcoming_search.lower() in r.Application.Job_Drive.company.company_name.lower() or upcoming_search.lower() in r.Application.student.user.name.lower():
+                if upcoming_search.lower() in r.Application.Job_Drive.company.company_name.lower() or upcoming_search.lower() in r.Application.student.user.name.lower() or upcoming_search.lower() in r.Application.Job_Drive.title.lower():
                     upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
             else:
                 upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
         else:
             if past_search:
-                if past_search.lower() in r.Application.Job_Drive.company.company_name.lower() or past_search.lower() in r.Application.student.user.name.lower():
+                if past_search.lower() in r.Application.Job_Drive.company.company_name.lower() or past_search.lower() in r.Application.student.user.name.lower() or past_search.lower() in r.Application.Job_Drive.title.lower():
                     Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
             else:
                 Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title,r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
@@ -329,18 +350,8 @@ def Companies_info():
 
     mode = request.args.get('mode','ViewAll')
     search = request.args.get("search", "").strip()
-    search_by = request.args.get("search_by", "company_name")
-    query = Companies.query
     if search:
-        if search_by == "company_name":
-            query = query.filter(Companies.company_name.ilike(f"%{search}%"), Companies.creater_id == current_user.user_id)
-
-        elif search_by == "industry":
-            query = query.filter(Companies.industry.ilike(f"%{search}%"), Companies.creater_id == current_user.user_id)
-
-        elif search_by == "hr_name":
-            query = query.filter(Companies.hr_name.ilike(f"%{search}%"), Companies.creater_id == current_user.user_id)
-
+        query = Companies.query.filter(or_(Companies.company_name.ilike(f"%{search}%"),Companies.industry.ilike(f"%{search}%"),Companies.hr_name.ilike(f"%{search}%")), Companies.creater_id == current_user.user_id)
         companies = query.order_by(Companies.company_name).all()
 
         a = []
