@@ -69,7 +69,7 @@ The **Smart Placement Management System** is built using Python, Flask, SQLAlche
 
 | 💻 Technology / Package | 📌 Version in Project | 🎯 Purpose |
 |---|---|---|
-| 🐍 **Python** | Not pinned | Core programming language used to develop and run the application. Uses `zoneinfo`, which is available in Python 3.9 and later. |
+| 🐍 **Python** |  | Core programming language used to develop and run the application. |
 | 🌐 **Flask** | `3.1.3` | Web framework responsible for routing, request handling, templates, redirects, and flash messages. |
 | 🎨 **Jinja2** | `3.1.6` | Server-side template engine used to render dynamic HTML pages. |
 | 🔐 **Flask-Login** | `0.6.3` | Manages user login sessions and provides `current_user` and `login_required` functionality. |
@@ -80,8 +80,7 @@ The **Smart Placement Management System** is built using Python, Flask, SQLAlche
 | 🔑 **itsdangerous** | `2.2.0` | Supports signed, time-limited tokens used in the password-reset workflow. |
 | ⚙️ **python-dotenv** | `1.2.3` | Loads environment variables from a `.env` file. |
 | 📄 **ReportLab** | `5.0.0` | Generates PDF reports through the placement-officer functionality. |
-| 🖼️ **Pillow** | `12.3.0` | Image-processing library dependency. Its exact runtime usage should be verified before removal. |
-| 📧 **Brevo Python SDK** | Unpinned | Integrates with Brevo's transactional email API for application notifications. |
+| 📧 **Brevo Python SDK** |  | Integrates with Brevo's transactional email API for application notifications. |
 | 🚀 **Gunicorn** | `23.0.0` | WSGI server dependency intended for serving the Flask application. Deployment commands and container configuration are not included in the supplied project archive. |
 | 🧩 **HTML, CSS & Jinja2 Templates** | Browser-provided / No separate package version | Build the server-rendered user interface, page layouts, and styling. The repository also includes Font Awesome and Material Design Iconic Font assets. |
 
