@@ -11,5 +11,7 @@ Solution:
 
   Smart Placement Management System provides a shared web application with role-oriented interfaces where:
     ·	 Students can maintain profile information, browse job drives, apply, review application/interview information, and manage resume/certification-related files.
+    
     ·  Recruiters can manage job drives, review applications, schedule interviews, and access candidate information.
+    
     ·	 Placement officers can manage company information and placement drives, review students and interview information, and view analytics/reports.
