@@ -37,6 +37,27 @@ def load_user(user_id):
 
 with app.app_context():
     db.create_all()
+
+
+@app.errorhandler(400)
+def handle_bad_request(error):
+    return render_template('400.html'), 400
+
+@app.errorhandler(401)
+def handle_unauthorized(error):
+    return render_template('401.html'), 401
+
+@app.errorhandler(403)
+def handle_forbidden(error):
+    return render_template('403.html'), 403
+
+@app.errorhandler(404)
+def handle_not_found(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def handle_internal_server_error(error):
+    return render_template('500.html'), 500
 ################################################ Home ##################################################
 @app.route('/')
 def home():
