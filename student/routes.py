@@ -162,17 +162,60 @@ def Student_interview():
     if current_user.role != "student":
         abort(403)
 
-    student = Students.query.filter_by(user_id = current_user.user_id).first()
-    application_ids = db.session.scalars(db.select(Applications.id).where(Applications.student_id == student.id)).all()
-    rounds = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids)).all()
+    PER_PAGE = 5
+
+    try:
+        page = int(request.args.get("page", 1))
+    except (ValueError, TypeError):
+        page = 1
 
     today_search = request.form.get('today_search')
     upcoming_search = request.form.get('upcoming_search')
     past_search = request.form.get('past_search')
 
+    student = Students.query.filter_by(user_id = current_user.user_id).first()
+    application_ids = db.session.scalars(db.select(Applications.id).where(Applications.student_id == student.id)).all()
+    rounds = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids)).all()
+    if past_search:
+        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date < datetime.datetime.combine(datetime.date.today(), datetime.time.min),Companies.company_name.ilike(f"%{past_search.strip()}%")))
+        Past_pagination = base_query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+        if Past_pagination.pages and page > Past_pagination.pages:
+            page = Past_pagination.pages
+            Past_pagination = base_query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+    else:
+        Past_pagination = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date < datetime.datetime.combine(datetime.date.today(), datetime.time.min)).paginate(page=page, per_page=PER_PAGE, error_out=False)
+
+    Past_interviews = []
+    for r in Past_pagination.items:
+        Past_interviews.append([
+            r.Application.Job_Drive.company.company_name,  # [0] Company name
+            r.Application.Job_Drive.title,  # [1] Role
+            r.round_name,  # [2] Interview round
+            r.date,  # [3] Date
+            r.link,  # [4] Interview link
+            r.result,  # [5] Result
+            r.feedback,  # [6] Feedback
+            r.Application.Job_Drive.company.logo_path,  # [7] Company logo
+            r.id  # [8] Interview round ID
+        ])
+
+    total_records = Past_pagination.total or 0
+    showing_start = Past_pagination.first or 0
+    showing_end = Past_pagination.last or 0
+    total_pages = Past_pagination.pages
+
+    if total_pages <= 5:
+        page_numbers = list(range(1, total_pages + 1))
+    elif page <= 3:
+        page_numbers = [1, 2, 3, "...", total_pages]
+    elif page >= total_pages - 2:
+        page_numbers = [1, "...",total_pages - 2,total_pages - 1,total_pages]
+    else:
+        page_numbers = [1, "...",page - 1,page,page + 1,"...",total_pages]
+
     Todays_interview = []
     upcoming_interviews = []
-    Past_interviews = []
+    #Past_interviews = []
 
     for r in rounds:
         if r.date.date() == datetime.date.today():
@@ -188,15 +231,22 @@ def Student_interview():
             else:
                 upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
         else:
-            if past_search:
-                if past_search.lower() in r.Application.Job_Drive.company.company_name.lower():
-                    Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name,r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
-            else:
-                Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
+            pass
+#            if past_search:
+#                if past_search.lower() in r.Application.Job_Drive.company.company_name.lower():
+#                    Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name,r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
+#            else:
+#                Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
 
     student = Students.query.filter(Students.user_id == current_user.user_id).first()
-    return render_template('Student_interview.html', Todays_interview = Todays_interview, upcoming_interviews = upcoming_interviews, Past_interviews = Past_interviews, student = student)
 
+    return render_template('Student_interview.html',Todays_interview=Todays_interview,upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews,Past_pagination=Past_pagination,student=student,page=Past_pagination.page,
+        total_pages=Past_pagination.pages,
+        total_records=Past_pagination.total,
+        showing_start=Past_pagination.first or 0,
+        showing_end=Past_pagination.last or 0,
+        page_numbers=page_numbers
+    )
 
 @student_bp.route('/Student_Job_Drive', methods = ['GET','POST'])
 @login_required
