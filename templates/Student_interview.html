@@ -806,6 +806,129 @@
         }
 
     }
+
+    /* Past Interviews Pagination */
+
+.past-pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 4px 4px;
+    flex-shrink: 0;
+}
+
+.past-pagination-info {
+    color: #1e293b;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.past-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.past-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-width: 42px;
+    height: 42px;
+    padding: 0 13px;
+
+    border: 1px solid #dfe3ea;
+    border-radius: 10px;
+
+    background: #fff;
+    color: #1e293b;
+
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: all 0.2s ease;
+}
+
+a.past-page-btn:hover {
+    border-color: #6350d7;
+    color: #6350d7;
+    background: #f5f3ff;
+}
+
+.past-page-btn.past-active {
+    color: #fff;
+    background: #6350d7;
+    border-color: #6350d7;
+    font-weight: 600;
+}
+
+.past-page-btn.past-prev-next {
+    padding: 0 16px;
+}
+
+.past-page-btn.past-disabled {
+    color: #b8bec9;
+    background: #fafafa;
+    border-color: #e1e4ea;
+    cursor: not-allowed;
+}
+
+.past-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    color: #7c8595;
+    font-size: 18px;
+}
+
+.past-arrow {
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    flex-shrink: 0;
+}
+
+.past-left-arrow {
+    transform: rotate(-135deg);
+}
+
+.past-right-arrow {
+    transform: rotate(45deg);
+}
+
+@media (max-width: 768px) {
+    .past-pagination-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .past-pagination {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 6px;
+    }
+
+    .past-page-btn {
+        min-width: 36px;
+        height: 38px;
+        padding: 0 10px;
+        font-size: 13px;
+    }
+
+    .past-page-btn.past-prev-next {
+        padding: 0 10px;
+    }
+}
 </style>
 {%endblock%}
 
@@ -1284,7 +1407,7 @@
                     <h2>Past Interviews</h2>
                 </div>
                 <div>
-                    <span class="count-badge">Total: {{ Past_interviews|length }}</span>
+                    <span class="count-badge">Total: {{ total_records }}</span>
                 </div>
             </div>
 
@@ -1377,6 +1500,84 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Past Interviews Pagination -->
+            <div class="past-pagination-container">
+                <!-- Record count -->
+                <div class="past-pagination-info">
+                    Showing
+                    {{ showing_start or 0 }}–{{ showing_end or 0 }}
+                    of {{total_records }}
+                </div>
+
+                <nav class="past-pagination" aria-label="Past interviews pagination">
+
+                    <!-- Previous -->
+                    {% if Past_pagination.has_prev %}
+                    <a
+                        href="{{ url_for('student.Student_interview', page=Past_pagination.prev_num) }}#past-interviews" class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    <!-- Page numbers -->
+                    {% for p in Past_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                    ) %}
+
+                        {% if p %}
+
+                            {% if p == Past_pagination.page %}
+                            <span class="past-page-btn past-active"
+                                aria-current="page">
+                                {{ p }}
+                            </span>
+                            {% else %}
+                            <a
+                                href="{{ url_for('student.Student_interview',
+                                                page=p) }}#past-interviews"
+                                class="past-page-btn"
+                            >
+                                {{ p }}
+                            </a>
+                            {% endif %}
+
+                        {% else %}
+                            <span class="past-ellipsis">…</span>
+                        {% endif %}
+
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if Past_pagination.has_next %}
+                    <a
+                        href="{{ url_for('student.Student_interview',
+                                        page=Past_pagination.next_num) }}#past-interviews"
+                        class="past-page-btn past-prev-next"
+                    >
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+
+            </div>
+
             {% for interview_round in Past_interviews %}
             {% if interview_round[6] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
