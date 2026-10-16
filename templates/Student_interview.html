@@ -1506,8 +1506,8 @@ a.past-page-btn:hover {
                 <!-- Record count -->
                 <div class="past-pagination-info">
                     Showing
-                    {{ showing_start or 0 }}–{{ showing_end or 0 }}
-                    of {{total_records }}
+                    {{ Past_pagination.first or 0 }}–{{ Past_pagination.last or 0 }}
+                    of {{Past_pagination.total }}
                 </div>
 
                 <nav class="past-pagination" aria-label="Past interviews pagination">
