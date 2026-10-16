@@ -1113,7 +1113,7 @@ a.past-page-btn:hover {
                     <h2>Today's Interview</h2>
                 </div>
                 <div>
-                    <span class="count-badge">Total: {{ Todays_interview|length }}</span>
+                    <span class="count-badge">Total: {{ Today_pagination.total }}</span>
                 </div>
             </div>
 
@@ -1206,6 +1206,82 @@ a.past-page-btn:hover {
                     </tbody>
                 </table>
             </div>
+             <!-- Past Interviews Pagination -->
+            <div class="past-pagination-container">
+                <!-- Record count -->
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Today_pagination.first or 0 }}–{{ Today_pagination.last or 0 }}
+                    of {{ Today_pagination.total }}
+                </div>
+
+                <nav class="past-pagination" aria-label="Past interviews pagination">
+
+                    <!-- Previous -->
+                    {% if Today_pagination.has_prev %}
+                    <a
+                        href="{{ url_for('student.Student_interview', today_page=Today_pagination.prev_num) }}#past-interviews" class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    <!-- Page numbers -->
+                    {% for p in Today_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                    ) %}
+
+                        {% if p %}
+
+                            {% if p == Today_pagination.page %}
+                            <span class="past-page-btn past-active"
+                                aria-current="page">
+                                {{ p }}
+                            </span>
+                            {% else %}
+                            <a
+                                href="{{ url_for('student.Student_interview',
+                                                today_page=p) }}#past-interviews"
+                                class="past-page-btn"
+                            >
+                                {{ p }}
+                            </a>
+                            {% endif %}
+
+                        {% else %}
+                            <span class="past-ellipsis">…</span>
+                        {% endif %}
+
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if Today_pagination.has_next %}
+                    <a
+                        href="{{ url_for('student.Student_interview',
+                                        today_page=Today_pagination.next_num) }}#past-interviews"
+                        class="past-page-btn past-prev-next"
+                    >
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+
+            </div>
             {% for interview_round in Todays_interview %}
             {% if interview_round[6] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[8] }}"
@@ -1264,7 +1340,7 @@ a.past-page-btn:hover {
                     <h2>Upcoming Interviews</h2>
                 </div>
                 <div>
-                    <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
+                    <span class="count-badge">Total: {{ Upcoming_pagination.total }}</span>
                 </div>
             </div>
 
@@ -1306,7 +1382,7 @@ a.past-page-btn:hover {
                                         </svg>
                                         {% endif %}
                                     </div>
-                                    <span>{{ interview_round[0]}}</span>
+                                    <span>{{ interview_round[0] }}</span>
                                 </div>
                             </td>
                             <td>{{ interview_round[1] }}</td>
@@ -1356,6 +1432,82 @@ a.past-page-btn:hover {
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+             <!-- Past Interviews Pagination -->
+            <div class="past-pagination-container">
+                <!-- Record count -->
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Upcoming_pagination.first or 0 }}–{{ Upcoming_pagination.last or 0 }}
+                    of {{ Upcoming_pagination.total }}
+                </div>
+
+                <nav class="past-pagination" aria-label="Past interviews pagination">
+
+                    <!-- Previous -->
+                    {% if Upcoming_pagination.has_prev %}
+                    <a
+                        href="{{ url_for('student.Student_interview', upcoming_page=Upcoming_pagination.prev_num) }}#past-interviews" class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    <!-- Page numbers -->
+                    {% for p in Upcoming_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                    ) %}
+
+                        {% if p %}
+
+                            {% if p == Upcoming_pagination.page %}
+                            <span class="past-page-btn past-active"
+                                aria-current="page">
+                                {{ p }}
+                            </span>
+                            {% else %}
+                            <a
+                                href="{{ url_for('student.Student_interview',
+                                                upcoming_page=p) }}#past-interviews"
+                                class="past-page-btn"
+                            >
+                                {{ p }}
+                            </a>
+                            {% endif %}
+
+                        {% else %}
+                            <span class="past-ellipsis">…</span>
+                        {% endif %}
+
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if Upcoming_pagination.has_next %}
+                    <a
+                        href="{{ url_for('student.Student_interview',
+                                        upcoming_page=Upcoming_pagination.next_num) }}#past-interviews"
+                        class="past-page-btn past-prev-next"
+                    >
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+
             </div>
             {% for interview_round in upcoming_interviews %}
             {% if interview_round[6] %}
@@ -1407,7 +1559,7 @@ a.past-page-btn:hover {
                     <h2>Past Interviews</h2>
                 </div>
                 <div>
-                    <span class="count-badge">Total: {{ total_records }}</span>
+                    <span class="count-badge">Total: {{ Past_pagination.total }}</span>
                 </div>
             </div>
 
