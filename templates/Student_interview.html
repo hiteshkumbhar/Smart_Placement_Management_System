@@ -254,7 +254,8 @@
         padding: 5px 5px 20px 5px;
         flex: 1;
         min-height: 0;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;    
     }
 
     .interview-header {
@@ -294,11 +295,11 @@
     }
 
     .interview-section {
-        height: 100%;
-        min-height: 0;
+         height: auto;
+        min-height: auto;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
+        overflow: visible;
         background: #fff;
         border: 1px solid #edf0f6;
         border-radius: 16px;
@@ -410,9 +411,10 @@
 
     .table-scroll {
         width: 100%;
-        flex: 1;
-        min-height: 0;
-        overflow: auto;
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
         border: 1px solid #e9ecf3;
         border-radius: 11px;
     }
