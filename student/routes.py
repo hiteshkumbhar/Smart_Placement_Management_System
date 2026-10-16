@@ -236,9 +236,6 @@ def Student_interview():
 
     return render_template('Student_interview.html',Todays_interview=Todays_interview,upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews,Past_pagination=Past_pagination,student=student,page=Past_pagination.page,
         total_pages=Past_pagination.pages,
-        total_records=Past_pagination.total,
-        showing_start=Past_pagination.first or 0,
-        showing_end=Past_pagination.last or 0,
         page_numbers=page_numbers
     )
 
