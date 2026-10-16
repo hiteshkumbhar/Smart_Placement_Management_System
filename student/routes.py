@@ -77,6 +77,8 @@ def Application():
     if current_user.role != "student":
         abort(403)  # Forbidden
 
+    page = request.args.get('page', 1, type=int)
+
     total_applications = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id),Job_Drives.status != 'Closed').count()
     shortlisted_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).count()
     interview_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.INTERVIEW).count()
@@ -85,63 +87,59 @@ def Application():
 
     filter = request.args.get('filter','All')
     if filter == 'shortlisted':
-        application = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).all()
+        applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).paginate(page=page,per_page=5,error_out=False)
         applications = []
-        for i in application:
+        for i in applications_pagination.items:
             applications.append([i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value,i.drive_id, i.Job_Drive.company.logo_path])
         student = Students.query.filter(Students.user_id == current_user.user_id).first()
-        return render_template('Student_Application.html', applications=applications, student=student, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
+        return render_template('Student_Application.html', applications_pagination = applications_pagination,applications=applications, student=student, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
     elif filter == 'inteview':
-        application = Applications.query.join(Job_Drives).filter(
-            Applications.student_id == db.session.query(Students.id).filter(
-                Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',
-            Applications.status == Application_status.INTERVIEW).all()
+        applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.INTERVIEW).paginate(page=page,per_page=5,error_out=False)
         applications = []
-        for i in application:
-            applications.append(
-                [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
+        for i in applications_pagination.items:
+            applications.append([i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
         student = Students.query.filter(Students.user_id == current_user.user_id).first()
-        return render_template('Student_Application.html', applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
+        return render_template('Student_Application.html', applications_pagination = applications_pagination,applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
     elif filter == 'selected':
-        application = Applications.query.join(Job_Drives).filter(
+        applications_pagination = Applications.query.join(Job_Drives).filter(
             Applications.student_id == db.session.query(Students.id).filter(
                 Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',
-            Applications.status == Application_status.SELECTED).all()
+            Applications.status == Application_status.SELECTED).paginate(page=page,per_page=5,error_out=False)
 
         applications = []
-        for i in application:
+        for i in applications_pagination.items:
             applications.append(
                 [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
         student = Students.query.filter(Students.user_id == current_user.user_id).first()
-        return render_template('Student_Application.html', applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
+        return render_template('Student_Application.html', applications_pagination = applications_pagination, applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
     elif filter == 'rejected':
-        application = Applications.query.join(Job_Drives).filter(
+        applications_pagination = Applications.query.join(Job_Drives).filter(
             Applications.student_id == db.session.query(Students.id).filter(
                 Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',
-            Applications.status == Application_status.REJECTED).all()
+            Applications.status == Application_status.REJECTED).paginate(page=page,per_page=5,error_out=False)
         applications = []
-        for i in application:
+        for i in applications_pagination.items:
             applications.append(
                 [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
         student = Students.query.filter(Students.user_id == current_user.user_id).first()
-        return render_template('Student_Application.html', applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
+        return render_template('Student_Application.html', applications_pagination = applications_pagination, applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
     if request.method == 'POST':
         search_term = f"%{request.form.get('search')}%"
-        application = Applications.query.join(Job_Drives).join(Companies).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Companies.company_name.ilike(search_term)).all()
+        applications_pagination = Applications.query.join(Job_Drives).join(Companies).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Companies.company_name.ilike(search_term)).paginate(page=page,per_page=5,error_out=False)
         applications = []
-        for i in application:
+        for i in applications_pagination.items:
             applications.append(
                 [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
         student = Students.query.filter(Students.user_id == current_user.user_id).first()
-        return render_template('Student_Application.html', applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
+        return render_template('Student_Application.html', applications=applications, applications_pagination = applications_pagination, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
-    application = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id), Job_Drives.status != 'Closed').all()
+    applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id), Job_Drives.status != 'Closed').paginate(page=page,per_page=5,error_out=False)
     applications = []
-    for i in application:
+    for i in applications_pagination.items:
         applications.append([i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
     student = Students.query.filter(Students.user_id == current_user.user_id).first()
-    return render_template('Student_Application.html', applications = applications, student = student, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
+    return render_template('Student_Application.html', applications = applications, student = student, applications_pagination = applications_pagination, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
 
 @student_bp.route('/Student_Application_Details')
