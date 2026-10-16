@@ -188,15 +188,15 @@ def Student_interview():
     Past_interviews = []
     for r in Past_pagination.items:
         Past_interviews.append([
-            r.Application.Job_Drive.company.company_name,  # [0] Company name
-            r.Application.Job_Drive.title,  # [1] Role
-            r.round_name,  # [2] Interview round
-            r.date,  # [3] Date
-            r.link,  # [4] Interview link
-            r.result,  # [5] Result
-            r.feedback,  # [6] Feedback
-            r.Application.Job_Drive.company.logo_path,  # [7] Company logo
-            r.id  # [8] Interview round ID
+            r.Application.Job_Drive.company.company_name, 
+            r.Application.Job_Drive.title,  
+            r.round_name,  
+            r.date,
+            r.link, 
+            r.result,
+            r.feedback, 
+            r.Application.Job_Drive.company.logo_path, 
+            r.id 
         ])
 
     total_records = Past_pagination.total or 0
@@ -215,7 +215,6 @@ def Student_interview():
 
     Todays_interview = []
     upcoming_interviews = []
-    #Past_interviews = []
 
     for r in rounds:
         if r.date.date() == datetime.date.today():
@@ -232,11 +231,6 @@ def Student_interview():
                 upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
         else:
             pass
-#            if past_search:
-#                if past_search.lower() in r.Application.Job_Drive.company.company_name.lower():
-#                    Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name,r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
-#            else:
-#                Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path, r.id])
 
     student = Students.query.filter(Students.user_id == current_user.user_id).first()
 
