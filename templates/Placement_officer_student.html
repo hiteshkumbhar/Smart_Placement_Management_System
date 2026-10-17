@@ -487,7 +487,7 @@
         border-top-right-radius: 16px;
         border-top-left-radius: 16px;
         background: var(--student-card);
-box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
     }
 
     .table-header {
@@ -684,6 +684,98 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
         color: var(--student-muted);
         font-size: 13px;
     }
+
+
+    /* Application pagination (adapted from Student_interview.html) */
+    .application-pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 4px 4px;
+        margin: 0px 10px 10px 10px;
+    }
+
+    .application-pagination-info {
+        color: #1e293b;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .application-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .application-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 42px;
+        padding: 0 13px;
+        border: 1px solid #dfe3ea;
+        border-radius: 10px;
+        background: #fff;
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    a.application-page-btn:hover {
+        border-color: #5146e8;
+        color: #5146e8;
+        background: #f5f3ff;
+    }
+
+    .application-page-btn.application-active {
+        color: #fff;
+        background: #5146e8;
+        border-color: #5146e8;
+        font-weight: 600;
+    }
+
+    .application-page-btn.application-prev-next {
+        padding: 0 16px;
+    }
+
+    .application-page-btn.application-disabled {
+        color: #b8bec9;
+        background: #fafafa;
+        border-color: #e1e4ea;
+        cursor: not-allowed;
+    }
+
+    .application-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        color: #7c8595;
+        font-size: 18px;
+    }
+
+    .application-arrow {
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        flex-shrink: 0;
+    }
+
+    .application-left-arrow {
+        transform: rotate(-135deg);
+    }
+
+    .application-right-arrow {
+        transform: rotate(45deg);
+    }
+
 </style>
 {% endblock %}
 
@@ -740,7 +832,8 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
             </div>
 
             <div class="students-toolbar">
-                <form class="search-form" method="GET" action="{{ url_for('Placement_officer.Placement_officer_student') }}">
+                <form class="search-form" method="GET"
+                    action="{{ url_for('Placement_officer.Placement_officer_student') }}">
                     <div class="search-box">
                         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -776,7 +869,7 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
                                     <option value="Pending">Pending</option>
                                     <option value="Verified">Verified</option>
                                     <option value="Rejected">Rejected</option>
-                                    <option value="Reuploaded">Reuploaded</option>                                    
+                                    <option value="Reuploaded">Reuploaded</option>
                                 </select>
                             </div>
 
@@ -819,87 +912,172 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
                 </div>
                 <div class="student-count">
                     <span class="student-count-dot"></span>
-                    {{ students|length }} student{% if students|length != 1 %}s{% endif %}
+                    {{ students_pagination.total }} student{% if students_pagination.total != 1 %}s{% endif %}
                 </div>
             </div>
 
-        <div class="table-wrapper">
-            {% if students %}
-            <table class="students-table">
-                <thead>
-                    <tr>
-                        <th>Student name</th>
-                        <th>Branch</th>
-                        <th>Graduation Year</th>
-                        <th>Resume Status</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
+            <div class="table-wrapper">
+                {% if students %}
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Student name</th>
+                            <th>Branch</th>
+                            <th>Graduation Year</th>
+                            <th>Resume Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    {% for student in students %}
-                    {% set student_name = student.user.name or 'Student' %}
-                    {% set status = student.resume_status or 'Pending' %}
-                    {% set status_class = 'status-' ~ status|lower if status|lower in ['pending', 'verified',
-                    'rejected'] else 'status-default' %}
+                    <tbody>
+                        {% for student in students %}
+                        {% set student_name = student.user.name or 'Student' %}
+                        {% set status = student.resume_status or 'Pending' %}
+                        {% set status_class = 'status-' ~ status|lower if status|lower in ['pending', 'verified',
+                        'rejected'] else 'status-default' %}
 
-                    <tr>
-                        <td>
-                            <div class="student-cell">
-                                <span class="student-name">{{ student_name }}</span>
-                            </div>
-                        </td>
+                        <tr>
+                            <td>
+                                <div class="student-cell">
+                                    <span class="student-name">{{ student_name }}</span>
+                                </div>
+                            </td>
 
-                        <td class="muted-cell">{{ student.branch or '—' }}</td>
+                            <td class="muted-cell">{{ student.branch or '—' }}</td>
 
-                        <td>
-                            <span class="year-badge">{{ student.graduation_year or '—' }}</span>
-                        </td>
+                            <td>
+                                <span class="year-badge">{{ student.graduation_year or '—' }}</span>
+                            </td>
 
-                        <td>
-                            <span class="status-badge {{ status_class }}">
-                                <span class="status-dot"></span>
-                                {{ status }}
-                            </span>
-                        </td>
+                            <td>
+                                <span class="status-badge {{ status_class }}">
+                                    <span class="status-dot"></span>
+                                    {{ status }}
+                                </span>
+                            </td>
 
-                        <td>
-                            <form method="POST" action="{{ url_for('Placement_officer.Placement_officer_student') }}">
-                                <input type="hidden" name="Student_details" value="{{ student.id }}">
-                                <input type="hidden" name="mode" value="view_details">
-                                <button type="submit" class="view-button">
-                                    View Details
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M5 12h14"></path>
-                                        <path d="m13 6 6 6-6 6"></path>
-                                    </svg>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
+                            <td>
+                                <form method="POST"
+                                    action="{{ url_for('Placement_officer.Placement_officer_student') }}">
+                                    <input type="hidden" name="Student_details" value="{{ student.id }}">
+                                    <input type="hidden" name="mode" value="view_details">
+                                    <button type="submit" class="view-button">
+                                        View Details
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M5 12h14"></path>
+                                            <path d="m13 6 6 6-6 6"></path>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if students_pagination is defined and students_pagination %}
+                <div class="application-pagination-container">
+
+                    <div class="application-pagination-info">
+                        Showing {{ students_pagination.first or 0 }}–{{ students_pagination.last or 0 }}
+                        of {{ students_pagination.total }} students
+                    </div>
+
+                    <nav class="application-pagination" aria-label="Student pagination">
+
+                        <!-- Previous button -->
+                        {% if students_pagination.has_prev %}
+                        <a href="{{ url_for(
+            'Placement_officer.Placement_officer_student',
+            page=students_pagination.prev_num,
+            Search=request.args.get('Search'),
+            status=request.args.get('status'),
+            graduation_year=request.args.get('graduation_year'),
+            branch=request.args.get('branch')
+        ) }}" class="application-page-btn application-prev-next">
+
+                            <span class="application-arrow application-left-arrow"></span>
+                            <span>Previous</span>
+                        </a>
+                        {% else %}
+                        <span class="application-page-btn application-prev-next application-disabled">
+                            <span class="application-arrow application-left-arrow"></span>
+                            <span>Previous</span>
+                        </span>
+                        {% endif %}
+
+                        <!-- Page numbers -->
+                        {% for p in students_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                        ) %}
+
+                        {% if p %}
+
+                        {% if p == students_pagination.page %}
+                        <span class="application-page-btn application-active" aria-current="page">{{ p }}</span>
+                        {% else %}
+                        <a href="{{ url_for(
+                    'Placement_officer.Placement_officer_student',
+                    page=p,
+                    Search=request.args.get('Search'),
+                    status=request.args.get('status'),
+                    graduation_year=request.args.get('graduation_year'),
+                    branch=request.args.get('branch')
+                ) }}" class="application-page-btn">{{ p }}</a>
+                        {% endif %}
+
+                        {% else %}
+                        <span class="application-ellipsis">…</span>
+                        {% endif %}
+
+                        {% endfor %}
+
+                        <!-- Next button -->
+                        {% if students_pagination.has_next %}
+                        <a href="{{ url_for(
+            'Placement_officer.Placement_officer_student',
+            page=students_pagination.next_num,
+            Search=request.args.get('Search'),
+            status=request.args.get('status'),
+            graduation_year=request.args.get('graduation_year'),
+            branch=request.args.get('branch')
+        ) }}" class="application-page-btn application-prev-next">
+
+                            <span>Next</span>
+                            <span class="application-arrow application-right-arrow"></span>
+                        </a>
+                        {% else %}
+                        <span class="application-page-btn application-prev-next application-disabled">
+                            <span>Next</span>
+                            <span class="application-arrow application-right-arrow"></span>
+                        </span>
+                        {% endif %}
+
+                    </nav>
                 </div>
-                <h3>No students found</h3>
-                <p>Try changing your search or filter criteria.</p>
+                {% endif %}
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3>No students found</h3>
+                    <p>Try changing your search or filter criteria.</p>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
-</div>
 </div>
 
 <script>
