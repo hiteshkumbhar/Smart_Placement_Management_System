@@ -190,8 +190,11 @@ def Placement_officer_student():
 
     if request.args.get('Search') is not None:
         search = request.args.get('Search')
-        students = Students.query.filter(Students.user.has(Users.name.ilike(f"%{search}%"))).all()
-        return render_template('Placement_officer_student.html', students=students, graduation_years = graduation_years, branches = branches)
+        page = request.args.get('page', 1, type=int)
+        query = Students.query.filter(Students.user.has(Users.name.ilike(f"%{search}%")))
+        students_pagination = query.paginate(page=page,per_page=5,error_out=False)
+        students = students_pagination.items
+        return render_template('Placement_officer_student.html',students=students,students_pagination=students_pagination,graduation_years=graduation_years,branches=branches)
 
     if request.args.get('status') or request.args.get('graduation_year') or request.args.get('branch'):
         status = request.args.get('status')
@@ -209,14 +212,15 @@ def Placement_officer_student():
         if branch:
             query = query.filter(Students.branch == branch)
 
-        students = query.all()
-        return render_template('Placement_officer_student.html', students=students, graduation_years = graduation_years, branches = branches)
+        page = request.args.get('page', 1, type=int)
+        students_pagination = query.paginate(page=page,per_page=5,error_out=False)
+        students = students_pagination.items
+        return render_template('Placement_officer_student.html',students=students,students_pagination=students_pagination,graduation_years=graduation_years,branches=branches)
 
     if request.method == 'POST':
         student = Students.query.filter_by(id=request.form.get('Student_details')).first_or_404()
         applications = Applications.query.filter_by(student_id=request.form.get('Student_details')).all()
         student_drives = student.job_drive.split(',') if student.job_drive else None
-        print(student_drives)
         opted_outs = [job for job in Job_Drives.query.all() if job.opt_out and str(request.form.get('Student_details')) in job.opt_out]
         apps = []
         if applications:
@@ -273,8 +277,12 @@ def Placement_officer_student():
             db.session.commit()
             return render_template('Placement_officer_student_details.html', student=student, certifications=certifications, graduation_years = graduation_years, branches = branches, applications = apps )
 
-    students = Students.query.all()
-    return render_template('Placement_officer_student.html', students = students, graduation_years = graduation_years, branches = branches)
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+
+    students_pagination = Students.query.paginate(page=page,per_page=per_page,error_out=False)
+    students = students_pagination.items
+    return render_template('Placement_officer_student.html',students=students,students_pagination=students_pagination,graduation_years=graduation_years,branches=branches)
 
 
 @officer_bp.route('/Analytics', methods = ['GET','POST'])
