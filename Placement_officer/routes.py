@@ -141,41 +141,58 @@ def Placement_officer_Job_drive():
 @officer_bp.route('/Placement_Officer_Interview', methods = ['GET','POST'])
 @login_required
 def Placement_Officer_Interview():
-
     if current_user.role != "Placement_Officer":
-        abort(403)  # Forbidden
+        abort(403)
 
-    rounds = Interview_Rounds.query.all()
+    today_search = request.args.get('today_search', '')
+    upcoming_search = request.args.get('upcoming_search', '')
+    past_search = request.args.get('past_search', '')
 
-    today_search = request.form.get('today_search')
-    upcoming_search = request.form.get('upcoming_search')
-    past_search = request.form.get('past_search')
+    # Pagination settings
+    per_page = 5
 
-    Todays_interview = []
-    upcoming_interviews = []
-    Past_interviews = []
+    today_page = request.args.get('today_page', 1, type=int)
+    upcoming_page = request.args.get('upcoming_page', 1, type=int)
+    past_page = request.args.get('past_page', 1, type=int)
 
-    for r in rounds:
-        if r.date.date() == datetime.date.today():
-            if today_search:
-                if today_search.lower() in r.Application.Job_Drive.company.company_name.lower() or today_search.lower() in r.Application.student.user.name.lower() or today_search.lower() in r.Application.Job_Drive.title.lower():
-                    Todays_interview.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
-            else:
-                Todays_interview.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
-        elif r.date.date() > datetime.date.today():
-            if upcoming_search:
-                if upcoming_search.lower() in r.Application.Job_Drive.company.company_name.lower() or upcoming_search.lower() in r.Application.student.user.name.lower() or upcoming_search.lower() in r.Application.Job_Drive.title.lower():
-                    upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
-            else:
-                upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
-        else:
-            if past_search:
-                if past_search.lower() in r.Application.Job_Drive.company.company_name.lower() or past_search.lower() in r.Application.student.user.name.lower() or past_search.lower() in r.Application.Job_Drive.title.lower():
-                    Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
-            else:
-                Past_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title,r.Application.student.user.name, r.round_name, r.date, r.link, r.result, r.feedback, r.Application.Job_Drive.company.logo_path,r.id])
+    today = datetime.date.today()
 
-    return render_template('Placement_Officer_Interview.html', Todays_interview=Todays_interview, upcoming_interviews=upcoming_interviews, Past_interviews=Past_interviews)
+    today_start = datetime.datetime.combine(today, datetime.time.min)
+
+    tomorrow_start = today_start + datetime.timedelta(days=1)
+
+    base_query = (Interview_Rounds.query.join(Interview_Rounds.Application).join(Applications.student).join(Students.user).join(Applications.Job_Drive).join(Job_Drives.company))
+
+    today_query = base_query.filter(Interview_Rounds.date >= today_start,Interview_Rounds.date < tomorrow_start)
+
+    if today_search:
+        search_term = f"%{today_search}%"
+        today_query = today_query.filter(or_(Companies.company_name.ilike(search_term),Users.name.ilike(search_term),Job_Drives.title.ilike(search_term)))
+
+    upcoming_query = base_query.filter(Interview_Rounds.date >= tomorrow_start)
+
+    if upcoming_search:
+        search_term = f"%{upcoming_search}%"
+        upcoming_query = upcoming_query.filter(or_(Companies.company_name.ilike(search_term),Users.name.ilike(search_term),Job_Drives.title.ilike(search_term)))
+
+    past_query = base_query.filter(Interview_Rounds.date < today_start)
+
+    if past_search:
+        search_term = f"%{past_search}%"
+        past_query = past_query.filter(or_(Companies.company_name.ilike(search_term),Users.name.ilike(search_term),Job_Drives.title.ilike(search_term)))
+
+    Today_pagination = today_query.order_by(Interview_Rounds.date.asc()).paginate(page=today_page,per_page=per_page,error_out=False)
+    Upcoming_pagination = upcoming_query.order_by(Interview_Rounds.date.asc()).paginate(page=upcoming_page,per_page=per_page,error_out=False)
+    Past_pagination = past_query.order_by(Interview_Rounds.date.desc()).paginate(page=past_page,per_page=per_page,error_out=False)
+
+    def format_interviews(interviews):
+        return [[r.Application.Job_Drive.company.company_name,r.Application.Job_Drive.title,r.Application.student.user.name,r.round_name,r.date,r.link,r.result,r.feedback,r.Application.Job_Drive.company.logo_path,r.id] for r in interviews]
+
+    Todays_interview = format_interviews(Today_pagination.items)
+    upcoming_interviews = format_interviews(Upcoming_pagination.items)
+    Past_interviews = format_interviews(Past_pagination.items)
+
+    return render_template('Placement_Officer_Interview.html',Todays_interview=Todays_interview, upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews, Today_pagination=Today_pagination, Upcoming_pagination=Upcoming_pagination, Past_pagination=Past_pagination, today_search=today_search, upcoming_search=upcoming_search, past_search=past_search)
 
 
 @officer_bp.route('/students', methods = ['GET','POST'])
