@@ -232,7 +232,6 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        flex: 1;
         margin: 0 auto;
         color: #17233f;
     }
@@ -279,15 +278,15 @@
     }
 
     .interview-section {
-        height: 100%;
-        min-height: 0;
+           height: auto;
+        min-height: auto;
         background: #fff;
         border: 1px solid #edf0f6;
         border-radius: 16px;
         padding: 22px 22px 18px;
         margin-bottom: 22px;
         box-shadow: 0 8px 28px rgba(31, 43, 73, 0.07);
-        overflow: hidden;
+        overflow: visible;
         display: flex;
         flex-direction: column;
     }
@@ -395,9 +394,10 @@
 
     .table-scroll {
         width: 100%;
-        flex: 1;
-        min-height: 0;
-        overflow: auto;
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
         border: 1px solid #e9ecf3;
         border-radius: 11px;
     }
@@ -773,11 +773,9 @@
     .scrollable-bottom-section {
         padding: 0px 24px 20px;
         flex: 1;
-        /* Take up the remaining space */
-        overflow: hidden;
-        /* Allow scrolling inside this section */
+        overflow-y: auto;
+        overflow-x: hidden; 
         min-height: 0;
-        /* Ensures the flex child can scroll */
     }
 
 
@@ -822,6 +820,105 @@
         border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
     }
+
+
+    /* Past Interviews Pagination */
+
+.past-pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 4px 4px;
+    flex-shrink: 0;
+}
+
+.past-pagination-info {
+    color: #1e293b;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.past-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.past-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-width: 42px;
+    height: 42px;
+    padding: 0 13px;
+
+    border: 1px solid #dfe3ea;
+    border-radius: 10px;
+
+    background: #fff;
+    color: #1e293b;
+
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: all 0.2s ease;
+}
+
+a.past-page-btn:hover {
+    border-color: #6350d7;
+    color: #6350d7;
+    background: #f5f3ff;
+}
+
+.past-page-btn.past-active {
+    color: #fff;
+    background: #6350d7;
+    border-color: #6350d7;
+    font-weight: 600;
+}
+
+.past-page-btn.past-prev-next {
+    padding: 0 16px;
+}
+
+.past-page-btn.past-disabled {
+    color: #b8bec9;
+    background: #fafafa;
+    border-color: #e1e4ea;
+    cursor: not-allowed;
+}
+
+.past-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    color: #7c8595;
+    font-size: 18px;
+}
+
+.past-arrow {
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    flex-shrink: 0;
+}
+
+.past-left-arrow {
+    transform: rotate(-135deg);
+}
+
+.past-right-arrow {
+    transform: rotate(45deg);
+}
+
 </style>
 {%endblock%}
 
@@ -879,11 +976,11 @@
                 <p>Track interview journey and results</p>
             </div>
             <div>
-                <form method="POST" id="interview-search-form" class="interview-controls"
+                <form method="GET" id="interview-search-form" class="interview-controls"
                     action="{{ url_for('Placement_officer.Placement_Officer_Interview') }}">
                     <div class="search">
                         <span class="icon">🔍</span>
-                        <input type="text" id="interview-search" name="today_search"
+                        <input type="text" id="interview-search" name="today_search" value="{{ today_search if today_search else (past_search if past_search else upcoming_search) }}"
                             placeholder="Search today's interviews...">
                     </div>
 
@@ -999,7 +1096,7 @@
                     <h2>Today's Interview</h2>
                 </div>
                 <div>
-                    <span class="count-badge">Total: {{ Todays_interview |length }}</span>
+                    <span class="count-badge">Total: {{ Today_pagination.total }}</span>
                 </div>
             </div>
 
@@ -1096,6 +1193,80 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Today's Interviews Pagination -->
+            <div class="past-pagination-container">
+
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Today_pagination.first or 0 }}–{{ Today_pagination.last or 0 }}
+                    of {{ Today_pagination.total }}
+                </div>
+
+                <nav class="past-pagination" aria-label="Today's interviews pagination">
+
+                    {% if Today_pagination.has_prev %}
+                    <a href="{{ url_for(
+            'Placement_officer.Placement_Officer_Interview',
+            today_page=Today_pagination.prev_num,
+                today_search=today_search
+        ) }}#today-interviews" class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    {% for p in Today_pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
+                    ) %}
+
+                    {% if p %}
+
+                    {% if p == Today_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for(
+                    'Placement_officer.Placement_Officer_Interview',
+                    today_page=p,
+                        today_search=today_search
+                ) }}#today-interviews" class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
+
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
+
+                    {% endfor %}
+
+                    {% if Today_pagination.has_next %}
+                    <a href="{{ url_for(
+            'Placement_officer.Placement_Officer_Interview',
+            today_page=Today_pagination.next_num,
+                today_search=today_search
+        ) }}#today-interviews" class="past-page-btn past-prev-next">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+            </div>
             {% for interview_round in Todays_interview %}
             {% if interview_round[7] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[9] }}"
@@ -1156,7 +1327,7 @@
                     <h2>Upcoming Interviews</h2>
                 </div>
                 <div>
-                    <span class="count-badge">Total: {{ upcoming_interviews|length }}</span>
+                    <span class="count-badge">Total: {{ Upcoming_pagination.total }}</span>
                 </div>
             </div>
 
@@ -1252,6 +1423,80 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Upcoming interviews pagination -->
+            <div class="past-pagination-container">
+
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Upcoming_pagination.first or 0 }}–{{ Upcoming_pagination.last or 0 }}
+                    of {{ Upcoming_pagination.total }}
+                </div>
+
+                <nav class="past-pagination" aria-label="Today's interviews pagination">
+
+                    {% if Upcoming_pagination.has_prev %}
+                    <a href="{{ url_for(
+            'Placement_officer.Placement_Officer_Interview',
+            upcoming_page=Upcoming_pagination.prev_num,
+            upcoming_search=upcoming_search
+        ) }}#upcoming-interviews" class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    {% for p in Upcoming_pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
+                    ) %}
+
+                    {% if p %}
+
+                    {% if p == Upcoming_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for(
+                    'Placement_officer.Placement_Officer_Interview',
+                    upcoming_page=p,
+                    upcoming_search=upcoming_search
+                ) }}#upcoming-interviews" class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
+
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
+
+                    {% endfor %}
+
+                    {% if Upcoming_pagination.has_next %}
+                    <a href="{{ url_for(
+            'Placement_officer.Placement_Officer_Interview',
+            upcoming_page=Upcoming_pagination.next_num,
+            upcoming_search=upcoming_search
+        ) }}#upcoming-interviews" class="past-page-btn past-prev-next">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+            </div>
             {% for interview_round in upcoming_interviews %}
             {% if interview_round[7] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[9] }}"
@@ -1303,7 +1548,7 @@
                 </div>
 
                 <div>
-                    <span class="count-badge">Total: {{ Past_interviews|length }}</span>
+                    <span class="count-badge">Total: {{ Past_pagination.total }}</span>
                 </div>
             </div>
 
@@ -1402,6 +1647,80 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Past interviews pagination -->
+            <div class="past-pagination-container">
+
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Past_pagination.first or 0 }}–{{ Past_pagination.last or 0 }}
+                    of {{ Past_pagination.total }}
+                </div>
+
+                <nav class="past-pagination" aria-label="Past interviews pagination">
+
+                    {% if Past_pagination.has_prev %}
+                    <a href="{{ url_for(
+            'Placement_officer.Placement_Officer_Interview',
+            past_page=Past_pagination.prev_num,
+            past_search=past_search
+        ) }}#past-interviews" class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    {% for p in Past_pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
+                    ) %}
+
+                    {% if p %}
+
+                    {% if p == Past_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for(
+                    'Placement_officer.Placement_Officer_Interview',
+                    past_page=p,
+                    past_search=past_search
+                ) }}#past-interviews" class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
+
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
+
+                    {% endfor %}
+
+                    {% if Past_pagination.has_next %}
+                    <a href="{{ url_for(
+            'Placement_officer.Placement_Officer_Interview',
+            past_page=Past_pagination.next_num,
+            past_search=past_search
+        ) }}#past-interviews" class="past-page-btn past-prev-next">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+            </div>
             {% for interview_round in Past_interviews %}
             {% if interview_round[7] %}
             <div class="jd-overlay" id="jdModal{{ interview_round[9] }}"
@@ -1426,30 +1745,32 @@
 <script>
 
     function filterInterviews(filter) {
-        sessionStorage.setItem("selectedInterviewFilter", filter);
-        const todaySection = document.getElementById("today-interviews");
-        const pastSection = document.getElementById("past-interviews");
-        const upcomingSection = document.getElementById("upcoming-interviews");
+    sessionStorage.setItem("selectedInterviewFilter", filter);
 
-        const searchBox = document.getElementById("interview-search");
+    const todaySection = document.getElementById("today-interviews");
+    const pastSection = document.getElementById("past-interviews");
+    const upcomingSection = document.getElementById("upcoming-interviews");
+    const searchBox = document.getElementById("interview-search");
 
-        // Show only the selected section
-        todaySection.style.display = filter === "today" ? "" : "none";
-        pastSection.style.display = filter === "past" ? "" : "none";
-        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+    // Show only the selected section
+    todaySection.style.display = filter === "today" ? "" : "none";
+    pastSection.style.display = filter === "past" ? "" : "none";
+    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
 
-        // Set the backend field name and placeholder
-        if (filter === "today") {
-            searchBox.name = "today_search";
-            searchBox.placeholder = "Search Company/ Job Title/ Student";
-        } else if (filter === "past") {
-            searchBox.name = "past_search";
-            searchBox.placeholder = "Search Company/ Job Title/ Student";
-        } else if (filter === "upcoming") {
-            searchBox.name = "upcoming_search";
-            searchBox.placeholder = "Search Company/ Job Title/ Student";
-        }
+    // Set the correct search field, value, and placeholder
+    if (filter === "today") {
+        searchBox.name = "today_search";
+        searchBox.value = {{ today_search|tojson }};
+    } else if (filter === "past") {
+        searchBox.name = "past_search";
+        searchBox.value = {{ past_search|tojson }};
+    } else if (filter === "upcoming") {
+        searchBox.name = "upcoming_search";
+        searchBox.value = {{ upcoming_search|tojson }};
     }
+
+    searchBox.placeholder = "Search Company / Job Title / Student";
+}
 
     document.addEventListener("DOMContentLoaded", function () {
         const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
