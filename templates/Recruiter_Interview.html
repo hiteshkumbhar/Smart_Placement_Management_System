@@ -1143,7 +1143,8 @@
                         </tr>{% endfor %}
                     </tbody>
                 </table>
-                <!-- Past Interviews Pagination -->
+            </div>
+            <!-- Past Interviews Pagination -->
                 <div class="past-pagination-container">
                     <!-- Record count -->
                     <div class="past-pagination-info">
@@ -1183,7 +1184,8 @@
                             {{ p }}
                         </span>
                         {% else %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=p,today_search=request.args.get('today_search', '')) }}#today-interviews" class="past-page-btn">
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=p,today_search=request.args.get('today_search', '')) }}#today-interviews"
+                            class="past-page-btn">
                             {{ p }}
                         </a>
                         {% endif %}
@@ -1227,7 +1229,6 @@
                 </div>
                 {% endif %}
                 {% endfor %}
-            </div>
         </section>
         <section id="upcoming-interviews" class="interview-section">
             <div class="section-header">
@@ -1297,7 +1298,8 @@
                         </tr>{% endfor %}
                     </tbody>
                 </table>
-                <!-- Upcoming Interviews Pagination -->
+            </div>
+            <!-- Upcoming Interviews Pagination -->
                 <div class="past-pagination-container">
                     <!-- Record count -->
                     <div class="past-pagination-info">
@@ -1338,7 +1340,8 @@
                         </span>
                         {% else %}
                         <a href="{{ url_for('Recruiter.Recruiter_Interview',
-                                                upcoming_page=p,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews" class="past-page-btn">
+                                                upcoming_page=p,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
+                            class="past-page-btn">
                             {{ p }}
                         </a>
                         {% endif %}
@@ -1384,7 +1387,6 @@
                 </div>
                 {% endif %}
                 {% endfor %}
-            </div>
         </section>
     </div>
     <div id="feedbackModal" class="feedback-modal-overlay" onclick="closeFeedbackModal(event)" aria-hidden="true">
@@ -1412,57 +1414,57 @@
 </div>
 <script>
 
-function filterInterviews(filter) {
+    function filterInterviews(filter) {
 
-    // Remember the selected section
-    sessionStorage.setItem("selectedInterviewFilter", filter);
+        // Remember the selected section
+        sessionStorage.setItem("selectedInterviewFilter", filter);
 
-    // NEW: Update the hidden input
-    document.getElementById("selected-filter").value = filter;
+        // NEW: Update the hidden input
+        document.getElementById("selected-filter").value = filter;
 
-    const todaySection = document.getElementById("today-interviews");
-    const upcomingSection = document.getElementById("upcoming-interviews");
-    const searchBox = document.getElementById("interview-search");
+        const todaySection = document.getElementById("today-interviews");
+        const upcomingSection = document.getElementById("upcoming-interviews");
+        const searchBox = document.getElementById("interview-search");
 
-    // Display only the selected section
-    todaySection.style.display = filter === "today" ? "" : "none";
-    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+        // Display only the selected section
+        todaySection.style.display = filter === "today" ? "" : "none";
+        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
 
-    // Update the search parameter and placeholder
-    if (filter === "today") {
+        // Update the search parameter and placeholder
+        if (filter === "today") {
 
-        searchBox.name = "today_search";
-        searchBox.placeholder = "Search today's interviews...";
+            searchBox.name = "today_search";
+            searchBox.placeholder = "Search today's interviews...";
 
-    } else {
+        } else {
 
-        searchBox.name = "upcoming_search";
-        searchBox.placeholder = "Search upcoming interviews...";
+            searchBox.name = "upcoming_search";
+            searchBox.placeholder = "Search upcoming interviews...";
 
-    }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    // Read the selected section from the URL first
-    const params = new URLSearchParams(window.location.search);
-
-    let savedFilter = params.get("selected_filter")
-        || sessionStorage.getItem("selectedInterviewFilter")
-        || "today";
-
-    // Validate the selected section
-    if (savedFilter !== "today" && savedFilter !== "upcoming") {
-        savedFilter = "today";
+        }
     }
 
-    // Restore the dropdown selection
-    document.getElementById("interview-filter").value = savedFilter;
+    document.addEventListener("DOMContentLoaded", function () {
 
-    // Restore the correct section and search parameter
-    filterInterviews(savedFilter);
+        // Read the selected section from the URL first
+        const params = new URLSearchParams(window.location.search);
 
-});
+        let savedFilter = params.get("selected_filter")
+            || sessionStorage.getItem("selectedInterviewFilter")
+            || "today";
+
+        // Validate the selected section
+        if (savedFilter !== "today" && savedFilter !== "upcoming") {
+            savedFilter = "today";
+        }
+
+        // Restore the dropdown selection
+        document.getElementById("interview-filter").value = savedFilter;
+
+        // Restore the correct section and search parameter
+        filterInterviews(savedFilter);
+
+    });
 
     function openFeedbackModal(roundId) {
         document.getElementById('feedbackRoundId').value = roundId;
