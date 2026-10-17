@@ -350,9 +350,12 @@ def Companies_info():
 
     mode = request.args.get('mode','ViewAll')
     search = request.args.get("search", "").strip()
+    page = request.args.get('page', 1, type=int)
+
     if search:
         query = Companies.query.filter(or_(Companies.company_name.ilike(f"%{search}%"),Companies.industry.ilike(f"%{search}%"),Companies.hr_name.ilike(f"%{search}%")), Companies.creater_id == current_user.user_id)
-        companies = query.order_by(Companies.company_name).all()
+        companies_pagination = query.order_by(Companies.company_name).paginate(page=page,per_page=10,error_out=False)
+        companies = companies_pagination.items
 
         a = []
 
@@ -360,9 +363,10 @@ def Companies_info():
             a.append([company.company_name, company.logo_path, company.industry, company.website, company.hr_name,
                       company.phone, company.email, company.address,
                       Job_Drives.query.filter(Job_Drives.company_id == company.id, Job_Drives.status != 'Closed').count(), company.id])
-        return render_template('Companies_info.html', companies=a, mode=mode)
+        return render_template('Companies_info.html', companies=a, mode=mode, companies_pagination=companies_pagination)
 
-    companies = Companies.query.filter(Companies.creater_id == current_user.user_id).all()
+    companies_pagination = Companies.query.filter(Companies.creater_id == current_user.user_id).order_by(Companies.company_name).paginate(page=page,per_page=10,error_out=False)
+    companies = companies_pagination.items
     a = []
     for company in companies:
         a.append([company.company_name, company.logo_path, company.industry, company.website, company.hr_name,  company.phone, company.email,company.address, Job_Drives.query.filter(Job_Drives.company_id == company.id).count() ,company.id])
@@ -371,10 +375,9 @@ def Companies_info():
         if t_company is None:
             abort(403)
         target_company = [t_company.company_name, t_company.logo_path, t_company.industry, t_company.website, t_company.hr_name, t_company.phone, t_company.email, t_company.address, Job_Drives.query.filter(Job_Drives.company_id == t_company.id).count(), t_company.id]
-        return render_template('Companies_info.html', companies=a, mode=mode, target_company = target_company)
+        return render_template('Companies_info.html', companies=a, mode=mode, target_company = target_company, companies_pagination=companies_pagination)
 
-    return render_template('Companies_info.html', companies = a, mode = mode)
-
+    return render_template('Companies_info.html', companies = a, mode = mode, companies_pagination=companies_pagination)
 
 @officer_bp.route('/Company/edit', methods = ['GET','POST'])
 @login_required
