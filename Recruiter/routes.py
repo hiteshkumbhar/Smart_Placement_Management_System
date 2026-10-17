@@ -346,10 +346,21 @@ def Recruiter_Interview():
     if current_user.role != "Recruiter":
         abort(403)
 
+    today_start = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
+    tomorrow_start = today_start + datetime.timedelta(days=1)
+    PER_PAGE = 5
+
+    try:
+        today_page = int(request.args.get("today_page", 1))
+        upcoming_page = int(request.args.get("upcoming_page", 1))
+    except (ValueError, TypeError):
+        today_page = 1
+        upcoming_page = 1
+
+
     today_search = request.args.get('today_search', '').strip()
     upcoming_search = request.args.get('upcoming_search', '').strip()
 
-    print(today_search, upcoming_search)
 
     if request.method == 'POST':
         round_id = request.form.get('round_id')
@@ -359,18 +370,19 @@ def Recruiter_Interview():
         if mode == 'feedback':
             job_drive = Job_Drives.query.filter_by(creater_id=current_user.user_id).all()
             inner_query = db.session.query(Applications.id).filter(Applications.drive_id.in_([x.id for x in job_drive])).scalar_subquery()
-            interview_rounds = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(inner_query)).all()
+
             today_interview = []
             upcoming_interview = []
-            for round in interview_rounds:
-                if round.date.date() == datetime.date.today():
-                    today_interview.append(
-                        [round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
-                elif round.date.date() >= datetime.date.today():
-                    upcoming_interview.append(
-                        [round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
 
-            return render_template('Recruiter_Interview.html', mode = 'feedback',  today_interview = today_interview, upcoming_interview = upcoming_interview, round_id = round_id)
+            Today_pagination = Interview_Rounds.query.join(Applications,Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies,Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(inner_query),Interview_Rounds.date >= today_start, Interview_Rounds.date < tomorrow_start).paginate(page=today_page, per_page=PER_PAGE, error_out=False)
+            Upcoming_pagination = Interview_Rounds.query.join(Applications,Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies,Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(inner_query),Interview_Rounds.date > tomorrow_start).paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
+
+            for round in Today_pagination.items:
+                today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title,round.Application.student.user.name, round])
+            for round in Upcoming_pagination.items:
+                upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title,round.Application.student.user.name, round])
+
+            return render_template('Recruiter_Interview.html', mode = 'feedback',  today_interview = today_interview, upcoming_interview = upcoming_interview, round_id = round_id, Upcoming_pagination=Upcoming_pagination, Today_pagination=Today_pagination)
 
         elif mode == 'submit_feedback':
             feedback = request.form.get('feedback')
@@ -397,28 +409,31 @@ def Recruiter_Interview():
         return redirect(url_for('Recruiter.Recruiter_Interview'))
 
     job_drive = Job_Drives.query.filter_by(creater_id = current_user.user_id).all()
-
     inner_query = db.session.query(Applications.id).filter(Applications.drive_id.in_([x.id for x in job_drive])).scalar_subquery()
-
-    interview_rounds = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(inner_query)).all()
 
     today_interview = []
     upcoming_interview = []
 
-    for round in interview_rounds:
-        if round.date.date() == datetime.date.today():
-            if today_search:
-                print('today:',today_search, round.Application.Job_Drive.title, round.Application.student.user.name)
-                if today_search.lower() in round.Application.Job_Drive.title.lower() or today_search.lower() in round.Application.student.user.name.lower():
-                    today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
-            else:
-                today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
-        elif round.date.date() >= datetime.date.today():
-            if upcoming_search:
-                print('upcoming:',upcoming_search, round.Application.Job_Drive.title, round.Application.student.user.name)
-                if upcoming_search.lower() in round.Application.Job_Drive.title.lower() or upcoming_search.lower() in round.Application.student.user.name.lower():
-                    upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
-            else:
-                upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+    if today_search:
+        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Students,Applications.student_id == Students.id).join(Users,Students.user_id == Users.user_id).filter(Interview_Rounds.application_id.in_(inner_query),Interview_Rounds.date >= today_start, Interview_Rounds.date < tomorrow_start,or_(Job_Drives.title.ilike(f"%{today_search.strip()}%"),Users.name.ilike(f"%{today_search.strip()}%"))))
+        Today_pagination = base_query.paginate(page=today_page, per_page=PER_PAGE, error_out=False)
+        if Today_pagination.pages and today_page > Today_pagination.pages:
+            today_page = Today_pagination.pages
+            Today_pagination = base_query.paginate(page=today_page, per_page=PER_PAGE, error_out=False)
+    else:
+        Today_pagination = Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(inner_query),Interview_Rounds.date >= today_start, Interview_Rounds.date < tomorrow_start).paginate(page=today_page, per_page=PER_PAGE, error_out=False)
+    if upcoming_search:
+        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Students,Applications.student_id == Students.id).join(Users,Students.user_id == Users.user_id).filter(Interview_Rounds.application_id.in_(inner_query),Interview_Rounds.date > tomorrow_start,or_(Job_Drives.title.ilike(f"%{upcoming_search.strip()}%"),Users.name.ilike(f"%{upcoming_search.strip()}%"))))
+        Upcoming_pagination = base_query.paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
+        if Upcoming_pagination.pages and upcoming_page > Upcoming_pagination.pages:
+            upcoming_page = Upcoming_pagination.pages
+            Upcoming_pagination = base_query.paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
+    else:
+        Upcoming_pagination = Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(inner_query),Interview_Rounds.date > tomorrow_start).paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
 
-    return render_template('Recruiter_Interview.html', today_interview = today_interview, upcoming_interview = upcoming_interview)
+    for round in Today_pagination.items:
+        today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+    for round in Upcoming_pagination.items:
+        upcoming_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title, round.Application.student.user.name, round])
+
+    return render_template('Recruiter_Interview.html', today_interview = today_interview, upcoming_interview = upcoming_interview, Upcoming_pagination=Upcoming_pagination, Today_pagination=Today_pagination)
