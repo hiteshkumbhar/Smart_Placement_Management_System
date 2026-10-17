@@ -339,7 +339,7 @@
         background: var(--company-card);
         border: 1px solid var(--company-border);
         border-radius: var(--company-radius);
-        box-shadow: 0px 0px 5px rgb(209, 209, 209);    
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
     }
 
     .company-table-wrapper {
@@ -654,6 +654,96 @@
         /* Ensures the flex child can scroll */
     }
 
+    /* Application pagination (adapted from Student_interview.html) */
+    .application-pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 4px 4px;
+        margin: 0px 10px 10px 10px;
+    }
+
+    .application-pagination-info {
+        color: #1e293b;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .application-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .application-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 42px;
+        padding: 0 13px;
+        border: 1px solid #dfe3ea;
+        border-radius: 10px;
+        background: #fff;
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    a.application-page-btn:hover {
+        border-color: #5146e8;
+        color: #5146e8;
+        background: #f5f3ff;
+    }
+
+    .application-page-btn.application-active {
+        color: #fff;
+        background: #5146e8;
+        border-color: #5146e8;
+        font-weight: 600;
+    }
+
+    .application-page-btn.application-prev-next {
+        padding: 0 16px;
+    }
+
+    .application-page-btn.application-disabled {
+        color: #b8bec9;
+        background: #fafafa;
+        border-color: #e1e4ea;
+        cursor: not-allowed;
+    }
+
+    .application-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        color: #7c8595;
+        font-size: 18px;
+    }
+
+    .application-arrow {
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        flex-shrink: 0;
+    }
+
+    .application-left-arrow {
+        transform: rotate(-135deg);
+    }
+
+    .application-right-arrow {
+        transform: rotate(45deg);
+    }
+
     .empty-state {
         padding: 45px 20px;
         text-align: center;
@@ -750,7 +840,7 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
     }
 
-.search-form {
+    .search-form {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -834,11 +924,13 @@
                 <a href="{{ url_for('Placement_officer.add_company') }}" class="company-btn company-btn-primary">
                     + Add Company
                 </a>
-                <form method="GET" action="{{ url_for('Placement_officer.Companies_info', mode='ViewAll') }}" class="search-form">
+                <form method="GET" action="{{ url_for('Placement_officer.Companies_info', mode='ViewAll') }}"
+                    class="search-form">
                     <!-- Search -->
                     <div class="search">
                         <span class="icon">🔍</span>
-                        <input type="text" name="search" id="searchInput" placeholder="Name/ Industry/ Hr name" value="{{ request.args.get('search', '') }}" />
+                        <input type="text" name="search" id="searchInput" placeholder="Name/ Industry/ Hr name"
+                            value="{{ request.args.get('search', '') }}" />
                     </div>
                 </form>
             </div>
@@ -903,10 +995,13 @@
                             <td>
                                 <div class="table-actions">
                                     <a class="table-action"
-                                        href="{{ url_for('Placement_officer.Companies_info', id=company[9], mode='view') }}"> View </a>
-                                    <a class="table-action" href="{{ url_for('Placement_officer.edit_company', id=company[9]) }}"> Edit
+                                        href="{{ url_for('Placement_officer.Companies_info', id=company[9], mode='view') }}">
+                                        View </a>
+                                    <a class="table-action"
+                                        href="{{ url_for('Placement_officer.edit_company', id=company[9]) }}"> Edit
                                     </a>
-                                    <a class="table-action delete" href="{{ url_for('Placement_officer.delete_company', id=company[9]) }}"
+                                    <a class="table-action delete"
+                                        href="{{ url_for('Placement_officer.delete_company', id=company[9]) }}"
                                         onclick="return confirm('Are you sure you want to delete {{ company[0] }}?');">
                                         Delete </a>
                                 </div>
@@ -925,6 +1020,69 @@
                     </tbody>
                 </table>
             </div>
+            {% if companies_pagination is defined and companies_pagination %}
+            <!-- Application Pagination -->
+            <div class="application-pagination-container">
+
+                <div class="application-pagination-info">
+                    Showing {{ companies_pagination.first or 0 }}–{{ companies_pagination.last or 0 }}
+                    of {{ companies_pagination.total }} companies
+                </div>
+
+                <nav class="application-pagination" aria-label="Application pagination">
+
+                    <!-- Previous button -->
+                    {% if companies_pagination.has_prev %}
+                    <a href="{{ url_for('Placement_officer.Companies_info',mode='ViewAll',page=companies_pagination.prev_num,search=request.args.get('search', '')) }}"
+                        class="application-page-btn application-prev-next">
+                        <span class="application-arrow application-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="application-page-btn application-prev-next application-disabled">
+                        <span class="application-arrow application-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
+
+                    <!-- Page numbers -->
+                    {% for p in companies_pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
+                    ) %}
+
+                    {% if p %}
+                    {% if p == companies_pagination.page %}
+                    <span class="application-page-btn application-active" aria-current="page">{{ p }}</span>
+                    {% else %}
+                    <a href="{{ url_for('Placement_officer.Companies_info',mode='ViewAll',page=p,search=request.args.get('search', '')) }}"
+                        class="application-page-btn">{{ p }}</a>
+                    {% endif %}
+                    {% else %}
+                    <span class="application-ellipsis">…</span>
+                    {% endif %}
+
+                    {% endfor %}
+
+                    <!-- Next button -->
+                    {% if companies_pagination.has_next %}
+                    <a href="{{ url_for('Placement_officer.Companies_info', mode='ViewAll', page=companies_pagination.next_num, search=request.args.get('search', '')) }}"
+                        class="application-page-btn application-prev-next">
+                        <span>Next</span>
+                        <span class="application-arrow application-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="application-page-btn application-prev-next application-disabled">
+                        <span>Next</span>
+                        <span class="application-arrow application-right-arrow"></span>
+                    </span>
+                    {% endif %}
+
+                </nav>
+            </div>
+            {% endif %}
         </div>
 
         {% elif mode == "view" %}
@@ -985,9 +1143,11 @@
                                 <td>
                                     <div class="table-actions">
                                         <a class="table-action"
-                                            href="{{ url_for('Placement_officer.Companies_info', id=company[9], mode='view') }}"> View
+                                            href="{{ url_for('Placement_officer.Companies_info', id=company[9], mode='view') }}">
+                                            View
                                         </a>
-                                        <a class="table-action" href="{{ url_for('Placement_officer.edit_company', id=company[9]) }}">
+                                        <a class="table-action"
+                                            href="{{ url_for('Placement_officer.edit_company', id=company[9]) }}">
                                             Edit </a>
                                         <a class="table-action delete"
                                             href="{{ url_for('Placement_officer.delete_company', id=company[9]) }}"
@@ -1000,6 +1160,69 @@
                         </tbody>
                     </table>
                 </div>
+                {% if companies_pagination is defined and companies_pagination %}
+                <!-- Application Pagination -->
+                <div class="application-pagination-container">
+
+                    <div class="application-pagination-info">
+                        Showing {{ companies_pagination.first or 0 }}–{{ companies_pagination.last or 0 }}
+                        of {{ companies_pagination.total }} companies
+                    </div>
+
+                    <nav class="application-pagination" aria-label="Application pagination">
+
+                        <!-- Previous button -->
+                        {% if companies_pagination.has_prev %}
+                        <a href="{{ url_for('Placement_officer.Companies_info',mode=mode,id=request.args.get('id'),page=companies_pagination.prev_num,search=request.args.get('search', '')) }}"
+                            class="application-page-btn application-prev-next">
+                            <span class="application-arrow application-left-arrow"></span>
+                            <span>Previous</span>
+                        </a>
+                        {% else %}
+                        <span class="application-page-btn application-prev-next application-disabled">
+                            <span class="application-arrow application-left-arrow"></span>
+                            <span>Previous</span>
+                        </span>
+                        {% endif %}
+
+                        <!-- Page numbers -->
+                        {% for p in companies_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                        ) %}
+
+                        {% if p %}
+                        {% if p == companies_pagination.page %}
+                        <span class="application-page-btn application-active" aria-current="page">{{ p }}</span>
+                        {% else %}
+                        <a href="{{ url_for('Placement_officer.Companies_info',mode=mode,page=p,id=request.args.get('id'),search=request.args.get('search', '')) }}"
+                            class="application-page-btn">{{ p }}</a>
+                        {% endif %}
+                        {% else %}
+                        <span class="application-ellipsis">…</span>
+                        {% endif %}
+
+                        {% endfor %}
+
+                        <!-- Next button -->
+                        {% if companies_pagination.has_next %}
+                        <a href="{{ url_for('Placement_officer.Companies_info', mode=mode, id=request.args.get('id'), page=companies_pagination.next_num, search=request.args.get('search', '')) }}"
+                            class="application-page-btn application-prev-next">
+                            <span>Next</span>
+                            <span class="application-arrow application-right-arrow"></span>
+                        </a>
+                        {% else %}
+                        <span class="application-page-btn application-prev-next application-disabled">
+                            <span>Next</span>
+                            <span class="application-arrow application-right-arrow"></span>
+                        </span>
+                        {% endif %}
+
+                    </nav>
+                </div>
+                {% endif %}
             </div>
 
             <div class="details-section">
