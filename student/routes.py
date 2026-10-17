@@ -160,6 +160,9 @@ def Student_interview():
     if current_user.role != "student":
         abort(403)
 
+    today_start = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
+    tomorrow_start = today_start + datetime.timedelta(days=1)
+
     PER_PAGE = 5
 
     try:
@@ -179,7 +182,7 @@ def Student_interview():
     application_ids = db.session.scalars(db.select(Applications.id).where(Applications.student_id == student.id)).all()
 
     if past_search:
-        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date < datetime.datetime.combine(datetime.date.today(), datetime.time.min),Companies.company_name.ilike(f"%{past_search.strip()}%")))
+        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date < today_start,Companies.company_name.ilike(f"%{past_search.strip()}%")))
         Past_pagination = base_query.paginate(page=page, per_page=PER_PAGE, error_out=False)
         if Past_pagination.pages and page > Past_pagination.pages:
             page = Past_pagination.pages
@@ -187,21 +190,21 @@ def Student_interview():
     else:
         Past_pagination = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date < datetime.datetime.combine(datetime.date.today(), datetime.time.min)).paginate(page=page, per_page=PER_PAGE, error_out=False)
     if today_search:
-        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date == datetime.datetime.combine(datetime.date.today(), datetime.time.min),Companies.company_name.ilike(f"%{today_search.strip()}%")))
+        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date >= today_start, Interview_Rounds.date < tomorrow_start,Companies.company_name.ilike(f"%{today_search.strip()}%")))
         Today_pagination = base_query.paginate(page=today_page, per_page=PER_PAGE, error_out=False)
         if Today_pagination.pages and today_page > Today_pagination.pages:
             today_page = Today_pagination.pages
             Today_pagination = base_query.paginate(page=today_page, per_page=PER_PAGE, error_out=False)
     else:
-        Today_pagination = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date == datetime.datetime.combine(datetime.date.today(), datetime.time.min)).paginate(page=today_page, per_page=PER_PAGE, error_out=False)
+        Today_pagination = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date >= today_start, Interview_Rounds.date < tomorrow_start).paginate(page=today_page, per_page=PER_PAGE, error_out=False)
     if upcoming_search:
-        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date > datetime.datetime.combine(datetime.date.today(), datetime.time.min),Companies.company_name.ilike(f"%{upcoming_search.strip()}%")))
+        base_query = (Interview_Rounds.query.join(Applications, Interview_Rounds.application_id == Applications.id).join(Job_Drives, Applications.drive_id == Job_Drives.id).join(Companies, Job_Drives.company_id == Companies.id).filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date > tomorrow_start,Companies.company_name.ilike(f"%{upcoming_search.strip()}%")))
         Upcoming_pagination = base_query.paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
         if Upcoming_pagination.pages and upcoming_page > Upcoming_pagination.pages:
             upcoming_page = Upcoming_pagination.pages
             Upcoming_pagination = base_query.paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
     else:
-        Upcoming_pagination = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date > datetime.datetime.combine(datetime.date.today(), datetime.time.min)).paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
+        Upcoming_pagination = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(application_ids),Interview_Rounds.date > tomorrow_start).paginate(page=upcoming_page, per_page=PER_PAGE, error_out=False)
 
     Past_interviews = []
     Todays_interview = []
