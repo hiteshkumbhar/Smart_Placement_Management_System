@@ -192,11 +192,9 @@
     .scrollable-bottom-section {
         padding: 0px 24px 20px;
         flex: 1;
-        /* Take up the remaining space */
-        overflow: hidden;
-        /* Allow scrolling inside this section */
+        overflow-y: auto;
+        overflow-x: hidden;
         min-height: 0;
-        /* Ensures the flex child can scroll */
     }
 
     .interview-page {
@@ -274,9 +272,10 @@
 
     .table-wrapper {
         width: 100%;
-        flex: 1;
-        min-height: 0;
-        overflow: auto;
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
         border: 1px solid #e9ecf3;
         border-radius: 11px;
     }
@@ -837,12 +836,11 @@
     }
 
     .interview-section {
-        height: 100%;
-        min-height: 0;
+        height: auto;
+        min-height: auto;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
-
+        overflow: visible;
         background: #fff;
         border: 1px solid #edf0f6;
         border-radius: 16px;
@@ -857,21 +855,21 @@
     }
 
     .section-icon {
-    width: 38px;
-    height: 38px;
-    flex: 0 0 38px;
-    display: grid;
-    place-items: center;
-    border-radius: 10px;
-}
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+    }
 
-.today-icon {
-    background: #fff0e8;
-}
+    .today-icon {
+        background: #fff0e8;
+    }
 
-.upcoming-icon {
-    background: #e9f8ee;
-}
+    .upcoming-icon {
+        background: #e9f8ee;
+    }
 
     /* Today's section accent */
     .today-section .section-title {
@@ -891,6 +889,101 @@
     #upcoming-interviews .section-count {
         color: #9141ac;
         background: #f6eaf8;
+    }
+
+    .past-pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 4px 4px;
+        flex-shrink: 0;
+    }
+
+    .past-pagination-info {
+        color: #1e293b;
+        font-size: 15px;
+        white-space: nowrap;
+    }
+
+    .past-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .past-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+
+        min-width: 42px;
+        height: 42px;
+        padding: 0 13px;
+
+        border: 1px solid #dfe3ea;
+        border-radius: 10px;
+
+        background: #fff;
+        color: #1e293b;
+
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+
+        transition: all 0.2s ease;
+    }
+
+    a.past-page-btn:hover {
+        border-color: #6350d7;
+        color: #6350d7;
+        background: #f5f3ff;
+    }
+
+    .past-page-btn.past-active {
+        color: #fff;
+        background: #6350d7;
+        border-color: #6350d7;
+        font-weight: 600;
+    }
+
+    .past-page-btn.past-prev-next {
+        padding: 0 16px;
+    }
+
+    .past-page-btn.past-disabled {
+        color: #b8bec9;
+        background: #fafafa;
+        border-color: #e1e4ea;
+        cursor: not-allowed;
+    }
+
+    .past-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        color: #7c8595;
+        font-size: 18px;
+    }
+
+    .past-arrow {
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        flex-shrink: 0;
+    }
+
+    .past-left-arrow {
+        transform: rotate(-135deg);
+    }
+
+    .past-right-arrow {
+        transform: rotate(45deg);
     }
 </style>
 {% endblock %}
@@ -941,16 +1034,28 @@
                 <form method="GET" id="interview-search-form"
                     style="display: flex; gap: 10px; justify-content: space-between;"
                     action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+
+                    <!-- NEW: Preserve the selected interview section -->
+                    <input type="hidden" id="selected-filter" name="selected_filter"
+                        value="{{ request.args.get('selected_filter', 'today') }}">
+
                     <div class="search">
                         <span class="icon">🔍</span>
-                        <input type="text" id="interview-search" name="today_search" placeholder="Search today's interviews...">
+
+                        <input type="text" id="interview-search" name="today_search"
+                            value="{{ request.args.get('today_search', request.args.get('upcoming_search', '')) }}"
+                            placeholder="Search today's interviews...">
                     </div>
+
                     <div class="job-filter">
                         <select id="interview-filter" onchange="filterInterviews(this.value)">
+
                             <option value="today">Today's Interview</option>
                             <option value="upcoming">Upcoming Interviews</option>
+
                         </select>
                     </div>
+
                 </form>
             </div>
             <p>Review today's interviews, upcoming schedules, feedback and candidate results.</p>
@@ -962,8 +1067,9 @@
 
             <div class="section-header">
                 <h2 class="section-title">
-                    <div class="section-icon today-icon"><svg fill="#1a5fb4" width="35px" height="35px" viewBox="-3 0 19 19"
-                            xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;">
+                    <div class="section-icon today-icon"><svg fill="#1a5fb4" width="35px" height="35px"
+                            viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg"
+                            style="background: #e3f0fc;">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                             <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                             <g id="SVGRepo_iconCarrier">
@@ -973,8 +1079,7 @@
                             </g>
                         </svg></div>
                     &nbsp; Today's Interviews
-                </h2><span class="section-count">Total: {{ today_interview|length
-                    }}&nbsp;interviews</span>
+                </h2><span class="section-count">Total: {{ Today_pagination.total }}&nbsp;interviews</span>
             </div>
             <div class="table-wrapper">
                 <table class="interview-table">
@@ -1038,7 +1143,73 @@
                         </tr>{% endfor %}
                     </tbody>
                 </table>
+                <!-- Past Interviews Pagination -->
+                <div class="past-pagination-container">
+                    <!-- Record count -->
+                    <div class="past-pagination-info">
+                        Showing
+                        {{ Today_pagination.first or 0 }}–{{ Today_pagination.last or 0 }}
+                        of {{ Today_pagination.total }}
+                    </div>
 
+                    <nav class="past-pagination" aria-label="Past interviews pagination">
+
+                        <!-- Previous -->
+                        {% if Today_pagination.has_prev %}
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=Today_pagination.prev_num, today_search=request.args.get('today_search', '')) }}#today-interviews"
+                            class="past-page-btn past-prev-next">
+                            <span class="past-arrow past-left-arrow"></span>
+                            <span>Previous</span>
+                        </a>
+                        {% else %}
+                        <span class="past-page-btn past-prev-next past-disabled">
+                            <span class="past-arrow past-left-arrow"></span>
+                            <span>Previous</span>
+                        </span>
+                        {% endif %}
+
+                        <!-- Page numbers -->
+                        {% for p in Today_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                        ) %}
+
+                        {% if p %}
+
+                        {% if p == Today_pagination.page %}
+                        <span class="past-page-btn past-active" aria-current="page">
+                            {{ p }}
+                        </span>
+                        {% else %}
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=p,today_search=request.args.get('today_search', '')) }}#today-interviews" class="past-page-btn">
+                            {{ p }}
+                        </a>
+                        {% endif %}
+
+                        {% else %}
+                        <span class="past-ellipsis">…</span>
+                        {% endif %}
+
+                        {% endfor %}
+
+                        <!-- Next -->
+                        {% if Today_pagination.has_next %}
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview',
+                                        today_page=Today_pagination.next_num, today_search=request.args.get('today_search', '')) }}#today-interviews"
+                            class="past-page-btn past-prev-next">
+                            <span>Next</span>
+                            <span class="past-arrow past-right-arrow"></span>
+                        </a>
+                        {% else %}
+                        <span class="past-page-btn past-prev-next past-disabled">
+                            <span>Next</span>
+                            <span class="past-arrow past-right-arrow"></span>
+                        </span>
+                        {% endif %}
+                    </nav>
+                </div>
                 {% for interview in today_interview %}
                 {% if interview[3].feedback %}
                 <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
@@ -1060,22 +1231,22 @@
         </section>
         <section id="upcoming-interviews" class="interview-section">
             <div class="section-header">
-                <h2 class="section-title"> <div class="section-icon upcoming-icon"><svg fill="#9141ac" width="35px" height="35px" viewBox="-3 0 19 19"
-                        xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <path
-                                d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z">
-                            </path>
-                        </g>
-                    </svg>
+                <h2 class="section-title">
+                    <div class="section-icon upcoming-icon"><svg fill="#9141ac" width="35px" height="35px"
+                            viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg"
+                            style="background: #e3f0fc;">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z">
+                                </path>
+                            </g>
+                        </svg>
                     </div>
                     &nbsp; Upcoming Interviews
                 </h2>
-                <span class="section-count">Total: {{
-                    upcoming_interview|length
-                    }}&nbsp;interviews</span>
+                <span class="section-count">Total: {{ Upcoming_pagination.total }}&nbsp;interviews</span>
             </div>
             <div class="table-wrapper">
                 <table class="interview-table">
@@ -1126,6 +1297,76 @@
                         </tr>{% endfor %}
                     </tbody>
                 </table>
+                <!-- Upcoming Interviews Pagination -->
+                <div class="past-pagination-container">
+                    <!-- Record count -->
+                    <div class="past-pagination-info">
+                        Showing
+                        {{ Upcoming_pagination.first or 0 }}–{{ Upcoming_pagination.last or 0 }}
+                        of {{ Upcoming_pagination.total }}
+                    </div>
+
+                    <nav class="past-pagination" aria-label="Upcoming interviews pagination">
+
+                        <!-- Previous -->
+                        {% if Upcoming_pagination.has_prev %}
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview', upcoming_page=Upcoming_pagination.prev_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
+                            class="past-page-btn past-prev-next">
+                            <span class="past-arrow past-left-arrow"></span>
+                            <span>Previous</span>
+                        </a>
+                        {% else %}
+                        <span class="past-page-btn past-prev-next past-disabled">
+                            <span class="past-arrow past-left-arrow"></span>
+                            <span>Previous</span>
+                        </span>
+                        {% endif %}
+
+                        <!-- Page numbers -->
+                        {% for p in Upcoming_pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=1,
+                        right_current=1
+                        ) %}
+
+                        {% if p %}
+
+                        {% if p == Upcoming_pagination.page %}
+                        <span class="past-page-btn past-active" aria-current="page">
+                            {{ p }}
+                        </span>
+                        {% else %}
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview',
+                                                upcoming_page=p,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews" class="past-page-btn">
+                            {{ p }}
+                        </a>
+                        {% endif %}
+
+                        {% else %}
+                        <span class="past-ellipsis">…</span>
+                        {% endif %}
+
+                        {% endfor %}
+
+                        <!-- Next -->
+                        {% if Upcoming_pagination.has_next %}
+                        <a href="{{ url_for('Recruiter.Recruiter_Interview',
+                                        upcoming_page=Upcoming_pagination.next_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
+                            class="past-page-btn past-prev-next">
+                            <span>Next</span>
+                            <span class="past-arrow past-right-arrow"></span>
+                        </a>
+                        {% else %}
+                        <span class="past-page-btn past-prev-next past-disabled">
+                            <span>Next</span>
+                            <span class="past-arrow past-right-arrow"></span>
+                        </span>
+                        {% endif %}
+
+                    </nav>
+
+                </div>
                 {% for interview in upcoming_interview %}
                 {% if interview[3].feedback %}
                 <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
@@ -1171,38 +1412,57 @@
 </div>
 <script>
 
-    function filterInterviews(filter) {
-        sessionStorage.setItem("selectedInterviewFilter", filter);
-        const todaySection = document.getElementById("today-interviews");
-        const upcomingSection = document.getElementById("upcoming-interviews");
+function filterInterviews(filter) {
 
-        const searchBox = document.getElementById("interview-search");
+    // Remember the selected section
+    sessionStorage.setItem("selectedInterviewFilter", filter);
 
-        // Show only the selected section
-        todaySection.style.display = filter === "today" ? "" : "none";
-        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+    // NEW: Update the hidden input
+    document.getElementById("selected-filter").value = filter;
 
-        // Set the backend field name and placeholder
-        if (filter === "today") {
-            searchBox.name = "today_search";
-            searchBox.placeholder = "Search today's interviews...";
-        } else if (filter === "upcoming") {
-            searchBox.name = "upcoming_search";
-            searchBox.placeholder = "Search upcoming interviews...";
-        }
+    const todaySection = document.getElementById("today-interviews");
+    const upcomingSection = document.getElementById("upcoming-interviews");
+    const searchBox = document.getElementById("interview-search");
+
+    // Display only the selected section
+    todaySection.style.display = filter === "today" ? "" : "none";
+    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+
+    // Update the search parameter and placeholder
+    if (filter === "today") {
+
+        searchBox.name = "today_search";
+        searchBox.placeholder = "Search today's interviews...";
+
+    } else {
+
+        searchBox.name = "upcoming_search";
+        searchBox.placeholder = "Search upcoming interviews...";
+
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Read the selected section from the URL first
+    const params = new URLSearchParams(window.location.search);
+
+    let savedFilter = params.get("selected_filter")
+        || sessionStorage.getItem("selectedInterviewFilter")
+        || "today";
+
+    // Validate the selected section
+    if (savedFilter !== "today" && savedFilter !== "upcoming") {
+        savedFilter = "today";
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        let savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
+    // Restore the dropdown selection
+    document.getElementById("interview-filter").value = savedFilter;
 
-        // Only allow options that exist in the dropdown
-        if (savedFilter !== "today" && savedFilter !== "upcoming") {
-            savedFilter = "today";
-        }
+    // Restore the correct section and search parameter
+    filterInterviews(savedFilter);
 
-        document.getElementById("interview-filter").value = savedFilter;
-        filterInterviews(savedFilter);
-    });
+});
 
     function openFeedbackModal(roundId) {
         document.getElementById('feedbackRoundId').value = roundId;

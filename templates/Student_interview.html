@@ -1208,7 +1208,7 @@ a.past-page-btn:hover {
                     </tbody>
                 </table>
             </div>
-             <!-- Past Interviews Pagination -->
+             <!-- Today Interviews Pagination -->
             <div class="past-pagination-container">
                 <!-- Record count -->
                 <div class="past-pagination-info">
@@ -1217,12 +1217,12 @@ a.past-page-btn:hover {
                     of {{ Today_pagination.total }}
                 </div>
 
-                <nav class="past-pagination" aria-label="Past interviews pagination">
+                <nav class="past-pagination" aria-label="Today interviews pagination">
 
                     <!-- Previous -->
                     {% if Today_pagination.has_prev %}
                     <a
-                        href="{{ url_for('student.Student_interview', today_page=Today_pagination.prev_num) }}#past-interviews" class="past-page-btn past-prev-next">
+                        href="{{ url_for('student.Student_interview', today_page=Today_pagination.prev_num) }}#today-interviews" class="past-page-btn past-prev-next">
                         <span class="past-arrow past-left-arrow"></span>
                         <span>Previous</span>
                     </a>
@@ -1251,7 +1251,7 @@ a.past-page-btn:hover {
                             {% else %}
                             <a
                                 href="{{ url_for('student.Student_interview',
-                                                today_page=p) }}#past-interviews"
+                                                today_page=p) }}#today-interviews"
                                 class="past-page-btn"
                             >
                                 {{ p }}
@@ -1268,7 +1268,7 @@ a.past-page-btn:hover {
                     {% if Today_pagination.has_next %}
                     <a
                         href="{{ url_for('student.Student_interview',
-                                        today_page=Today_pagination.next_num) }}#past-interviews"
+                                        today_page=Today_pagination.next_num) }}#today-interviews"
                         class="past-page-btn past-prev-next"
                     >
                         <span>Next</span>
@@ -1435,7 +1435,7 @@ a.past-page-btn:hover {
                     </tbody>
                 </table>
             </div>
-             <!-- Past Interviews Pagination -->
+             <!-- Upcoming Interviews Pagination -->
             <div class="past-pagination-container">
                 <!-- Record count -->
                 <div class="past-pagination-info">
@@ -1444,12 +1444,12 @@ a.past-page-btn:hover {
                     of {{ Upcoming_pagination.total }}
                 </div>
 
-                <nav class="past-pagination" aria-label="Past interviews pagination">
+                <nav class="past-pagination" aria-label="Upcoming interviews pagination">
 
                     <!-- Previous -->
                     {% if Upcoming_pagination.has_prev %}
                     <a
-                        href="{{ url_for('student.Student_interview', upcoming_page=Upcoming_pagination.prev_num) }}#past-interviews" class="past-page-btn past-prev-next">
+                        href="{{ url_for('student.Student_interview', upcoming_page=Upcoming_pagination.prev_num) }}#upcoming-interviews" class="past-page-btn past-prev-next">
                         <span class="past-arrow past-left-arrow"></span>
                         <span>Previous</span>
                     </a>
@@ -1478,7 +1478,7 @@ a.past-page-btn:hover {
                             {% else %}
                             <a
                                 href="{{ url_for('student.Student_interview',
-                                                upcoming_page=p) }}#past-interviews"
+                                                upcoming_page=p) }}#upcoming-interviews"
                                 class="past-page-btn"
                             >
                                 {{ p }}
@@ -1495,7 +1495,7 @@ a.past-page-btn:hover {
                     {% if Upcoming_pagination.has_next %}
                     <a
                         href="{{ url_for('student.Student_interview',
-                                        upcoming_page=Upcoming_pagination.next_num) }}#past-interviews"
+                                        upcoming_page=Upcoming_pagination.next_num) }}#upcoming-interviews"
                         class="past-page-btn past-prev-next"
                     >
                         <span>Next</span>
