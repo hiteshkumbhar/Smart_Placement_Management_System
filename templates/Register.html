@@ -130,7 +130,7 @@
             z-index: 2;
         }
 
-   
+
 
         .brand h1 {
             font-size: 31px;
@@ -613,6 +613,7 @@
 
 
             <form id="registerForm" method="POST" action="{{ url_for('Register') }}" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
                 <div class="form-grid">
 
@@ -939,7 +940,7 @@
 
                 valid = false;
 
-            } 
+            }
 
 
             /*

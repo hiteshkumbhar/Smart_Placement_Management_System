@@ -642,6 +642,15 @@
     .search .icon {
         color: #9ca3af;
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {% endblock %}
 
@@ -677,10 +686,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -691,9 +703,11 @@
                 <p class="subtitle">Manage applicants and review candidates for your placement drives.</p>
             </div>
             <form method="GET" action="{{ url_for('Recruiter.Recruiter_Application') }}" class="search-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <div class="search">
                     <span class="icon">🔍</span>
-                    <input type="text" name="search" id="searchInput" placeholder="Search job title " value="{{ request.args.get('search', '') }}" />
+                    <input type="text" name="search" id="searchInput" placeholder="Search job title "
+                        value="{{ request.args.get('search', '') }}" />
                 </div>
             </form>
         </div>
@@ -749,6 +763,7 @@
                     </div>
 
                     <form method="post" action="{{ url_for('Recruiter.Recruiter_Application', mode='view') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="drive_id" value="{{ job[1].id }}">
                         <button class="view-btn" type="submit">View Applicants →</button>
                     </form>

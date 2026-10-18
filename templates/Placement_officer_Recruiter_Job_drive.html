@@ -723,6 +723,16 @@
         color: #9ca3af;
     }
 
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
+
     /* Filter */
     .job-filter {
         display: flex;
@@ -795,10 +805,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -887,6 +900,11 @@
                     {% if request.args.get('filter') != 'Expired' %}
                     <form method="post"
                         action="{{ url_for('Placement_officer.Post_Job_Drive', mode='post_job_drive') }}">
+                        <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token }}"
+>
                         <input type="hidden" name="drive_id" value="{{ job[1].id }}">
                         <button class="view-btn" type="submit">Post Job Drive →</button>
                     </form>

@@ -6,6 +6,7 @@
     * {
         box-sizing: border-box;
     }
+
     :root {
         --primary: #2563eb;
         --primary-dark: #1d4ed8;
@@ -19,7 +20,7 @@
         --bg: #f8fafc
     }
 
-.topbar {
+    .topbar {
         height: 82px;
         display: flex;
         align-items: center;
@@ -198,28 +199,36 @@
         background: #fff0f3;
     }
 
- 
-   .applicants-page {
+
+    .applicants-page {
         /* Remove the old padding properties and add flexbox */
         background: var(--bg);
         color: var(--text);
         height: 100vh;
         display: flex;
         flex-direction: column;
-        overflow: hidden; /* Prevent the entire page from scrolling */
+        overflow: hidden;
+        /* Prevent the entire page from scrolling */
         flex: 1;
-    min-width: 0;
+        min-width: 0;
     }
+
     .fixed-top-section {
-        padding: 0px 28px; /* Horizontal padding for the top section */
-        flex-shrink: 0; /* Keep this section from shrinking */
+        padding: 0px 28px;
+        /* Horizontal padding for the top section */
+        flex-shrink: 0;
+        /* Keep this section from shrinking */
     }
 
     .scrollable-bottom-section {
-        padding: 0px 28px 28px; /* Horizontal and bottom padding */
-        flex: 1; /* Take up the remaining space */
-        overflow-y: auto; /* Allow scrolling inside this section */
-        min-height: 0; /* Ensures the flex child can scroll properly */
+        padding: 0px 28px 28px;
+        /* Horizontal and bottom padding */
+        flex: 1;
+        /* Take up the remaining space */
+        overflow-y: auto;
+        /* Allow scrolling inside this section */
+        min-height: 0;
+        /* Ensures the flex child can scroll properly */
     }
 
     .page-header {
@@ -474,6 +483,15 @@
         color: var(--text);
         font-weight: 700
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {% endblock %}
 
@@ -481,177 +499,190 @@
 
 
 <div class="applicants-page">
-    
-    <div class="fixed-top-section">
-    <header class="topbar">
-        <div class="top-actions">
-            <details class="profile-menu">
-                <summary>
-                    <div class="avatar">
-                        {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
-                    </div>
-                    <div>
-                        <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
-                        </div>
-                        <div class="profile-role">Recruiter</div>
-                    </div>
-                    <span class="chevron">⌄</span>
-                </summary>
 
-                <div class="profile-dropdown">
-                    <div class="profile-summary">
+    <div class="fixed-top-section">
+        <header class="topbar">
+            <div class="top-actions">
+                <details class="profile-menu">
+                    <summary>
                         <div class="avatar">
                             {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
                         </div>
-
                         <div>
-                            <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
-                            <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
                         </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
-
-                    <hr class="profile-divider">
-
-                    <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                        <span class="action-icon">↪</span>
-                        <span>Logout</span>
-                    </a>
-                </div>
-            </details>
-        </div>
-    </header>
+                </details>
+            </div>
+        </header>
     </div>
 
     <div class="scrollable-bottom-section">
-    <div class="page-header">
-        <h1>Applicants</h1>
-        <p>Review candidates, manage applications and track recruitment progress.</p>
-    </div>
-
-    <section class="job-card">
-        <div class="job-card-header">
-            <span class="company-name">{{ job[0] }}</span>
-            <h2>{{ job[1].title }}</h2>
+        <div class="page-header">
+            <h1>Applicants</h1>
+            <p>Review candidates, manage applications and track recruitment progress.</p>
         </div>
 
-        <div class="job-details">
-            <div class="job-detail"><span class="detail-label">Package</span><span class="detail-value">{{
-                    job[1].package }}</span></div>
-            <div class="job-detail"><span class="detail-label">Location</span><span class="detail-value">{{
-                    job[1].location }}</span></div>
-            <div class="job-detail"><span class="detail-label">Minimum CGPA</span><span class="detail-value">{{
-                    job[1].CGPA }}</span></div>
-            <div class="job-detail"><span class="detail-label">Graduation Year</span><span class="detail-value">{{
-                    job[1].Graduation_Year }}</span></div>
-            <div class="job-detail"><span class="detail-label">Eligible Branches</span><span class="detail-value">{{
-                    job[1].Eligible_Branches }}</span></div>
-            <div class="job-detail"><span class="detail-label">Vacancies</span><span class="detail-value">{{
-                    job[1].Vacancies }}</span></div>
-            <div class="job-detail"><span class="detail-label">Deadline</span><span class="detail-value">{{
-                    job[1].deadline }}</span></div>
-            <div class="job-detail full"><span class="detail-label">Job Description</span><span class="detail-value">{{
-                    job[1].description }}</span></div>
-        </div>
-    </section>
+        <section class="job-card">
+            <div class="job-card-header">
+                <span class="company-name">{{ job[0] }}</span>
+                <h2>{{ job[1].title }}</h2>
+            </div>
 
-    <section class="applications-card">
-        <div class="applications-header">
-            <h2>Candidate Applications</h2>
-        </div>
-        <div class="table-wrapper">
-            <table class="applicants-table">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Graduation</th>
-                        <th>Branch</th>
-                        <th>Eligibility</th>
-                        <th>Profile</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                        <th>Result</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for applicant in applicants %}
-                    {% set status = applicant[0].status.value %}
-                    <tr>
-                        <td><span class="student-name">{{ applicant[1] }}</span></td>
-                        <td>{{ applicant[2].graduation_year }}</td>
-                        <td>{{ applicant[2].branch }}</td>
-                        <td>{{ applicant[3] }}</td>
-                        <td>
-                            <form class="action-form" method="POST" action="{{url_for('Recruiter.Student_Profile_Recruiter')}}">
-                                <input type="hidden" value="{{applicant[2].id}}" name="id">
-                                <input type="hidden" value="{{applicant[0].id}}" name="application_id">
-                                <button class="action-btn btn-view" type="submit">View</button>
-                            </form>
-                        </td>
+            <div class="job-details">
+                <div class="job-detail"><span class="detail-label">Package</span><span class="detail-value">{{
+                        job[1].package }}</span></div>
+                <div class="job-detail"><span class="detail-label">Location</span><span class="detail-value">{{
+                        job[1].location }}</span></div>
+                <div class="job-detail"><span class="detail-label">Minimum CGPA</span><span class="detail-value">{{
+                        job[1].CGPA }}</span></div>
+                <div class="job-detail"><span class="detail-label">Graduation Year</span><span class="detail-value">{{
+                        job[1].Graduation_Year }}</span></div>
+                <div class="job-detail"><span class="detail-label">Eligible Branches</span><span class="detail-value">{{
+                        job[1].Eligible_Branches }}</span></div>
+                <div class="job-detail"><span class="detail-label">Vacancies</span><span class="detail-value">{{
+                        job[1].Vacancies }}</span></div>
+                <div class="job-detail"><span class="detail-label">Deadline</span><span class="detail-value">{{
+                        job[1].deadline }}</span></div>
+                <div class="job-detail full"><span class="detail-label">Job Description</span><span
+                        class="detail-value">{{
+                        job[1].description }}</span></div>
+            </div>
+        </section>
 
-                        <td>
-                            {% if status == 'Applied' %}<span class="status-badge status-applied">Applied</span>
-                            {% elif status == 'Shortlisted' %}<span
-                                class="status-badge status-shortlisted">Shortlisted</span>
-                            {% elif status == 'Interview Scheduled' %}<span
-                                class="status-badge status-interview">Interview Scheduled</span>
-                            {% elif status == 'Selected' %}<span class="status-badge status-selected">Selected</span>
-                            {% elif status == 'Rejected' %}<span class="status-badge status-rejected">Rejected</span>
-                            {% else %}<span class="status-badge status-pending">{{ status }}</span>{% endif %}
-                        </td>
+        <section class="applications-card">
+            <div class="applications-header">
+                <h2>Candidate Applications</h2>
+            </div>
+            <div class="table-wrapper">
+                <table class="applicants-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Graduation</th>
+                            <th>Branch</th>
+                            <th>Eligibility</th>
+                            <th>Profile</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for applicant in applicants %}
+                        {% set status = applicant[0].status.value %}
+                        <tr>
+                            <td><span class="student-name">{{ applicant[1] }}</span></td>
+                            <td>{{ applicant[2].graduation_year }}</td>
+                            <td>{{ applicant[2].branch }}</td>
+                            <td>{{ applicant[3] }}</td>
+                            <td>
+                                <form class="action-form" method="POST"
+                                    action="{{url_for('Recruiter.Student_Profile_Recruiter')}}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <input type="hidden" value="{{applicant[2].id}}" name="id">
+                                    <input type="hidden" value="{{applicant[0].id}}" name="application_id">
+                                    <button class="action-btn btn-view" type="submit">View</button>
+                                </form>
+                            </td>
+
+                            <td>
+                                {% if status == 'Applied' %}<span class="status-badge status-applied">Applied</span>
+                                {% elif status == 'Shortlisted' %}<span
+                                    class="status-badge status-shortlisted">Shortlisted</span>
+                                {% elif status == 'Interview Scheduled' %}<span
+                                    class="status-badge status-interview">Interview Scheduled</span>
+                                {% elif status == 'Selected' %}<span
+                                    class="status-badge status-selected">Selected</span>
+                                {% elif status == 'Rejected' %}<span
+                                    class="status-badge status-rejected">Rejected</span>
+                                {% else %}<span class="status-badge status-pending">{{ status }}</span>{% endif %}
+                            </td>
 
 
-                        {% if status == 'Applied' %}
-                        <td>
-                            <form class="action-form" method="post"
-                                action="{{url_for('Recruiter.Recruiter_Application',mode='update')}}">
-                                <input type="hidden" value="{{applicant[2].id}}" name="student_id"><input type="hidden"
-                                    value="{{applicant[0].drive_id}}" name="drive_id">
-                                <button class="action-btn btn-shortlist" type="submit">Shortlist</button>
-                            </form>
-                        </td>
-                        {% elif status == 'Shortlisted' or status == 'Interview Scheduled' %}
-                        <td>
-                            <form class="action-form" method="post" action="{{url_for('Recruiter.Schedule_Interview')}}">
-                                <input type="hidden" name="student_id" value="{{applicant[2].id}}"><input type="hidden"
-                                    name="drive_id" value="{{applicant[0].drive_id}}"><input type="hidden"
-                                    name="application_id" value="{{applicant[0].id}}">
-                                <button class="action-btn btn-interview" type="submit">Schedule Interview</button>
-                            </form>
-                        </td>
-                        {% elif status == 'Selected' %}<td><span class="result-text">Selected</span></td>
-                        {% elif status == 'Rejected' %}<td><span class="result-text">Rejected</span></td>{% endif %}
+                            {% if status == 'Applied' %}
+                            <td>
+                                <form class="action-form" method="post"
+                                    action="{{url_for('Recruiter.Recruiter_Application',mode='update')}}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <input type="hidden" value="{{applicant[2].id}}" name="student_id"><input
+                                        type="hidden" value="{{applicant[0].drive_id}}" name="drive_id">
+                                    <button class="action-btn btn-shortlist" type="submit">Shortlist</button>
+                                </form>
+                            </td>
+                            {% elif status == 'Shortlisted' or status == 'Interview Scheduled' %}
+                            <td>
+                                <form class="action-form" method="post"
+                                    action="{{url_for('Recruiter.Schedule_Interview')}}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <input type="hidden" name="student_id" value="{{applicant[2].id}}"><input
+                                        type="hidden" name="drive_id" value="{{applicant[0].drive_id}}"><input
+                                        type="hidden" name="application_id" value="{{applicant[0].id}}">
+                                    <button class="action-btn btn-interview" type="submit">Schedule Interview</button>
+                                </form>
+                            </td>
+                            {% elif status == 'Selected' %}<td><span class="result-text">Selected</span></td>
+                            {% elif status == 'Rejected' %}<td><span class="result-text">Rejected</span></td>{% endif %}
 
-                        {% if status == 'Applied' or status == 'Shortlisted' %}
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        {% elif status == 'Interview Scheduled' %}
-                        <td>
-                            <form class="action-form" method="post"
-                                action="{{url_for('Recruiter.Recruiter_Application',mode='update')}}">
-                                <input type="hidden" value="{{applicant[2].id}}" name="student_id"><input type="hidden"
-                                    name="drive_id" value="{{applicant[0].drive_id}}">
-                                <button class="action-btn btn-select" name="result" value="Select"
-                                    type="submit">Select</button>
-                                <button class="action-btn btn-reject" name="result" value="Reject"
-                                    type="submit">Reject</button>
-                            </form>
-                        </td>
-                        {% elif status == 'Selected' %}<td><span class="result-text">Selected</span></td>
-                        {% elif status == 'Rejected' %}<td><span class="result-text">Rejected</span></td>{% endif %}
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="11">
-                            <div class="empty-state">
-                                <p class="empty-state-title">No applicants yet</p>Applications for this job drive will
-                                appear here.
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
+                            {% if status == 'Applied' or status == 'Shortlisted' %}
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            {% elif status == 'Interview Scheduled' %}
+                            <td>
+                                <form class="action-form" method="post"
+                                    action="{{url_for('Recruiter.Recruiter_Application',mode='update')}}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <input type="hidden" value="{{applicant[2].id}}" name="student_id"><input
+                                        type="hidden" name="drive_id" value="{{applicant[0].drive_id}}">
+                                    <button class="action-btn btn-select" name="result" value="Select"
+                                        type="submit">Select</button>
+                                    <button class="action-btn btn-reject" name="result" value="Reject"
+                                        type="submit">Reject</button>
+                                </form>
+                            </td>
+                            {% elif status == 'Selected' %}<td><span class="result-text">Selected</span></td>
+                            {% elif status == 'Rejected' %}<td><span class="result-text">Rejected</span></td>{% endif %}
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="11">
+                                <div class="empty-state">
+                                    <p class="empty-state-title">No applicants yet</p>Applications for this job drive
+                                    will
+                                    appear here.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </div>
 

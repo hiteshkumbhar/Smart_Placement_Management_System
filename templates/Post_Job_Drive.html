@@ -6,7 +6,6 @@
 {{ super() }}
 
 <style>
-    
     .topbar {
         height: 82px;
         display: flex;
@@ -324,13 +323,13 @@
         flex: 1;
     }
 
-    .dropdown-container details, 
+    .dropdown-container details,
     #dropdown details {
         position: relative;
         width: 100%;
     }
 
-    .dropdown-container summary, 
+    .dropdown-container summary,
     #dropdown summary {
         position: relative;
         list-style: none;
@@ -350,8 +349,8 @@
         display: none;
     }
 
-   .dropdown-container summary::after,
-    #dropdown summary::after{
+    .dropdown-container summary::after,
+    #dropdown summary::after {
         content: "";
         position: absolute;
         right: 15px;
@@ -488,6 +487,15 @@
         min-height: 0;
         /* Ensures the flex child can scroll */
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {% endblock %}
 
@@ -525,10 +533,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -540,6 +551,7 @@
 
             <!-- Job Drive Card -->
             <form action="{{ url_for('Placement_officer.Post_Job_Drive', id=job_id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="drive_id" value="{{job_id}}">
 
                 <div class="job-drive-card">

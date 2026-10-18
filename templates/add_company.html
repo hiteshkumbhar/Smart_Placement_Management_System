@@ -186,7 +186,15 @@
         background: #fff0f3;
     }
 
-
+    /* Reset button defaults so it acts like a styled link */
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 
     .company-page {
         height: 100vh;
@@ -352,8 +360,8 @@
 
     /* Flash Messages */
     .flash-message {
-        margin: 0 30px 20px;
         padding: 12px 15px;
+        width: 100%;
         border-radius: 9px;
         background: #fff7ed;
         border: 1px solid #fed7aa;
@@ -512,10 +520,14 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <!-- Make the button itself the flex container -->
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -592,8 +604,8 @@
 
                     {% if mode == 'edit' %}
 
-                    <form id="addcompany" action="{{ url_for('Placement_officer.edit_company', id=company.id) }}" method="POST"
-                        enctype="multipart/form-data">
+                    <form id="addcompany" action="{{ url_for('Placement_officer.edit_company', id=company.id) }}"
+                        method="POST" enctype="multipart/form-data">
 
                         {% else %}
 
@@ -601,6 +613,7 @@
                             enctype="multipart/form-data">
 
                             {% endif %}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
 
                             <div class="form-grid">
@@ -680,8 +693,26 @@
                                         value="{% if mode == 'edit' %}{{ company.email or '' }}{% endif %}">
 
                                     <small class="error" id="HR_EmailError"></small>
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+
+                                    {% for category, message in messages %}
+
+                                    {% if category == "profile_pic" or category == "email" %}
+
+                                    <div class="flash-message">
+                                        {{ message }}
+                                    </div>
+
+                                    {% endif %}
+
+                                    {% endfor %}
+
+                                    {% endif %}
+                                    {% endwith %}
 
                                 </div>
+
 
 
                                 <!-- Phone -->
@@ -696,6 +727,22 @@
                                         value="{% if mode == 'edit' %}{{ company.phone or '' }}{% endif %}">
 
                                     <small class="error" id="HR_numberError"></small>
+                                    {% if messages %}
+
+                                    {% for category, message in messages %}
+
+                                    {% if category == "profile_pic" or category == "number" %}
+
+                                    <div class="flash-message">
+                                        {{ message }}
+                                    </div>
+
+                                    {% endif %}
+
+                                    {% endfor %}
+
+                                    {% endif %}
+                                    {% endwith %}
 
                                 </div>
 

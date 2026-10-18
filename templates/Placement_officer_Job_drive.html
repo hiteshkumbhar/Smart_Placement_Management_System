@@ -1225,6 +1225,15 @@
     .search .icon {
         color: #9ca3af;
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {%endblock%}
 
@@ -1270,10 +1279,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -1285,6 +1297,7 @@
                 <p>Review the job drive information and manage student applications.</p>
             </div>
             <form method="post" action="{{ url_for('Placement_officer.Post_Job_Drive',  mode='post_job_drive')}}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="drive_id" value="{{jobs[1].id}}">
                 <button type="submit" class="placement-drive-edit-link">✎ Edit Job Drive</button>
             </form>
@@ -1398,6 +1411,7 @@
 
                                 <form method="POST" action="{{ url_for('Recruiter.Student_Profile_Recruiter') }}"
                                     class="placement-applicant-view-form">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
                                     <input type="hidden" value="{{ Applicant[6] }}" name="id">
 
@@ -1488,10 +1502,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -1567,6 +1584,7 @@
                         <form method="post"
                             action="{{ url_for('Placement_officer.Post_Job_Drive', mode='post_job_drive') }}"
                             style="width: 100%;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <input type="hidden" name="drive_id" value="{{ job[1].id }}">
                             <button type="submit" class="edit-jd-btn">
                                 <i class="fa-solid fa-file-lines"></i>
@@ -1576,6 +1594,7 @@
                     </div>
 
                     <form method="post" action="{{ url_for('Placement_officer.Placement_officer_Job_drive') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="drive_id" value="{{ job[1].id }}">
                         <input type="hidden" name="mode" value="view">
                         <button class="view-btn" type="submit">View Applicants →</button>

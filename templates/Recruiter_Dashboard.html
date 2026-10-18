@@ -1,8 +1,8 @@
 {%extends "Recruiter_Base.html" %}
- {% block title %} Recruiter Dashboard {% endblock %}
+{% block title %} Recruiter Dashboard {% endblock %}
 {% block style %}
 {{super()}}
-    <style>
+<style>
     .topbar {
         height: 82px;
         display: flex;
@@ -458,9 +458,18 @@
         min-height: 0;
     }
 
-.scrollable-bottom-section::-webkit-scrollbar {
-    display: none;               
-}
+    .scrollable-bottom-section::-webkit-scrollbar {
+        display: none;
+    }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {%endblock%}
 
@@ -469,181 +478,293 @@
 
     <div class="fixed-top-section">
 
-    <header class="topbar">
-        <div>
-            <h1>Welcome, {{ current_user.name if current_user.name else 'Recruiter' }}! 👋</h1>
-        </div>
+        <header class="topbar">
+            <div>
+                <h1>Welcome, {{ current_user.name if current_user.name else 'Recruiter' }}! 👋</h1>
+            </div>
 
-        <div class="top-actions">
+            <div class="top-actions">
 
-            <details class="profile-menu">
-                <summary>
-                    <div class="avatar">
-                        {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
-                    </div>
-                 
-
-                    <div>
-                        <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}</div>
-                        <div class="profile-role">Recruiter</div>
-                    </div>
-                    <span class="chevron">⌄</span>
-                </summary>
-
-                <div class="profile-dropdown">
-                    <div class="profile-summary">
+                <details class="profile-menu">
+                    <summary>
                         <div class="avatar">
                             {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
                         </div>
-                        
+
+
                         <div>
-                            <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
-                            <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            <div class="profile-name">{{ current_user.name if current_user.name else 'Recruiter' }}
+                            </div>
+                            <div class="profile-role">Recruiter</div>
                         </div>
+                        <span class="chevron">⌄</span>
+                    </summary>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-summary">
+                            <div class="avatar">
+                                {{ (current_user.name[:1] if current_user.name else 'R')|upper }}
+                            </div>
+
+                            <div>
+                                <strong>{{ current_user.name if current_user.name else 'Recruiter' }}</strong>
+                                <small>{{ current_user.email if current_user.email else 'Recruiter account' }}</small>
+                            </div>
+                        </div>
+
+                        <hr class="profile-divider">
+
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
-
-                    <hr class="profile-divider">
-
-                    <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                        <span class="action-icon">↪</span>
-                        <span>Logout</span>
-                    </a>
-                </div>
-            </details>
-        </div>
-    </header>
-</div>
+                </details>
+            </div>
+        </header>
+    </div>
     <div class="scrollable-bottom-section">
 
-    <div class='overview'>
+        <div class='overview'>
 
-        <div class='cardbox'>
-            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50"> <defs> <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" stop-color="#643fe3" /> <stop offset="100%" stop-color="#2b14a7" /> </linearGradient> </defs> <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#purpleGradient)" /> <g fill="#ffffff"> <circle cx="50" cy="38" r="13" /> <path d="M 50,57 C 34,57 28,68 28,74 A 2,2 0 0 0 30,76 L 70,76 A 2,2 0 0 0 72,74 C 72,68 66,57 50,57 Z" /> </g> </svg>
+            <div class='cardbox'>
+                <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
+                        <defs>
+                            <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#643fe3" />
+                                <stop offset="100%" stop-color="#2b14a7" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#purpleGradient)" />
+                        <g fill="#ffffff">
+                            <circle cx="50" cy="38" r="13" />
+                            <path
+                                d="M 50,57 C 34,57 28,68 28,74 A 2,2 0 0 0 30,76 L 70,76 A 2,2 0 0 0 72,74 C 72,68 66,57 50,57 Z" />
+                        </g>
+                    </svg>
+                </div>
+
+                <div class='content' style="margin-top: 20px;">
+                    <div> Open Job Drives </div>
+                    <div style="font-size: 20px; font-weight: 800;"> {{job_drive_count}} </div>
+                </div>
             </div>
 
-            <div class='content' style="margin-top: 20px;">
-                <div> Open Job Drives </div>
-                <div style="font-size: 20px; font-weight: 800;"> {{job_drive_count}} </div>
+            <div class='cardbox'>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="55px" height="55px"
+                    style="margin-top: 22px; margin-left: 10px;">
+                    <defs> <!-- Background Gradient matching the vibrant green app icon -->
+                        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#2ecc71" />
+                            <stop offset="100%" stop-color="#27ae60" />
+                        </linearGradient> <!-- Soft Drop Shadow for the main background squircle -->
+                        <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
+                            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#1e7e43" flood-opacity="0.4" />
+                        </filter>
+                    </defs> <!-- Background Squircle (Rounded Corner Square) -->
+                    <rect x="32" y="32" width="448" height="448" rx="115" fill="url(#bgGrad)"
+                        filter="url(#softShadow)" /> <!-- Document Sheet Container Group -->
+                    <g transform="translate(146, 126)"> <!-- White Document Body with a Dog-Ear folded corner -->
+                        <!-- Path traces the main sheet and cuts inwards at the top right for the fold -->
+                        <path
+                            d="M 20,0 L 150,0 L 220,70 L 220,240 A 20,20 0 0 1 200,260 L 20,260 A 20,20 0 0 1 0,240 L 0,20 A 20,20 0 0 1 20,0 Z"
+                            fill="#ffffff" /> <!-- Dog-Ear Folded Corner Shadow & Flap -->
+                        <path d="M 150,0 L 150,50 A 20,20 0 0 0 170,70 L 220,70 Z" fill="#e0e0e0" />
+                        <!-- Greener Internal Lines -->
+                        <!-- Stylized text lines utilizing a matching dark green hue (#27ae60) with rounded caps -->
+                        <g stroke="#27ae60" stroke-width="16" stroke-linecap="round"> <!-- Top Line -->
+                            <line x1="40" y1="130" x2="180" y2="130" /> <!-- Middle Line -->
+                            <line x1="40" y1="185" x2="120" y2="185" />
+                        </g>
+                    </g>
+                </svg>
+                <div class='content' style="margin-top: 19px;">
+                    <div> Total applications </div>
+                    <div style="font-size: 16px; font-weight: 700;"> {{total_applicants}} </div>
+                </div>
+            </div>
+
+            <div class='cardbox'>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="55" height="55"
+                    style="margin-top: 22px; margin-left: 10px;">
+                    <defs> <!-- Background Gradient: Smooth vibrant blue -->
+                        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#3A88F6" />
+                            <stop offset="100%" stop-color="#1261D4" />
+                        </linearGradient> <!-- Subtle Drop Shadow for the Inner Document Paper Sheet -->
+                        <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.15" />
+                        </filter>
+                    </defs> <!-- 1. Main Squircle/Rounded Background Container -->
+                    <rect x="32" y="32" width="448" height="448" rx="110" ry="110" fill="url(#bgGradient)" />
+                    <!-- 2. White Paper Sheet with Top-Right Folded Corner -->
+                    <!-- Coordinates map out the standard Google document shape with a clipped top-right corner -->
+                    <path
+                        d="M 166 140 L 290 140 L 346 196 L 346 372 A 12 12 0 0 1 334 384 L 166 384 A 12 12 0 0 1 154 372 L 154 152 A 12 12 0 0 1 166 140 Z"
+                        fill="#FFFFFF" filter="url(#dropShadow)" />
+                    <!-- 3. Document Inner Text Alignment Lines (The Blue Stripes) -->
+                    <g fill="#2B76E6"> <!-- Top Long Line -->
+                        <rect x="186" y="230" width="130" height="10" rx="5" /> <!-- Middle Long Line -->
+                        <rect x="186" y="270" width="130" height="10" rx="5" /> <!-- Bottom Medium Line -->
+                        <rect x="186" y="310" width="90" height="10" rx="5" />
+                    </g>
+                </svg>
+                <div class='content' style="margin-top: 22px;">
+                    <div> Shortlisted </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;"> {{shortlisted}} </div>
+                </div>
+            </div>
+
+            <div class='cardbox'>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="55" height="55"
+                    style="margin-top: 22px; margin-left: 10px;">
+                    <defs> <!-- Vibrant, warm linear gradient matching the original image backdrop -->
+                        <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#FFBA3A" />
+                            <stop offset="40%" stop-color="#FFA01A" />
+                            <stop offset="100%" stop-color="#F27A00" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="46" y="46" width="420" height="420" rx="96" ry="96" fill="url(#orangeGradient)" />
+                    <g fill="#FFFFFF">
+                        <!-- The Calendar silhouette combines: - The main backplate with a distinct header divider indentation - The two overarching top binder rings/pegs -->
+                        <path
+                            d=" M 194,184 L 194,166 C 194,154 202,146 212,146 C 222,146 230,154 230,166 L 230,184 L 282,184 L 282,166 C 282,154 290,146 300,146 C 310,146 318,154 318,166 L 318,184 L 348,184 C 366,184 378,196 378,214 L 378,230 L 134,230 L 134,214 C 134,196 146,184 164,184 Z M 134,246 L 378,246 L 378,354 C 378,372 366,384 348,384 L 164,384 C 146,384 134,372 134,354 Z" />
+                    </g>
+                    <g fill="#E67300"> <!-- Row 1 -->
+                        <circle cx="190" cy="286" r="13" />
+                        <circle cx="256" cy="286" r="13" />
+                        <circle cx="322" cy="286" r="13" /> <!-- Row 2 -->
+                        <circle cx="190" cy="336" r="13" />
+                        <circle cx="256" cy="336" r="13" />
+                        <circle cx="322" cy="336" r="13" />
+                    </g>
+                </svg>
+                <div class='content' style="margin-top: 22px;">
+                    <div> Selected </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;"> {{selected}} </div>
+                </div>
             </div>
         </div>
 
-        <div class='cardbox'>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="55px" height="55px" style="margin-top: 22px; margin-left: 10px;"> <defs> <!-- Background Gradient matching the vibrant green app icon --> <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" stop-color="#2ecc71" /> <stop offset="100%" stop-color="#27ae60" /> </linearGradient> <!-- Soft Drop Shadow for the main background squircle --> <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%"> <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#1e7e43" flood-opacity="0.4" /> </filter> </defs> <!-- Background Squircle (Rounded Corner Square) --> <rect x="32" y="32" width="448" height="448" rx="115" fill="url(#bgGrad)" filter="url(#softShadow)" /> <!-- Document Sheet Container Group --> <g transform="translate(146, 126)"> <!-- White Document Body with a Dog-Ear folded corner --> <!-- Path traces the main sheet and cuts inwards at the top right for the fold --> <path d="M 20,0 L 150,0 L 220,70 L 220,240 A 20,20 0 0 1 200,260 L 20,260 A 20,20 0 0 1 0,240 L 0,20 A 20,20 0 0 1 20,0 Z" fill="#ffffff" /> <!-- Dog-Ear Folded Corner Shadow & Flap --> <path d="M 150,0 L 150,50 A 20,20 0 0 0 170,70 L 220,70 Z" fill="#e0e0e0" /> <!-- Greener Internal Lines --> <!-- Stylized text lines utilizing a matching dark green hue (#27ae60) with rounded caps --> <g stroke="#27ae60" stroke-width="16" stroke-linecap="round"> <!-- Top Line --> <line x1="40" y1="130" x2="180" y2="130" /> <!-- Middle Line --> <line x1="40" y1="185" x2="120" y2="185" /> </g> </g> </svg>
-            <div class='content' style="margin-top: 19px;">
-                <div> Total applications </div>
-                <div style="font-size: 16px; font-weight: 700;"> {{total_applicants}} </div>
+        <section class="panel jobs-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="27" height="27">
+                        <defs> <!-- Smooth gradient matching the blue-purple tone of the icon -->
+                            <linearGradient id="briefcaseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#635bff" />
+                                <stop offset="100%" stop-color="#3c31dd" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Handle & Upper Body Combined: The handle is now solid/filled in with the gradient -->
+                        <path
+                            d="M 38,25 C 38,18 42,14 48,14 L 52,14 C 58,14 62,18 62,25 L 62,28 L 80,28 C 85,28 89,32 89,37 L 89,45 L 58,45 C 57,45 56,46 55,47 L 53,50 C 52,51 48,51 47,50 L 45,47 C 44,46 43,45 42,45 L 11,45 L 11,37 C 11,32 15,28 20,28 L 38,28 Z"
+                            fill="url(#briefcaseGradient)" />
+                        <!-- Lower Body Half: Separated by the white, transparent horizontal U-shaped gap -->
+                        <path d="M 11,52 L 89,52 L 89,74 C 89,79 85,83 80,83 L 20,83 C 15,83 11,79 11,74 Z"
+                            fill="url(#briefcaseGradient)" />
+                    </svg>
+                    My Job drives
+                </div>
+                <a class="view-all" href="{{ url_for('Recruiter.Recruiter_Application') }}">View All →</a>
             </div>
-        </div>
 
-        <div class='cardbox'>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="55" height="55" style="margin-top: 22px; margin-left: 10px;"> <defs> <!-- Background Gradient: Smooth vibrant blue --> <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" stop-color="#3A88F6" /> <stop offset="100%" stop-color="#1261D4" /> </linearGradient> <!-- Subtle Drop Shadow for the Inner Document Paper Sheet --> <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%"> <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.15" /> </filter> </defs> <!-- 1. Main Squircle/Rounded Background Container --> <rect x="32" y="32" width="448" height="448" rx="110" ry="110" fill="url(#bgGradient)" /> <!-- 2. White Paper Sheet with Top-Right Folded Corner --> <!-- Coordinates map out the standard Google document shape with a clipped top-right corner --> <path d="M 166 140 L 290 140 L 346 196 L 346 372 A 12 12 0 0 1 334 384 L 166 384 A 12 12 0 0 1 154 372 L 154 152 A 12 12 0 0 1 166 140 Z" fill="#FFFFFF" filter="url(#dropShadow)" /> <!-- 3. Document Inner Text Alignment Lines (The Blue Stripes) --> <g fill="#2B76E6"> <!-- Top Long Line --> <rect x="186" y="230" width="130" height="10" rx="5" /> <!-- Middle Long Line --> <rect x="186" y="270" width="130" height="10" rx="5" /> <!-- Bottom Medium Line --> <rect x="186" y="310" width="90" height="10" rx="5" /> </g> </svg>
-            <div class='content' style="margin-top: 22px;">
-                <div> Shortlisted </div>
-                <div style="font-size: 18px; font-weight: 800; margin-top: 3px;"> {{shortlisted}} </div>
+            {% if Job_drive_info %}
+            <div class="table-wrap">
+                <table class="dashboard-table job-table">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Vacanies</th>
+                            <th>Applied</th>
+                            <th>Shortlisted</th>
+                            <th>Interview</th>
+                            <th>Selected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in Job_drive_info %}
+                        <tr>
+                            <td class="company-cell">{{job[0]}}</td>
+                            <td>{{job[1]}}</td>
+                            <td>{{job[2]}}</td>
+                            <td>{{job[3]}}</td>
+                            <td>{{job[4]}}</td>
+                            <td>{{job[5]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </div>
+            {% else %}
+            <div class="empty-state">No Job drives are available right now.</div>
+            {% endif %}
+        </section>
 
-        <div class='cardbox'>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="55" height="55" style="margin-top: 22px; margin-left: 10px;"> <defs> <!-- Vibrant, warm linear gradient matching the original image backdrop --> <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" stop-color="#FFBA3A" /> <stop offset="40%" stop-color="#FFA01A" /> <stop offset="100%" stop-color="#F27A00" /> </linearGradient> </defs> <rect x="46" y="46" width="420" height="420" rx="96" ry="96" fill="url(#orangeGradient)" /> <g fill="#FFFFFF"> <!-- The Calendar silhouette combines: - The main backplate with a distinct header divider indentation - The two overarching top binder rings/pegs --> <path d=" M 194,184 L 194,166 C 194,154 202,146 212,146 C 222,146 230,154 230,166 L 230,184 L 282,184 L 282,166 C 282,154 290,146 300,146 C 310,146 318,154 318,166 L 318,184 L 348,184 C 366,184 378,196 378,214 L 378,230 L 134,230 L 134,214 C 134,196 146,184 164,184 Z M 134,246 L 378,246 L 378,354 C 378,372 366,384 348,384 L 164,384 C 146,384 134,372 134,354 Z" /> </g> <g fill="#E67300"> <!-- Row 1 --> <circle cx="190" cy="286" r="13" /> <circle cx="256" cy="286" r="13" /> <circle cx="322" cy="286" r="13" /> <!-- Row 2 --> <circle cx="190" cy="336" r="13" /> <circle cx="256" cy="336" r="13" /> <circle cx="322" cy="336" r="13" /> </g> </svg>
-            <div class='content' style="margin-top: 22px;">
-                <div> Selected </div>
-                <div style="font-size: 18px; font-weight: 800; margin-top: 3px;"> {{selected}} </div>
+        <section class="panel jobs-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <svg fill="#1a5fb4" width="30px" height="30px" viewBox="-3 0 19 19"
+                        xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z">
+                            </path>
+                        </g>
+                    </svg>
+                    Todays interview
+                </div>
+                <a class="view-all" href="{{ url_for('Recruiter.Recruiter_Interview') }}">View All →</a>
             </div>
-        </div>
-    </div>
 
-    <section class="panel jobs-panel">
-        <div class="panel-header">
-            <div class="panel-title">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="27" height="27"> <defs> <!-- Smooth gradient matching the blue-purple tone of the icon --> <linearGradient id="briefcaseGradient" x1="0%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" stop-color="#635bff" /> <stop offset="100%" stop-color="#3c31dd" /> </linearGradient> </defs> <!-- Handle & Upper Body Combined: The handle is now solid/filled in with the gradient --> <path d="M 38,25 C 38,18 42,14 48,14 L 52,14 C 58,14 62,18 62,25 L 62,28 L 80,28 C 85,28 89,32 89,37 L 89,45 L 58,45 C 57,45 56,46 55,47 L 53,50 C 52,51 48,51 47,50 L 45,47 C 44,46 43,45 42,45 L 11,45 L 11,37 C 11,32 15,28 20,28 L 38,28 Z" fill="url(#briefcaseGradient)" /> <!-- Lower Body Half: Separated by the white, transparent horizontal U-shaped gap --> <path d="M 11,52 L 89,52 L 89,74 C 89,79 85,83 80,83 L 20,83 C 15,83 11,79 11,74 Z" fill="url(#briefcaseGradient)" /> </svg>
-                My Job drives
-            </div>
-            <a class="view-all" href="{{ url_for('Recruiter.Recruiter_Application') }}">View All →</a>
-        </div>
-
-        {% if Job_drive_info %}
-        <div class="table-wrap">
-            <table class="dashboard-table job-table">
-                <thead>
-                    <tr>
-                        <th>Role</th>
-                        <th>Vacanies</th>
-                        <th>Applied</th>
-                        <th>Shortlisted</th>
-                        <th>Interview</th>
-                        <th>Selected</th>
-                    </tr>
-                </thead>
-                <tbody>
-            {% for job in Job_drive_info %}
-                    <tr>
-                        <td class="company-cell">{{job[0]}}</td>
-                        <td>{{job[1]}}</td>
-                        <td>{{job[2]}}</td>
-                        <td>{{job[3]}}</td>
-                        <td>{{job[4]}}</td>
-                        <td>{{job[5]}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="empty-state">No Job drives are available right now.</div>
-        {% endif %}
-    </section>
-
-    <section class="panel jobs-panel">
-        <div class="panel-header">
-            <div class="panel-title">
-                <svg fill="#1a5fb4" width="30px" height="30px" viewBox="-3 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" style="background: #e3f0fc;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.882 3.187a.476.476 0 0 1 .475.475v11.063a.476.476 0 0 1-.475.475H1.118a.476.476 0 0 1-.475-.475V3.662a.476.476 0 0 1 .475-.475h1.328v.721a1.425 1.425 0 0 0 2.85 0v-.72H7.71v.72a1.425 1.425 0 0 0 2.85 0v-.72zm-.634 3.37H1.752v7.535h9.496zm-7.384.821H2.621V8.67h1.243zm0 2.292H2.621v1.292h1.243zm0 2.292H2.621v1.291h1.243zm.561-8.054V2.475a.554.554 0 1 0-1.108 0v1.433a.554.554 0 1 0 1.108 0zm1.613 3.47H4.794V8.67h1.244zm0 2.292H4.794v1.292h1.244zm0 2.292H4.794v1.291h1.244zm2.174-4.584H6.968V8.67h1.244zm0 2.292H6.968v1.292h1.244zm0 2.292H6.968v1.291h1.244zm1.477-8.054V2.475a.554.554 0 0 0-1.108 0v1.433a.554.554 0 0 0 1.108 0zm.696 3.47H9.142V8.67h1.243zm0 2.292H9.142v1.292h1.243zm0 2.292H9.142v1.291h1.243z"></path></g></svg>
-                Todays interview
-            </div>
-            <a class="view-all" href="{{ url_for('Recruiter.Recruiter_Interview') }}">View All →</a>
-        </div>
-
-        {% if today_interview %}
-        <div class="table-wrap">
-            <table class="dashboard-table job-table">
-                <thead>
-                    <tr>
-                        <th>Company name</th>
-                        <th>Job title</th>
-                        <th>Student name</th>
-                        <th>Round Name</th>
-                        <th>Date and time</th>
-                        <th>Link</th>
-                    </tr>
-                </thead>
-                <tbody>
-        {% for interview in today_interview %}
-                    <tr>
-                        <td class="company-cell">{{interview[0]}}</td>
-                        <td>{{interview[1]}}</td>
-                        <td>{{interview[2]}}</td>
-                        <td>{{interview[3].round_name}}</td>
-                        <td>{{interview[3].date}}</td>
-                        <td>
- {% if interview[3].link %}
+            {% if today_interview %}
+            <div class="table-wrap">
+                <table class="dashboard-table job-table">
+                    <thead>
+                        <tr>
+                            <th>Company name</th>
+                            <th>Job title</th>
+                            <th>Student name</th>
+                            <th>Round Name</th>
+                            <th>Date and time</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interview in today_interview %}
+                        <tr>
+                            <td class="company-cell">{{interview[0]}}</td>
+                            <td>{{interview[1]}}</td>
+                            <td>{{interview[2]}}</td>
+                            <td>{{interview[3].round_name}}</td>
+                            <td>{{interview[3].date}}</td>
+                            <td>
+                                {% if interview[3].link %}
                                 <a class="join-button" href="{{ interview[3].link }}" target="_blank" rel="noopener">
                                     Join</a>
                                 {% else %}
                                 <span class="status-badge status-default">Not available</span>
                                 {% endif %}
 
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="empty-state">No Job drives are available right now.</div>
-        {% endif %}
-    </section>
-</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">No Job drives are available right now.</div>
+            {% endif %}
+        </section>
+    </div>
 </div>
 
 {%endblock%}
-

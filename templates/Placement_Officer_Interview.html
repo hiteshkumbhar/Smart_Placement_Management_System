@@ -278,7 +278,7 @@
     }
 
     .interview-section {
-           height: auto;
+        height: auto;
         min-height: auto;
         background: #fff;
         border: 1px solid #edf0f6;
@@ -774,7 +774,7 @@
         padding: 0px 24px 20px;
         flex: 1;
         overflow-y: auto;
-        overflow-x: hidden; 
+        overflow-x: hidden;
         min-height: 0;
     }
 
@@ -824,101 +824,109 @@
 
     /* Past Interviews Pagination */
 
-.past-pagination-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 4px 4px;
-    flex-shrink: 0;
-}
+    .past-pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 4px 4px;
+        flex-shrink: 0;
+    }
 
-.past-pagination-info {
-    color: #1e293b;
-    font-size: 15px;
-    white-space: nowrap;
-}
+    .past-pagination-info {
+        color: #1e293b;
+        font-size: 15px;
+        white-space: nowrap;
+    }
 
-.past-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-}
+    .past-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
 
-.past-page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    .past-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
 
-    min-width: 42px;
-    height: 42px;
-    padding: 0 13px;
+        min-width: 42px;
+        height: 42px;
+        padding: 0 13px;
 
-    border: 1px solid #dfe3ea;
-    border-radius: 10px;
+        border: 1px solid #dfe3ea;
+        border-radius: 10px;
 
-    background: #fff;
-    color: #1e293b;
+        background: #fff;
+        color: #1e293b;
 
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    white-space: nowrap;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
 
-    transition: all 0.2s ease;
-}
+        transition: all 0.2s ease;
+    }
 
-a.past-page-btn:hover {
-    border-color: #6350d7;
-    color: #6350d7;
-    background: #f5f3ff;
-}
+    a.past-page-btn:hover {
+        border-color: #6350d7;
+        color: #6350d7;
+        background: #f5f3ff;
+    }
 
-.past-page-btn.past-active {
-    color: #fff;
-    background: #6350d7;
-    border-color: #6350d7;
-    font-weight: 600;
-}
+    .past-page-btn.past-active {
+        color: #fff;
+        background: #6350d7;
+        border-color: #6350d7;
+        font-weight: 600;
+    }
 
-.past-page-btn.past-prev-next {
-    padding: 0 16px;
-}
+    .past-page-btn.past-prev-next {
+        padding: 0 16px;
+    }
 
-.past-page-btn.past-disabled {
-    color: #b8bec9;
-    background: #fafafa;
-    border-color: #e1e4ea;
-    cursor: not-allowed;
-}
+    .past-page-btn.past-disabled {
+        color: #b8bec9;
+        background: #fafafa;
+        border-color: #e1e4ea;
+        cursor: not-allowed;
+    }
 
-.past-ellipsis {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    color: #7c8595;
-    font-size: 18px;
-}
+    .past-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        color: #7c8595;
+        font-size: 18px;
+    }
 
-.past-arrow {
-    width: 8px;
-    height: 8px;
-    border-top: 2px solid currentColor;
-    border-right: 2px solid currentColor;
-    flex-shrink: 0;
-}
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 
-.past-left-arrow {
-    transform: rotate(-135deg);
-}
+    .past-arrow {
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        flex-shrink: 0;
+    }
 
-.past-right-arrow {
-    transform: rotate(45deg);
-}
+    .past-left-arrow {
+        transform: rotate(-135deg);
+    }
 
+    .past-right-arrow {
+        transform: rotate(45deg);
+    }
 </style>
 {%endblock%}
 
@@ -962,10 +970,13 @@ a.past-page-btn:hover {
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -980,7 +991,8 @@ a.past-page-btn:hover {
                     action="{{ url_for('Placement_officer.Placement_Officer_Interview') }}">
                     <div class="search">
                         <span class="icon">🔍</span>
-                        <input type="text" id="interview-search" name="today_search" value="{{ today_search if today_search else (past_search if past_search else upcoming_search) }}"
+                        <input type="text" id="interview-search" name="today_search"
+                            value="{{ today_search if today_search else (past_search if past_search else upcoming_search) }}"
                             placeholder="Search today's interviews...">
                     </div>
 
@@ -1743,91 +1755,73 @@ a.past-page-btn:hover {
     </div>
 </div>
 <script>
-
     function filterInterviews(filter) {
-    sessionStorage.setItem("selectedInterviewFilter", filter);
+        sessionStorage.setItem("selectedInterviewFilter", filter);
 
-    const todaySection = document.getElementById("today-interviews");
-    const pastSection = document.getElementById("past-interviews");
-    const upcomingSection = document.getElementById("upcoming-interviews");
-    const searchBox = document.getElementById("interview-search");
+        const todaySection = document.getElementById("today-interviews");
+        const pastSection = document.getElementById("past-interviews");
+        const upcomingSection = document.getElementById("upcoming-interviews");
+        const searchBox = document.getElementById("interview-search");
 
-    // Show only the selected section
-    todaySection.style.display = filter === "today" ? "" : "none";
-    pastSection.style.display = filter === "past" ? "" : "none";
-    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+        // Show only the selected section
+        todaySection.style.display = filter === "today" ? "" : "none";
+        pastSection.style.display = filter === "past" ? "" : "none";
+        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
 
-    // Set the correct search field, value, and placeholder
-    if (filter === "today") {
-        searchBox.name = "today_search";
-        searchBox.value = {{ today_search|tojson }};
-    } else if (filter === "past") {
-        searchBox.name = "past_search";
-        searchBox.value = {{ past_search|tojson }};
-    } else if (filter === "upcoming") {
-        searchBox.name = "upcoming_search";
-        searchBox.value = {{ upcoming_search|tojson }};
+        // Set the correct search field, value, and placeholder
+        if (filter === "today") {
+            searchBox.name = "today_search";
+            searchBox.value = {{ today_search | tojson }};
+        } else if (filter === "past") {
+            searchBox.name = "past_search";
+            searchBox.value = {{ past_search | tojson }};
+        } else if (filter === "upcoming") {
+            searchBox.name = "upcoming_search";
+            searchBox.value = {{ upcoming_search | tojson }};
+        }
+
+        searchBox.placeholder = "Search Company / Job Title / Student";
     }
-
-    searchBox.placeholder = "Search Company / Job Title / Student";
-}
 
     document.addEventListener("DOMContentLoaded", function () {
         const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
         const filterDropdown = document.getElementById("interview-filter");
-        filterDropdown.value = savedFilter;
+        if (filterDropdown) {
+            filterDropdown.value = savedFilter;
+        }
         filterInterviews(savedFilter);
     });
 
     function openJD(jobId) {
-
         const modal = document.getElementById("jdModal" + jobId);
-
         if (modal) {
             modal.style.display = "flex";
             document.body.style.overflow = "hidden";
         }
-
     }
 
-
     function closeJD(jobId) {
-
         const modal = document.getElementById("jdModal" + jobId);
-
         if (modal) {
             modal.style.display = "none";
             document.body.style.overflow = "";
         }
-
     }
 
-
     function closeJDOutside(event, jobId) {
-
         if (event.target === event.currentTarget) {
             closeJD(jobId);
         }
-
     }
 
-
     /* Close using Escape key */
-
     document.addEventListener("keydown", function (event) {
-
         if (event.key === "Escape") {
-
             document.querySelectorAll(".jd-overlay").forEach(function (modal) {
-
                 modal.style.display = "none";
-
             });
-
             document.body.style.overflow = "";
-
         }
-
     });
 
 </script>

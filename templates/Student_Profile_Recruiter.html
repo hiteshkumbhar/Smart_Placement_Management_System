@@ -188,10 +188,10 @@
 
     .student-profile-page {
         margin: 0 auto;
-        height: 100vh;        
+        height: 100vh;
         display: flex;
         flex-direction: column;
-        overflow: hidden; 
+        overflow: hidden;
     }
 
     .profile-hero {
@@ -368,6 +368,15 @@
         text-decoration: none;
         background: #fff;
         transition: 0.2s ease;
+    }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
     }
 
     .social-link:hover {
@@ -576,10 +585,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -642,7 +654,8 @@
 
                     <div class="info-item">
                         <span class="info-label">Date of Birth</span>
-                        <span class="info-value">{{ student[1].DOB.strftime("%d-%m-%Y") if student[1].DOB else 'Not specified' }}</span>
+                        <span class="info-value">{{ student[1].DOB.strftime("%d-%m-%Y") if student[1].DOB else 'Not
+                            specified' }}</span>
                     </div>
 
                     <div class="info-item">
@@ -808,7 +821,9 @@
                     <div class="document-row">
                         <span class="document-name">{{ cert }}</span>
 
-                        <form class="document-form" action="{{ url_for('Recruiter.download_certifications') }}" method="post">
+                        <form class="document-form" action="{{ url_for('Recruiter.download_certifications') }}"
+                            method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <input type="hidden" value="{{ cert }}" name="name">
                             <input type="hidden" value="{{student[1].user_id}}" name="id">
                             <button type="submit" class="document-button">
@@ -840,6 +855,7 @@
                     <span class="resume-name">{{ student[1].resume_path }}</span>
 
                     <form class="resume-form" action="{{ url_for('Recruiter.download_resume') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" value="{{ student[1].id }}" name="id">
                         <button type="submit" class="resume-button">
                             Download Resume

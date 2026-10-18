@@ -255,7 +255,7 @@
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        overflow-x: hidden;    
+        overflow-x: hidden;
     }
 
     .interview-header {
@@ -295,7 +295,7 @@
     }
 
     .interview-section {
-         height: auto;
+        height: auto;
         min-height: auto;
         display: flex;
         flex-direction: column;
@@ -811,126 +811,135 @@
 
     /* Past Interviews Pagination */
 
-.past-pagination-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 4px 4px;
-    flex-shrink: 0;
-}
-
-.past-pagination-info {
-    color: #1e293b;
-    font-size: 15px;
-    white-space: nowrap;
-}
-
-.past-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-.past-page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    min-width: 42px;
-    height: 42px;
-    padding: 0 13px;
-
-    border: 1px solid #dfe3ea;
-    border-radius: 10px;
-
-    background: #fff;
-    color: #1e293b;
-
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    white-space: nowrap;
-
-    transition: all 0.2s ease;
-}
-
-a.past-page-btn:hover {
-    border-color: #6350d7;
-    color: #6350d7;
-    background: #f5f3ff;
-}
-
-.past-page-btn.past-active {
-    color: #fff;
-    background: #6350d7;
-    border-color: #6350d7;
-    font-weight: 600;
-}
-
-.past-page-btn.past-prev-next {
-    padding: 0 16px;
-}
-
-.past-page-btn.past-disabled {
-    color: #b8bec9;
-    background: #fafafa;
-    border-color: #e1e4ea;
-    cursor: not-allowed;
-}
-
-.past-ellipsis {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    color: #7c8595;
-    font-size: 18px;
-}
-
-.past-arrow {
-    width: 8px;
-    height: 8px;
-    border-top: 2px solid currentColor;
-    border-right: 2px solid currentColor;
-    flex-shrink: 0;
-}
-
-.past-left-arrow {
-    transform: rotate(-135deg);
-}
-
-.past-right-arrow {
-    transform: rotate(45deg);
-}
-
-@media (max-width: 768px) {
     .past-pagination-container {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 4px 4px;
+        flex-shrink: 0;
+    }
+
+    .past-pagination-info {
+        color: #1e293b;
+        font-size: 15px;
+        white-space: nowrap;
     }
 
     .past-pagination {
-        width: 100%;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
     }
 
     .past-page-btn {
-        min-width: 36px;
-        height: 38px;
-        padding: 0 10px;
-        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+
+        min-width: 42px;
+        height: 42px;
+        padding: 0 13px;
+
+        border: 1px solid #dfe3ea;
+        border-radius: 10px;
+
+        background: #fff;
+        color: #1e293b;
+
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+
+        transition: all 0.2s ease;
+    }
+
+    a.past-page-btn:hover {
+        border-color: #6350d7;
+        color: #6350d7;
+        background: #f5f3ff;
+    }
+
+    .past-page-btn.past-active {
+        color: #fff;
+        background: #6350d7;
+        border-color: #6350d7;
+        font-weight: 600;
     }
 
     .past-page-btn.past-prev-next {
-        padding: 0 10px;
+        padding: 0 16px;
     }
-}
+
+    .past-page-btn.past-disabled {
+        color: #b8bec9;
+        background: #fafafa;
+        border-color: #e1e4ea;
+        cursor: not-allowed;
+    }
+
+    .past-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        color: #7c8595;
+        font-size: 18px;
+    }
+
+    .past-arrow {
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        flex-shrink: 0;
+    }
+
+    .past-left-arrow {
+        transform: rotate(-135deg);
+    }
+
+    .past-right-arrow {
+        transform: rotate(45deg);
+    }
+
+    @media (max-width: 768px) {
+        .past-pagination-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .past-pagination {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 6px;
+        }
+
+        .past-page-btn {
+            min-width: 36px;
+            height: 38px;
+            padding: 0 10px;
+            font-size: 13px;
+        }
+
+        .past-page-btn.past-prev-next {
+            padding: 0 10px;
+        }
+    }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {%endblock%}
 
@@ -982,10 +991,13 @@ a.past-page-btn:hover {
                                 <span>My Profile</span>
                             </a>
                             <hr class="profile-divider">
-                            <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                                <span class="action-icon">↪</span>
-                                <span>Logout</span>
-                            </a>
+                            <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="profile-action logout-action">
+                                    <span class="action-icon">↪</span>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
                         </div>
                     </details>
                 </div>
@@ -997,11 +1009,16 @@ a.past-page-btn:hover {
                 <p>Track your interview journey and results</p>
             </div>
             <div>
-                <form method="POST" id="interview-search-form" class="interview-controls"
+                <form method="GET" id="interview-search-form" class="interview-controls"
                     action="{{ url_for('student.Student_interview') }}">
+
+                    <input type="hidden" id="selected-filter" name="selected_filter"
+                        value="{{ request.args.get('selected_filter', 'today') }}">
+
                     <div class="search">
                         <span class="icon">🔍</span>
                         <input type="text" id="interview-search" name="today_search"
+                            value="{{ request.args.get('today_search', request.args.get('past_search', request.args.get('upcoming_search', ''))) }}"
                             placeholder="Search today's interviews...">
                     </div>
 
@@ -1208,7 +1225,7 @@ a.past-page-btn:hover {
                     </tbody>
                 </table>
             </div>
-             <!-- Today Interviews Pagination -->
+            <!-- Today Interviews Pagination -->
             <div class="past-pagination-container">
                 <!-- Record count -->
                 <div class="past-pagination-info">
@@ -1221,8 +1238,8 @@ a.past-page-btn:hover {
 
                     <!-- Previous -->
                     {% if Today_pagination.has_prev %}
-                    <a
-                        href="{{ url_for('student.Student_interview', today_page=Today_pagination.prev_num) }}#today-interviews" class="past-page-btn past-prev-next">
+                    <a href="{{ url_for('student.Student_interview', today_page=Today_pagination.prev_num,  today_search=request.args.get('today_search', ''))}}#today-interviews"
+                        class="past-page-btn past-prev-next">
                         <span class="past-arrow past-left-arrow"></span>
                         <span>Previous</span>
                     </a>
@@ -1235,42 +1252,36 @@ a.past-page-btn:hover {
 
                     <!-- Page numbers -->
                     {% for p in Today_pagination.iter_pages(
-                        left_edge=1,
-                        right_edge=1,
-                        left_current=1,
-                        right_current=1
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
                     ) %}
 
-                        {% if p %}
+                    {% if p %}
 
-                            {% if p == Today_pagination.page %}
-                            <span class="past-page-btn past-active"
-                                aria-current="page">
-                                {{ p }}
-                            </span>
-                            {% else %}
-                            <a
-                                href="{{ url_for('student.Student_interview',
-                                                today_page=p) }}#today-interviews"
-                                class="past-page-btn"
-                            >
-                                {{ p }}
-                            </a>
-                            {% endif %}
+                    {% if p == Today_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for('student.Student_interview',
+                                                today_page=p,today_search=request.args.get('today_search', '')) }}#today-interviews" class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
 
-                        {% else %}
-                            <span class="past-ellipsis">…</span>
-                        {% endif %}
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
 
                     {% endfor %}
 
                     <!-- Next -->
                     {% if Today_pagination.has_next %}
-                    <a
-                        href="{{ url_for('student.Student_interview',
-                                        today_page=Today_pagination.next_num) }}#today-interviews"
-                        class="past-page-btn past-prev-next"
-                    >
+                    <a href="{{ url_for('student.Student_interview',
+                                        today_page=Today_pagination.next_num, today_search=request.args.get('today_search', '')) }}#today-interviews"
+                        class="past-page-btn past-prev-next">
                         <span>Next</span>
                         <span class="past-arrow past-right-arrow"></span>
                     </a>
@@ -1435,7 +1446,7 @@ a.past-page-btn:hover {
                     </tbody>
                 </table>
             </div>
-             <!-- Upcoming Interviews Pagination -->
+            <!-- Upcoming Interviews Pagination -->
             <div class="past-pagination-container">
                 <!-- Record count -->
                 <div class="past-pagination-info">
@@ -1448,8 +1459,8 @@ a.past-page-btn:hover {
 
                     <!-- Previous -->
                     {% if Upcoming_pagination.has_prev %}
-                    <a
-                        href="{{ url_for('student.Student_interview', upcoming_page=Upcoming_pagination.prev_num) }}#upcoming-interviews" class="past-page-btn past-prev-next">
+                    <a href="{{ url_for('student.Student_interview', upcoming_page=Upcoming_pagination.prev_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
+                        class="past-page-btn past-prev-next">
                         <span class="past-arrow past-left-arrow"></span>
                         <span>Previous</span>
                     </a>
@@ -1462,42 +1473,36 @@ a.past-page-btn:hover {
 
                     <!-- Page numbers -->
                     {% for p in Upcoming_pagination.iter_pages(
-                        left_edge=1,
-                        right_edge=1,
-                        left_current=1,
-                        right_current=1
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
                     ) %}
 
-                        {% if p %}
+                    {% if p %}
 
-                            {% if p == Upcoming_pagination.page %}
-                            <span class="past-page-btn past-active"
-                                aria-current="page">
-                                {{ p }}
-                            </span>
-                            {% else %}
-                            <a
-                                href="{{ url_for('student.Student_interview',
-                                                upcoming_page=p) }}#upcoming-interviews"
-                                class="past-page-btn"
-                            >
-                                {{ p }}
-                            </a>
-                            {% endif %}
+                    {% if p == Upcoming_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for('student.Student_interview',
+                                                upcoming_page=p,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews" class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
 
-                        {% else %}
-                            <span class="past-ellipsis">…</span>
-                        {% endif %}
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
 
                     {% endfor %}
 
                     <!-- Next -->
                     {% if Upcoming_pagination.has_next %}
-                    <a
-                        href="{{ url_for('student.Student_interview',
-                                        upcoming_page=Upcoming_pagination.next_num) }}#upcoming-interviews"
-                        class="past-page-btn past-prev-next"
-                    >
+                    <a href="{{ url_for('student.Student_interview',
+                                        upcoming_page=Upcoming_pagination.next_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
+                        class="past-page-btn past-prev-next">
                         <span>Next</span>
                         <span class="past-arrow past-right-arrow"></span>
                     </a>
@@ -1536,8 +1541,8 @@ a.past-page-btn:hover {
             <div class="section-heading">
                 <div class="section-title">
                     <div class="section-icon">
-                        <svg width="25px" height="25px" viewBox="0 0 48 48"
-                            xmlns="http://www.w3.org/2000/svg" fill="#6b42f5">
+                        <svg width="25px" height="25px" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"
+                            fill="#6b42f5">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                             <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                             <g id="SVGRepo_iconCarrier">
@@ -1668,8 +1673,8 @@ a.past-page-btn:hover {
 
                     <!-- Previous -->
                     {% if Past_pagination.has_prev %}
-                    <a
-                        href="{{ url_for('student.Student_interview', page=Past_pagination.prev_num) }}#past-interviews" class="past-page-btn past-prev-next">
+                    <a href="{{ url_for('student.Student_interview', page=Past_pagination.prev_num,past_search=request.args.get('past_search', '')) }}#past-interviews"
+                        class="past-page-btn past-prev-next">
                         <span class="past-arrow past-left-arrow"></span>
                         <span>Previous</span>
                     </a>
@@ -1682,42 +1687,36 @@ a.past-page-btn:hover {
 
                     <!-- Page numbers -->
                     {% for p in Past_pagination.iter_pages(
-                        left_edge=1,
-                        right_edge=1,
-                        left_current=1,
-                        right_current=1
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
                     ) %}
 
-                        {% if p %}
+                    {% if p %}
 
-                            {% if p == Past_pagination.page %}
-                            <span class="past-page-btn past-active"
-                                aria-current="page">
-                                {{ p }}
-                            </span>
-                            {% else %}
-                            <a
-                                href="{{ url_for('student.Student_interview',
-                                                page=p) }}#past-interviews"
-                                class="past-page-btn"
-                            >
-                                {{ p }}
-                            </a>
-                            {% endif %}
+                    {% if p == Past_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for('student.Student_interview',
+                                                page=p,past_search=request.args.get('past_search', '')) }}#past-interviews" class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
 
-                        {% else %}
-                            <span class="past-ellipsis">…</span>
-                        {% endif %}
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
 
                     {% endfor %}
 
                     <!-- Next -->
                     {% if Past_pagination.has_next %}
-                    <a
-                        href="{{ url_for('student.Student_interview',
-                                        page=Past_pagination.next_num) }}#past-interviews"
-                        class="past-page-btn past-prev-next"
-                    >
+                    <a href="{{ url_for('student.Student_interview',
+                                        page=Past_pagination.next_num,past_search=request.args.get('past_search', '')) }}#past-interviews"
+                        class="past-page-btn past-prev-next">
                         <span>Next</span>
                         <span class="past-arrow past-right-arrow"></span>
                     </a>
@@ -1754,40 +1753,45 @@ a.past-page-btn:hover {
 </div>
 
 <script>
+function filterInterviews(filter) {
+    sessionStorage.setItem("selectedInterviewFilter", filter);
+    document.getElementById("selected-filter").value = filter;
 
-    function filterInterviews(filter) {
-        sessionStorage.setItem("selectedInterviewFilter", filter);
-        const todaySection = document.getElementById("today-interviews");
-        const pastSection = document.getElementById("past-interviews");
-        const upcomingSection = document.getElementById("upcoming-interviews");
+    const todaySection = document.getElementById("today-interviews");
+    const pastSection = document.getElementById("past-interviews");
+    const upcomingSection = document.getElementById("upcoming-interviews");
+    const searchBox = document.getElementById("interview-search");
 
-        const searchBox = document.getElementById("interview-search");
+    // Show only the selected section
+    todaySection.style.display = filter === "today" ? "" : "none";
+    pastSection.style.display = filter === "past" ? "" : "none";
+    upcomingSection.style.display = filter === "upcoming" ? "" : "none";
 
-        // Show only the selected section
-        todaySection.style.display = filter === "today" ? "" : "none";
-        pastSection.style.display = filter === "past" ? "" : "none";
-        upcomingSection.style.display = filter === "upcoming" ? "" : "none";
+    // Set the backend field name and placeholder
+    if (filter === "today") {
+        searchBox.name = "today_search";
+        searchBox.placeholder = "Search today's interviews...";
+    } else if (filter === "past") {
+        searchBox.name = "past_search";
+        searchBox.placeholder = "Search past interviews...";
+    } else if (filter === "upcoming") {
+        searchBox.name = "upcoming_search";
+        searchBox.placeholder = "Search upcoming interviews...";
+    }
+}
 
-        // Set the backend field name and placeholder
-        if (filter === "today") {
-            searchBox.name = "today_search";
-            searchBox.placeholder = "Search today's interviews...";
-        } else if (filter === "past") {
-            searchBox.name = "past_search";
-            searchBox.placeholder = "Search past interviews...";
-        } else if (filter === "upcoming") {
-            searchBox.name = "upcoming_search";
-            searchBox.placeholder = "Search upcoming interviews...";
-        }
+document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    let savedFilter = params.get("selected_filter") || sessionStorage.getItem("selectedInterviewFilter") || "today";
+    
+    if (savedFilter !== "today" && savedFilter !== "past" && savedFilter !== "upcoming") {
+        savedFilter = "today";
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const savedFilter = sessionStorage.getItem("selectedInterviewFilter") || "today";
-        const filterDropdown = document.getElementById("interview-filter");
-        filterDropdown.value = savedFilter;
-        filterInterviews(savedFilter);
-    });
-
+    const filterDropdown = document.getElementById("interview-filter");
+    filterDropdown.value = savedFilter;
+    filterInterviews(savedFilter);
+});
     function openJD(jobId) {
 
         const modal = document.getElementById("jdModal" + jobId);

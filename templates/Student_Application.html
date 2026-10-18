@@ -408,7 +408,7 @@
     }
 
     .applications-table tbody tr:last-child td {
-        border-bottom: 1px solid #d5ddf0;    
+        border-bottom: 1px solid #d5ddf0;
     }
 
 
@@ -741,6 +741,15 @@
             justify-content: flex-start;
         }
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {% endblock %}
 
@@ -799,10 +808,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -815,10 +827,11 @@
                 <p>Track and manage all your placement applications.</p>
             </div>
 
-            <form method='POST' action="{{url_for('student.Application')}}">
+            <form method='GET' action="{{url_for('student.Application')}}">
                 <div class="search">
                     <span class="icon">🔍</span>
-                    <input type="text" name="search" id="searchInput" placeholder="Search Comapny..." />
+                    <input type="text" name="search" id="searchInput" placeholder="Search Comapny..."
+                        value="{{ request.args.get('search','') }}" />
                 </div>
             </form>
         </div>
@@ -1180,7 +1193,8 @@
                     <a href="{{ url_for(
             'student.Application',
             page=applications_pagination.prev_num,
-            filter=request.args.get('filter', 'All')
+            filter=request.args.get('filter', 'All'),
+            search=request.args.get('search', '')
         ) }}" class="application-page-btn application-prev-next">
                         <span class="application-arrow application-left-arrow"></span>
                         <span>Previous</span>
@@ -1207,7 +1221,8 @@
                     <a href="{{ url_for(
                     'student.Application',
                     page=p,
-                    filter=request.args.get('filter', 'All')
+                    filter=request.args.get('filter', 'All'),
+                    search=request.args.get('search', '')
                 ) }}" class="application-page-btn">{{ p }}</a>
                     {% endif %}
                     {% else %}
@@ -1221,7 +1236,8 @@
                     <a href="{{ url_for(
             'student.Application',
             page=applications_pagination.next_num,
-            filter=request.args.get('filter', 'All')
+            filter=request.args.get('filter', 'All'),
+            search=request.args.get('search', '')
         ) }}" class="application-page-btn application-prev-next">
                         <span>Next</span>
                         <span class="application-arrow application-right-arrow"></span>

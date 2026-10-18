@@ -855,6 +855,15 @@
         overflow-y: auto;
         min-height: 0;
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {% endblock %}
 
@@ -916,10 +925,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -942,11 +954,13 @@
                             src="{{ url_for('static', filename='Images/student/profile_photo/' + student.profile_pic) }}"
                             alt="Profile Picture">
                         {% endif %}
-                        <form method="POST" action="{{ url_for('student.Student_Profile')}}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ url_for('student.Student_Profile')}}"
+                            enctype="multipart/form-data">
                             <label for="profile-pic-upload" style="cursor: pointer;">
                                 <span class="sp-photo-edit" title="Profile photo">✎</span>
                             </label>
                             <input type="hidden" name="action" value="change_photo">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <input id="profile-pic-upload" name="profile_photo" type="file" style="display: none;"
                                 onchange="this.form.submit()" />
                         </form>
@@ -1017,7 +1031,8 @@
                             </div>
                             <div>
                                 <div class="sp-contact-label">Date of Birth</div>
-                                <div class="sp-contact-value">{{ student.DOB.strftime('%d-%m-%Y') if student.DOB is not none else 'Not specified' }}</div>
+                                <div class="sp-contact-value">{{ student.DOB.strftime('%d-%m-%Y') if student.DOB is not
+                                    none else 'Not specified' }}</div>
                             </div>
                         </div>
 
@@ -1154,7 +1169,8 @@
                             </span>
                             <div>
                                 <div class="sp-field-label">Date of Birth</div>
-                                <div class="sp-field-value">{{ student.DOB.strftime('%d-%m-%Y') if student.DOB is not none else 'Not specified' }}</div>
+                                <div class="sp-field-value">{{ student.DOB.strftime('%d-%m-%Y') if student.DOB is not
+                                    none else 'Not specified' }}</div>
                             </div>
                         </div>
                         <div class="sp-field">
@@ -1590,7 +1606,9 @@
             <div class="sp-link-grid">
 
                 {% if student.LinkedIn %}
-                <a class="sp-link-card" href="{{ student.LinkedIn if 'https://' in student.LinkedIn else 'https://' + student.LinkedIn }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card"
+                    href="{{ student.LinkedIn if 'https://' in student.LinkedIn else 'https://' + student.LinkedIn }}"
+                    target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg width="30px" height="30px" viewBox="0 0 16 16"
                             xmlns="http://www.w3.org/2000/svg" fill="none">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -1621,7 +1639,9 @@
                 {% endif %}
 
                 {% if student.GitHub %}
-                <a class="sp-link-card" href="{{ student.GitHub if 'https://' in student.GitHub else 'https://' + student.GitHub }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card"
+                    href="{{ student.GitHub if 'https://' in student.GitHub else 'https://' + student.GitHub }}"
+                    target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 20 20" version="1.1"
                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             fill="#000000">
@@ -1674,8 +1694,9 @@
                 {% endif %}
 
                 {% if student.Portfolio_Website %}
-                <a class="sp-link-card" href="{{ student.Portfolio_Website if 'https://' in student.Portfolio_Website else 'https://' + student.Portfolio_Website }}" target="_blank"
-                    rel="noopener noreferrer">
+                <a class="sp-link-card"
+                    href="{{ student.Portfolio_Website if 'https://' in student.Portfolio_Website else 'https://' + student.Portfolio_Website }}"
+                    target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg width="27px" height="27px" viewBox="0 0 64 64"
                             xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#6b42f5" fill="none">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -1723,7 +1744,9 @@
                 {% endif %}
 
                 {% if student.LeetCode %}
-                <a class="sp-link-card" href="{{ student.LeetCode if 'https://' in student.LeetCode else 'https://' + student.LeetCode }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card"
+                    href="{{ student.LeetCode if 'https://' in student.LeetCode else 'https://' + student.LeetCode }}"
+                    target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon"><svg xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 94 110.92" width="27"
                             height="27">
@@ -1784,7 +1807,9 @@
                 {% endif %}
 
                 {% if student.HackerRank %}
-                <a class="sp-link-card" href="{{ student.HackerRank if 'https://' in student.HackerRank else 'https://' + student.HackerRank }}" target="_blank" rel="noopener noreferrer">
+                <a class="sp-link-card"
+                    href="{{ student.HackerRank if 'https://' in student.HackerRank else 'https://' + student.HackerRank }}"
+                    target="_blank" rel="noopener noreferrer">
                     <span class="sp-link-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
                             <rect width="200" height="200" fill="#0E141E" />
@@ -1870,7 +1895,9 @@
                         </div>
                         {% if student.resume_path %}
                         <div style="margin-top:14px;">
-                            <form method="GET" action="{{ url_for('student.Student_Profile') }}" style="display:inline;">
+                            <form method="GET" action="{{ url_for('student.Student_Profile') }}"
+                                style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                 <button type="submit" name="Download" value="download_resume" class="sp-primary-btn">↓
                                     Download
                                     Resume</button>
@@ -1932,6 +1959,7 @@
                             <div>
                                 <form method="POST" action="{{ url_for('student.student_download_certifications') }}"
                                     style="display:inline; margin:0;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                     <button type="submit" name="name" value="{{Certificate}}"
                                         class="sp-btn">Download</button>
                                     <input type="hidden" name="id" value="{{current_user.user_id}}">
@@ -1956,6 +1984,7 @@
         <!-- UPDATE PROFILE BUTTON -->
         <div style="display:flex;justify-content:center;margin-top:18px;">
             <form method="POST" action="{{ url_for('student.Student_Profile') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <button type="submit" name="action" value="go_to_update" class="sp-primary-btn">✎ Update
                     Profile</button>
             </form>
@@ -1975,8 +2004,9 @@
     </div>
     <div class="scrollable-bottom-section">
 
-        <form method="POST" action="{{ url_for('student.Student_Profile', mode='Update') }}" enctype="multipart/form-data">
-
+        <form method="POST" action="{{ url_for('student.Student_Profile', mode='Update') }}"
+            enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <section class="sp-card sp-edit-card">
 
                 <div class="sp-edit-section">
@@ -2274,7 +2304,7 @@
                             <label class="sp-form-label">LeetCode</label>
                             <input class="sp-form-input" type="text" value="{{ student.LeetCode or '' }}"
                                 name="LeetCode">
-                                {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% with messages = get_flashed_messages(with_categories=true) %}
                             {% if messages %}
                             {% for category, message in messages %}
                             {% if category in [ "LeetCode_error"] %}
@@ -2289,7 +2319,7 @@
                             <label class="sp-form-label">HackerRank</label>
                             <input class="sp-form-input" type="text" value="{{ student.HackerRank or '' }}"
                                 name="HackerRank">
-                                {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% with messages = get_flashed_messages(with_categories=true) %}
                             {% if messages %}
                             {% for category, message in messages %}
                             {% if category in [ "HackerRank_error"] %}

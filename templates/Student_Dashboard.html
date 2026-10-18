@@ -15,9 +15,10 @@
         align-items: center;
         gap: 18px;
     }
-.scrollable-bottom-section::-webkit-scrollbar {
-    display: none;               
-}
+
+    .scrollable-bottom-section::-webkit-scrollbar {
+        display: none;
+    }
 
     .profile-menu {
         position: relative;
@@ -472,6 +473,16 @@
         overflow-y: auto;
         min-height: 0;
     }
+
+    /* Reset button defaults so it acts like a styled link */
+button.profile-action {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+}
 </style>
 {%endblock%}
 
@@ -528,10 +539,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -940,7 +954,8 @@
                             <td>{{ j[3] }}</td>
                             <td class="deadline">{{ j[4] }}</td>
                             <td>
-                                <a class="details-button" href="{{ url_for('student.Student_Job_Drive') }}">View Details</a>
+                                <a class="details-button" href="{{ url_for('student.Student_Job_Drive') }}">View
+                                    Details</a>
                             </td>
                         </tr>
                         {% endfor %}

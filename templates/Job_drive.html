@@ -215,15 +215,16 @@
     ========================================================= */
 
     .job-drive-header {
-          display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 30px;
-    margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 30px;
     }
+
     .job-drive-heading {
-    flex-shrink: 0;
-}
+        flex-shrink: 0;
+    }
 
     .job-drive-heading h1 {
         margin: 0;
@@ -239,25 +240,25 @@
     }
 
 
-.job-drive-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 15px;
-    flex: 1;
-    min-width: 0;
-}
+    .job-drive-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 15px;
+        flex: 1;
+        min-width: 0;
+    }
 
-.job-drive-actions .search-form {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+    .job-drive-actions .search-form {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-.job-drive-actions .search {
-    width: 260px;
-    box-sizing: border-box;
-}
+    .job-drive-actions .search {
+        width: 260px;
+        box-sizing: border-box;
+    }
 
     .logout-button {
         height: 48px;
@@ -703,6 +704,15 @@
     .search .icon {
         color: #9ca3af;
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 
 {% endblock %}
@@ -741,10 +751,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -759,7 +772,7 @@
                 <p>Manage all your job drives here</p>
             </div>
             <div class="job-drive-actions">
-                    <a href="{{ url_for('Recruiter.add_Job_drive') }}" class="add-job-button">
+                <a href="{{ url_for('Recruiter.add_Job_drive') }}" class="add-job-button">
                     <span class="plus">+</span> Add Job Drive
                 </a>
 

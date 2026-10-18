@@ -985,6 +985,15 @@
     .past-right-arrow {
         transform: rotate(45deg);
     }
+
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 </style>
 {% endblock %}
 {% block main %}
@@ -1019,10 +1028,13 @@
 
                         <hr class="profile-divider">
 
-                        <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                            <span class="action-icon">↪</span>
-                            <span>Logout</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-action logout-action">
+                                <span class="action-icon">↪</span>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     </div>
                 </details>
             </div>
@@ -1119,11 +1131,13 @@
                             </td>
                             <td>{% if interview[3].result is none %}<div class="result-actions">
                                     <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                         <input type="hidden" value="{{ interview[3].id }}" name="round_id"><button
                                             type="submit" name="result" value="Cleared"
                                             class="result-button pass-button">Pass</button>
                                     </form>
                                     <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                         <input type="hidden" value="{{ interview[3].id }}" name="round_id"><button
                                             type="submit" name="result" value="Rejected"
                                             class="result-button reject-button">Reject</button>
@@ -1145,90 +1159,90 @@
                 </table>
             </div>
             <!-- Past Interviews Pagination -->
-                <div class="past-pagination-container">
-                    <!-- Record count -->
-                    <div class="past-pagination-info">
-                        Showing
-                        {{ Today_pagination.first or 0 }}–{{ Today_pagination.last or 0 }}
-                        of {{ Today_pagination.total }}
-                    </div>
+            <div class="past-pagination-container">
+                <!-- Record count -->
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Today_pagination.first or 0 }}–{{ Today_pagination.last or 0 }}
+                    of {{ Today_pagination.total }}
+                </div>
 
-                    <nav class="past-pagination" aria-label="Past interviews pagination">
+                <nav class="past-pagination" aria-label="Past interviews pagination">
 
-                        <!-- Previous -->
-                        {% if Today_pagination.has_prev %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=Today_pagination.prev_num, today_search=request.args.get('today_search', '')) }}#today-interviews"
-                            class="past-page-btn past-prev-next">
-                            <span class="past-arrow past-left-arrow"></span>
-                            <span>Previous</span>
-                        </a>
-                        {% else %}
-                        <span class="past-page-btn past-prev-next past-disabled">
-                            <span class="past-arrow past-left-arrow"></span>
-                            <span>Previous</span>
-                        </span>
-                        {% endif %}
+                    <!-- Previous -->
+                    {% if Today_pagination.has_prev %}
+                    <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=Today_pagination.prev_num, today_search=request.args.get('today_search', '')) }}#today-interviews"
+                        class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
 
-                        <!-- Page numbers -->
-                        {% for p in Today_pagination.iter_pages(
-                        left_edge=1,
-                        right_edge=1,
-                        left_current=1,
-                        right_current=1
-                        ) %}
+                    <!-- Page numbers -->
+                    {% for p in Today_pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
+                    ) %}
 
-                        {% if p %}
+                    {% if p %}
 
-                        {% if p == Today_pagination.page %}
-                        <span class="past-page-btn past-active" aria-current="page">
-                            {{ p }}
-                        </span>
-                        {% else %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=p,today_search=request.args.get('today_search', '')) }}#today-interviews"
-                            class="past-page-btn">
-                            {{ p }}
-                        </a>
-                        {% endif %}
+                    {% if p == Today_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for('Recruiter.Recruiter_Interview', today_page=p,today_search=request.args.get('today_search', '')) }}#today-interviews"
+                        class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
 
-                        {% else %}
-                        <span class="past-ellipsis">…</span>
-                        {% endif %}
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
 
-                        {% endfor %}
+                    {% endfor %}
 
-                        <!-- Next -->
-                        {% if Today_pagination.has_next %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview',
+                    <!-- Next -->
+                    {% if Today_pagination.has_next %}
+                    <a href="{{ url_for('Recruiter.Recruiter_Interview',
                                         today_page=Today_pagination.next_num, today_search=request.args.get('today_search', '')) }}#today-interviews"
-                            class="past-page-btn past-prev-next">
-                            <span>Next</span>
-                            <span class="past-arrow past-right-arrow"></span>
-                        </a>
-                        {% else %}
-                        <span class="past-page-btn past-prev-next past-disabled">
-                            <span>Next</span>
-                            <span class="past-arrow past-right-arrow"></span>
-                        </span>
-                        {% endif %}
-                    </nav>
-                </div>
-                {% for interview in today_interview %}
-                {% if interview[3].feedback %}
-                <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
-                    onclick="closeJDOutside(event, '{{ interview[3].id }}')">
-                    <div class="jd-modal">
-                        <div class="jd-modal-header">
-                            <h3 class="jd-modal-title">Feedback</h3>
-                            <button type="button" class="jd-close-btn"
-                                onclick="closeJD('{{ interview[3].id }}')">&times;</button>
-                        </div>
-                        <div class="jd-full-description">
-                            {{ interview[3].feedback }}
-                        </div>
+                        class="past-page-btn past-prev-next">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
+                </nav>
+            </div>
+            {% for interview in today_interview %}
+            {% if interview[3].feedback %}
+            <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
+                onclick="closeJDOutside(event, '{{ interview[3].id }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview[3].id }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview[3].feedback }}
                     </div>
                 </div>
-                {% endif %}
-                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
         </section>
         <section id="upcoming-interviews" class="interview-section">
             <div class="section-header">
@@ -1300,93 +1314,93 @@
                 </table>
             </div>
             <!-- Upcoming Interviews Pagination -->
-                <div class="past-pagination-container">
-                    <!-- Record count -->
-                    <div class="past-pagination-info">
-                        Showing
-                        {{ Upcoming_pagination.first or 0 }}–{{ Upcoming_pagination.last or 0 }}
-                        of {{ Upcoming_pagination.total }}
-                    </div>
+            <div class="past-pagination-container">
+                <!-- Record count -->
+                <div class="past-pagination-info">
+                    Showing
+                    {{ Upcoming_pagination.first or 0 }}–{{ Upcoming_pagination.last or 0 }}
+                    of {{ Upcoming_pagination.total }}
+                </div>
 
-                    <nav class="past-pagination" aria-label="Upcoming interviews pagination">
+                <nav class="past-pagination" aria-label="Upcoming interviews pagination">
 
-                        <!-- Previous -->
-                        {% if Upcoming_pagination.has_prev %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview', upcoming_page=Upcoming_pagination.prev_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
-                            class="past-page-btn past-prev-next">
-                            <span class="past-arrow past-left-arrow"></span>
-                            <span>Previous</span>
-                        </a>
-                        {% else %}
-                        <span class="past-page-btn past-prev-next past-disabled">
-                            <span class="past-arrow past-left-arrow"></span>
-                            <span>Previous</span>
-                        </span>
-                        {% endif %}
+                    <!-- Previous -->
+                    {% if Upcoming_pagination.has_prev %}
+                    <a href="{{ url_for('Recruiter.Recruiter_Interview', upcoming_page=Upcoming_pagination.prev_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
+                        class="past-page-btn past-prev-next">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span class="past-arrow past-left-arrow"></span>
+                        <span>Previous</span>
+                    </span>
+                    {% endif %}
 
-                        <!-- Page numbers -->
-                        {% for p in Upcoming_pagination.iter_pages(
-                        left_edge=1,
-                        right_edge=1,
-                        left_current=1,
-                        right_current=1
-                        ) %}
+                    <!-- Page numbers -->
+                    {% for p in Upcoming_pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=1,
+                    right_current=1
+                    ) %}
 
-                        {% if p %}
+                    {% if p %}
 
-                        {% if p == Upcoming_pagination.page %}
-                        <span class="past-page-btn past-active" aria-current="page">
-                            {{ p }}
-                        </span>
-                        {% else %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview',
+                    {% if p == Upcoming_pagination.page %}
+                    <span class="past-page-btn past-active" aria-current="page">
+                        {{ p }}
+                    </span>
+                    {% else %}
+                    <a href="{{ url_for('Recruiter.Recruiter_Interview',
                                                 upcoming_page=p,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
-                            class="past-page-btn">
-                            {{ p }}
-                        </a>
-                        {% endif %}
+                        class="past-page-btn">
+                        {{ p }}
+                    </a>
+                    {% endif %}
 
-                        {% else %}
-                        <span class="past-ellipsis">…</span>
-                        {% endif %}
+                    {% else %}
+                    <span class="past-ellipsis">…</span>
+                    {% endif %}
 
-                        {% endfor %}
+                    {% endfor %}
 
-                        <!-- Next -->
-                        {% if Upcoming_pagination.has_next %}
-                        <a href="{{ url_for('Recruiter.Recruiter_Interview',
+                    <!-- Next -->
+                    {% if Upcoming_pagination.has_next %}
+                    <a href="{{ url_for('Recruiter.Recruiter_Interview',
                                         upcoming_page=Upcoming_pagination.next_num,upcoming_search=request.args.get('upcoming_search', '')) }}#upcoming-interviews"
-                            class="past-page-btn past-prev-next">
-                            <span>Next</span>
-                            <span class="past-arrow past-right-arrow"></span>
-                        </a>
-                        {% else %}
-                        <span class="past-page-btn past-prev-next past-disabled">
-                            <span>Next</span>
-                            <span class="past-arrow past-right-arrow"></span>
-                        </span>
-                        {% endif %}
+                        class="past-page-btn past-prev-next">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </a>
+                    {% else %}
+                    <span class="past-page-btn past-prev-next past-disabled">
+                        <span>Next</span>
+                        <span class="past-arrow past-right-arrow"></span>
+                    </span>
+                    {% endif %}
 
-                    </nav>
+                </nav>
 
-                </div>
-                {% for interview in upcoming_interview %}
-                {% if interview[3].feedback %}
-                <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
-                    onclick="closeJDOutside(event, '{{ interview[3].id }}')">
-                    <div class="jd-modal">
-                        <div class="jd-modal-header">
-                            <h3 class="jd-modal-title">Feedback</h3>
-                            <button type="button" class="jd-close-btn"
-                                onclick="closeJD('{{ interview[3].id }}')">&times;</button>
-                        </div>
-                        <div class="jd-full-description">
-                            {{ interview[3].feedback }}
-                        </div>
+            </div>
+            {% for interview in upcoming_interview %}
+            {% if interview[3].feedback %}
+            <div class="jd-overlay" id="jdModal{{ interview[3].id }}"
+                onclick="closeJDOutside(event, '{{ interview[3].id }}')">
+                <div class="jd-modal">
+                    <div class="jd-modal-header">
+                        <h3 class="jd-modal-title">Feedback</h3>
+                        <button type="button" class="jd-close-btn"
+                            onclick="closeJD('{{ interview[3].id }}')">&times;</button>
+                    </div>
+                    <div class="jd-full-description">
+                        {{ interview[3].feedback }}
                     </div>
                 </div>
-                {% endif %}
-                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
         </section>
     </div>
     <div id="feedbackModal" class="feedback-modal-overlay" onclick="closeFeedbackModal(event)" aria-hidden="true">
@@ -1398,6 +1412,7 @@
                     aria-label="Close">&times;</button>
             </div>
             <form method="post" action="{{ url_for('Recruiter.Recruiter_Interview') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <div class="feedback-modal-body">
                     <p>Enter your feedback for this interview round.</p>
                     <input type="hidden" id="feedbackRoundId" name="round_id" value="">

@@ -168,6 +168,14 @@
         color: white;
     }
 
+    button.profile-action {
+        width: 100%;
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        text-align: left;
+    }
 
     /* =========================================================
        KPI CARDS
@@ -428,7 +436,7 @@
 
         padding: 20px;
 
-box-shadow: 0px 0px 5px rgb(209, 209, 209);
+        box-shadow: 0px 0px 5px rgb(209, 209, 209);
         margin-bottom: 20px;
     }
 
@@ -552,7 +560,7 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
        FOOTER
        ========================================================= */
 
-.fixed-top-section {
+    .fixed-top-section {
         flex-shrink: 0;
     }
 
@@ -792,7 +800,7 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
     <!-- =====================================================
          HEADER
          ===================================================== -->
-             <div class="fixed-top-section">
+    <div class="fixed-top-section">
 
         <div class="header-right">
             <header class="topbar">
@@ -823,284 +831,287 @@ box-shadow: 0px 0px 5px rgb(209, 209, 209);
 
                             <hr class="profile-divider">
 
-                            <a class="profile-action logout-action" href="{{ url_for('logout') }}">
-                                <span class="action-icon">↪</span>
-                                <span>Logout</span>
-                            </a>
+                            <form method="POST" action="{{ url_for('logout') }}" style="margin: 0; padding: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="profile-action logout-action">
+                                    <span class="action-icon">↪</span>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
                         </div>
                     </details>
                 </div>
             </header>
         </div>
-        </div>
-            <div class="scrollable-bottom-section">
+    </div>
+    <div class="scrollable-bottom-section">
 
-    <!-- =====================================================
+        <!-- =====================================================
          KPI CARDS
          ===================================================== -->
-    <div class='overview'>
+        <div class='overview'>
 
-        <div class='cardbox'>
-            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
-                <div class="kpi-icon blue">
-                    <i class="bi bi-people-fill"></i>
+            <div class='cardbox'>
+                <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+                    <div class="kpi-icon blue">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+
+                <!-- Dedicated block to force vertical stacking -->
+                <div class='content' style="margin-top: 20px;">
+                    <div>
+                        Total Students
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800;">
+                        {{total_students}}
+                    </div>
                 </div>
             </div>
 
-            <!-- Dedicated block to force vertical stacking -->
-            <div class='content' style="margin-top: 20px;">
-                <div>
-                    Total Students
+            <div class='cardbox'>
+                <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+
+                    <div class="kpi-icon green">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
                 </div>
-                <div style="font-size: 20px; font-weight: 800;">
-                    {{total_students}}
+                <div class='content' style="margin-top: 19px;">
+                    <div>
+                        Placed Students
+                    </div>
+                    <div style="font-size: 16px; font-weight: 700;">
+                        {{placed_students}}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class='cardbox'>
+                <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+
+                    <div class="kpi-icon orange">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                </div>
+                <div class='content' style="margin-top: 22px;">
+                    <div>
+                        Unplaced Students
+                    </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                        {{unplaced_students}}
+                    </div>
+                </div>
+            </div>
+
+            <div class='cardbox'>
+                <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
+
+                    <div class="kpi-icon purple">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                </div>
+                <div class='content' style="margin-top: 22px;">
+                    <div>
+                        Placement Percentage
+                    </div>
+                    <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
+                        {{percentage | round(2)}} %
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class='cardbox'>
-            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
-
-                <div class="kpi-icon green">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
-            </div>
-            <div class='content' style="margin-top: 19px;">
-                <div>
-                    Placed Students
-                </div>
-                <div style="font-size: 16px; font-weight: 700;">
-                    {{placed_students}}
-                </div>
-            </div>
-
-        </div>
-
-        <div class='cardbox'>
-            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
-
-                <div class="kpi-icon orange">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-            </div>
-            <div class='content' style="margin-top: 22px;">
-                <div>
-                    Unplaced Students
-                </div>
-                <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
-                    {{unplaced_students}}
-                </div>
-            </div>
-        </div>
-
-        <div class='cardbox'>
-            <div class='svgs' style="margin-top: 25px; margin-left: 10px;">
-
-                <div class="kpi-icon purple">
-                    <i class="bi bi-bar-chart-fill"></i>
-                </div>
-            </div>
-            <div class='content' style="margin-top: 22px;">
-                <div>
-                    Placement Percentage
-                </div>
-                <div style="font-size: 18px; font-weight: 800; margin-top: 3px;">
-                    {{percentage | round(2)}} %
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- =====================================================
+        <!-- =====================================================
          YEAR + PACKAGE SUMMARY
          ===================================================== -->
-    <div class="summary-card">
-        <!-- YEAR -->
-        <div class="year-section">
-            <label class="summary-label">
-                Graduation Year
-            </label>
-            <form action="{{ url_for('Placement_officer.Placement_officer_analytics') }}">
-                <select name="year" class="year-select" onchange="this.form.submit()">
-                    {% for year in graduation_years %}
-                    <option value="{{ year }}" {% if request.args.get('year') | int==year %} selected {% endif %}>
-                        {{ year }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
-        <!-- HIGHEST PACKAGE -->
-        <div class="summary-divider">
-            <div class="package-item">
-                <div class="package-icon green">
-                    <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <div>
-                    <div class="package-title">
-                        Highest Package
+        <div class="summary-card">
+            <!-- YEAR -->
+            <div class="year-section">
+                <label class="summary-label">
+                    Graduation Year
+                </label>
+                <form action="{{ url_for('Placement_officer.Placement_officer_analytics') }}">
+                    <select name="year" class="year-select" onchange="this.form.submit()">
+                        {% for year in graduation_years %}
+                        <option value="{{ year }}" {% if request.args.get('year') | int==year %} selected {% endif %}>
+                            {{ year }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+            <!-- HIGHEST PACKAGE -->
+            <div class="summary-divider">
+                <div class="package-item">
+                    <div class="package-icon green">
+                        <i class="bi bi-graph-up-arrow"></i>
                     </div>
-                    <div class="package-value green">
-                        ₹ {{ highest_package }} LPA
+                    <div>
+                        <div class="package-title">
+                            Highest Package
+                        </div>
+                        <div class="package-value green">
+                            ₹ {{ highest_package }} LPA
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- AVERAGE PACKAGE -->
+            <div class="summary-divider">
+                <div class="package-item">
+                    <div class="package-icon blue">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div>
+                        <div class="package-title">
+                            Average Package
+                        </div>
+                        <div class="package-value blue">
+                            ₹ {{ average_package | round(2) }} LPA
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- AVERAGE PACKAGE -->
-        <div class="summary-divider">
-            <div class="package-item">
-                <div class="package-icon blue">
-                    <i class="bi bi-bar-chart-fill"></i>
-                </div>
-                <div>
-                    <div class="package-title">
-                        Average Package
-                    </div>
-                    <div class="package-value blue">
-                        ₹ {{ average_package | round(2) }} LPA
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- =====================================================
+        <!-- =====================================================
          COMPANY PARTICIPATION
          ===================================================== -->
-    <div class="chart-card">
-        <div class="chart-card-header">
-            <div class="chart-title-area">
-                <div class="chart-icon">
-                    <i class="bi bi-person-workspace"></i>
-                </div>
-                <div>
-                    <h2 class="chart-title">
-                        Company Participation
-                    </h2>
-                    <div class="chart-subtitle">
-                        Job Drives per Company
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div class="chart-title-area">
+                    <div class="chart-icon">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+                    <div>
+                        <h2 class="chart-title">
+                            Company Participation
+                        </h2>
+                        <div class="chart-subtitle">
+                            Job Drives per Company
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="large-chart">
+                <canvas id="companyParticipationChart"></canvas>
+            </div>
         </div>
-        <div class="large-chart">
-            <canvas id="companyParticipationChart"></canvas>
-        </div>
-    </div>
-    <!-- =====================================================
+        <!-- =====================================================
          BRANCH + RESUME
          ===================================================== -->
-    <div class="two-column">
-        <!-- BRANCH-WISE PLACEMENT -->
-        <div class="chart-card">
-            <div class="chart-card-header">
-                <div class="chart-title-area">
-                    <div class="chart-icon" style="background:#e5f8f4;color:#17b897;">
-                        <i class="bi bi-mortarboard-fill"></i>
-                    </div>
-                    <div>
-                        <h2 class="chart-title">
-                            Branch-wise Placements
-                        </h2>
-                       
+        <div class="two-column">
+            <!-- BRANCH-WISE PLACEMENT -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title-area">
+                        <div class="chart-icon" style="background:#e5f8f4;color:#17b897;">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <h2 class="chart-title">
+                                Branch-wise Placements
+                            </h2>
+
+                        </div>
                     </div>
                 </div>
+                <div class="medium-chart">
+                    <canvas id="branchPlacementChart"></canvas>
+                </div>
             </div>
-            <div class="medium-chart">
-                <canvas id="branchPlacementChart"></canvas>
-            </div>
-        </div>
-        <!-- RESUME VERIFICATION -->
+            <!-- RESUME VERIFICATION -->
 
-        <div class="chart-card">
+            <div class="chart-card">
 
-            <div class="chart-card-header">
+                <div class="chart-card-header">
 
-                <div class="chart-title-area">
+                    <div class="chart-title-area">
 
-                    <div class="chart-icon" style="background:#f0eaff;color:#7447e8;">
+                        <div class="chart-icon" style="background:#f0eaff;color:#7447e8;">
 
-                        <i class="bi bi-file-earmark-person-fill"></i>
+                            <i class="bi bi-file-earmark-person-fill"></i>
 
-                    </div>
+                        </div>
 
-                    <div>
+                        <div>
 
-                        <h2 class="chart-title">
-                            Resume Verification Status
-                        </h2>
+                            <h2 class="chart-title">
+                                Resume Verification Status
+                            </h2>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
 
+                <div class="medium-chart">
 
-            <div class="medium-chart">
+                    <canvas id="resumeStatusChart"></canvas>
 
-                <canvas id="resumeStatusChart"></canvas>
+                </div>
 
             </div>
 
         </div>
 
-    </div>
 
-
-    <!-- =====================================================
+        <!-- =====================================================
          APPLICATION PIPELINE
          ===================================================== -->
 
-    <div class="chart-card">
+        <div class="chart-card">
 
-        <div class="chart-card-header">
+            <div class="chart-card-header">
 
-            <div class="chart-title-area">
+                <div class="chart-title-area">
 
-                <div class="chart-icon">
-                    <i class="bi bi-graph-up"></i>
+                    <div class="chart-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+
+                    <div>
+
+                        <h2 class="chart-title">
+                            Overall Application Pipeline
+                        </h2>
+
+                    </div>
+
                 </div>
 
-                <div>
+            </div>
 
-                    <h2 class="chart-title">
-                        Overall Application Pipeline
-                    </h2>
 
-                </div>
+            <div class="pipeline-chart">
+
+                <canvas id="applicationStatusChart"></canvas>
 
             </div>
 
         </div>
 
 
-        <div class="pipeline-chart">
-
-            <canvas id="applicationStatusChart"></canvas>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
+        <!-- =====================================================
          FOOTER
          ===================================================== -->
 
-    <div class="dashboard-footer">
+        <div class="dashboard-footer">
 
-        <div>
-            © 2026 Smart Placement Management System.
-            All rights reserved.
+            <div>
+                © 2026 Smart Placement Management System.
+                All rights reserved.
+            </div>
+
+            <div>
+                Placement Cell &nbsp; | &nbsp; Empowering Careers
+            </div>
+
         </div>
 
-        <div>
-            Placement Cell &nbsp; | &nbsp; Empowering Careers
-        </div>
 
     </div>
-
-
-</div>
 </div>
 
 <!-- =========================================================
