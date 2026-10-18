@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, flash, url_for, abort, send_from_directory, current_app
-from flask_login import login_required, current_user
+from flask_jwt_extended import jwt_required
+from auth import get_current_user
 from werkzeug.utils import secure_filename
 from models import db, Users, Students, Companies, Job_Drives, Application_status, Applications, Interview_Rounds
 import os
@@ -11,12 +12,12 @@ from sqlalchemy import or_
 
 
 @student_bp.route('/Student_Dashboard')
-@login_required
+@jwt_required()
 def Student_Dashboard():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)  # Forbidden
 
-    student = Students.query.filter_by(user_id=current_user.user_id).first()
+    student = Students.query.filter_by(user_id=get_current_user().user_id).first()
 
     ########################## Placement percentage ########################
     student_fields = [ 'branch', 'cgpa', 'skills', 'resume_path', 'graduation_year', 'profile_pic',
@@ -53,7 +54,7 @@ def Student_Dashboard():
     for r in rounds:
         upcoming_interviews.append([r.Application.Job_Drive.company.company_name, r.Application.Job_Drive.title, r.round_name, r.date, r.link])
 
-    application = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar(), Job_Drives.status != 'Closed').limit(3).all()
+    application = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar(), Job_Drives.status != 'Closed').limit(3).all()
     applications = []
     for i in application:
         applications.append([db.session.query(Companies.company_name).filter(Companies.id == db.session.query(Job_Drives.company_id).filter(Job_Drives.id == i.drive_id).scalar()).scalar(),db.session.query(Job_Drives.title).filter(Job_Drives.id == i.drive_id).scalar(), i.status.value])
@@ -72,92 +73,92 @@ def Student_Dashboard():
 
 
 @student_bp.route('/Student_Application', methods = ['GET', 'POST'])
-@login_required
+@jwt_required()
 def Application():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)  # Forbidden
 
     page = request.args.get('page', 1, type=int)
 
-    total_applications = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id),Job_Drives.status != 'Closed').count()
-    shortlisted_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).count()
-    interview_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.INTERVIEW).count()
-    select_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.SELECTED).count()
-    reject_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.REJECTED).count()
+    total_applications = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id),Job_Drives.status != 'Closed').count()
+    shortlisted_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).count()
+    interview_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.INTERVIEW).count()
+    select_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.SELECTED).count()
+    reject_count = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.REJECTED).count()
 
     filter = request.args.get('filter','All')
     if filter == 'shortlisted':
-        applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).paginate(page=page,per_page=5,error_out=False)
+        applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(),Job_Drives.status != 'Closed',Applications.status == Application_status.SHORTLISTED).paginate(page=page,per_page=5,error_out=False)
         applications = []
         for i in applications_pagination.items:
             applications.append([i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value,i.drive_id, i.Job_Drive.company.logo_path])
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
+        student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
         return render_template('Student_Application.html', applications_pagination = applications_pagination,applications=applications, student=student, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
     elif filter == 'inteview':
-        applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.INTERVIEW).paginate(page=page,per_page=5,error_out=False)
+        applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(), Job_Drives.status != 'Closed',Applications.status == Application_status.INTERVIEW).paginate(page=page,per_page=5,error_out=False)
         applications = []
         for i in applications_pagination.items:
             applications.append([i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
+        student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
         return render_template('Student_Application.html', applications_pagination = applications_pagination,applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
     elif filter == 'selected':
         applications_pagination = Applications.query.join(Job_Drives).filter(
             Applications.student_id == db.session.query(Students.id).filter(
-                Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',
+                Students.user_id == get_current_user().user_id).scalar_subquery(), Job_Drives.status != 'Closed',
             Applications.status == Application_status.SELECTED).paginate(page=page,per_page=5,error_out=False)
 
         applications = []
         for i in applications_pagination.items:
             applications.append(
                 [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
+        student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
         return render_template('Student_Application.html', applications_pagination = applications_pagination, applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
     elif filter == 'rejected':
         applications_pagination = Applications.query.join(Job_Drives).filter(
             Applications.student_id == db.session.query(Students.id).filter(
-                Students.user_id == current_user.user_id).scalar_subquery(), Job_Drives.status != 'Closed',
+                Students.user_id == get_current_user().user_id).scalar_subquery(), Job_Drives.status != 'Closed',
             Applications.status == Application_status.REJECTED).paginate(page=page,per_page=5,error_out=False)
         applications = []
         for i in applications_pagination.items:
             applications.append(
                 [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
+        student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
         return render_template('Student_Application.html', applications_pagination = applications_pagination, applications=applications, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
-    if request.method == 'POST':
-        search_term = f"%{request.form.get('search')}%"
-        applications_pagination = Applications.query.join(Job_Drives).join(Companies).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar_subquery(),Job_Drives.status != 'Closed',Companies.company_name.ilike(search_term)).paginate(page=page,per_page=5,error_out=False)
+    if request.args.get('search'):
+        search_term = f"%{request.args.get('search')}%"
+        applications_pagination = Applications.query.join(Job_Drives).join(Companies).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar_subquery(),Job_Drives.status != 'Closed',Companies.company_name.ilike(search_term)).paginate(page=page,per_page=5,error_out=False)
         applications = []
         for i in applications_pagination.items:
             applications.append(
                 [i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
+        student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
         return render_template('Student_Application.html', applications=applications, applications_pagination = applications_pagination, student=student, total_applications = total_applications,  shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
-    applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id), Job_Drives.status != 'Closed').paginate(page=page,per_page=5,error_out=False)
+    applications_pagination = Applications.query.join(Job_Drives).filter(Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id), Job_Drives.status != 'Closed').paginate(page=page,per_page=5,error_out=False)
     applications = []
     for i in applications_pagination.items:
         applications.append([i.Job_Drive.company.company_name, i.Job_Drive.title, str(i.applied_at).split('.')[0], i.status.value, i.drive_id, i.Job_Drive.company.logo_path])
-    student = Students.query.filter(Students.user_id == current_user.user_id).first()
+    student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
     return render_template('Student_Application.html', applications = applications, student = student, applications_pagination = applications_pagination, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
 
 @student_bp.route('/Student_Application_Details')
-@login_required
+@jwt_required()
 def Student_Application_Details():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)  # Forbidden
 
     JD = Job_Drives.query.filter_by(id=request.args.get('job_id')).first()
-    application = Applications.query.filter(Applications.drive_id == request.args.get('job_id'), Applications.student_id == db.session.query(Students.id).filter(Students.user_id == current_user.user_id).scalar()).first()
+    application = Applications.query.filter(Applications.drive_id == request.args.get('job_id'), Applications.student_id == db.session.query(Students.id).filter(Students.user_id == get_current_user().user_id).scalar()).first()
     Job = [JD, JD.company.company_name, application, application.Interview_Round]
     return render_template('Student_Application_Details.html',Job=Job)
 
 
 @student_bp.route('/Student_interview', methods = ['GET', 'POST'])
-@login_required
+@jwt_required()
 def Student_interview():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)
 
     today_start = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
@@ -174,11 +175,11 @@ def Student_interview():
         today_page = 1
         upcoming_page = 1
 
-    today_search = request.form.get('today_search')
-    upcoming_search = request.form.get('upcoming_search')
-    past_search = request.form.get('past_search')
+    today_search = request.args.get('today_search', '').strip()
+    upcoming_search = request.args.get('upcoming_search', '').strip()
+    past_search = request.args.get('past_search', '').strip()
 
-    student = Students.query.filter_by(user_id = current_user.user_id).first()
+    student = Students.query.filter_by(user_id = get_current_user().user_id).first()
     application_ids = db.session.scalars(db.select(Applications.id).where(Applications.student_id == student.id)).all()
 
     if past_search:
@@ -232,7 +233,7 @@ def Student_interview():
         page_numbers = [1, "...",page - 1,page,page + 1,"...",total_pages]
 
 
-    student = Students.query.filter(Students.user_id == current_user.user_id).first()
+    student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
 
     return render_template('Student_interview.html',Todays_interview=Todays_interview,upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews,Past_pagination=Past_pagination, Today_pagination = Today_pagination, Upcoming_pagination=Upcoming_pagination, student=student,page=Past_pagination.page,
         total_pages=Past_pagination.pages,
@@ -240,9 +241,9 @@ def Student_interview():
     )
 
 @student_bp.route('/Student_Job_Drive', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def Student_Job_Drive():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)  # Forbidden
 
     job_drives = Job_Drives.query.filter(Job_Drives.status != 'Closed').all()
@@ -254,7 +255,7 @@ def Student_Job_Drive():
             job.status = 'Active'
             db.session.commit()
     if request.args.get('filter') == 'Expired':
-        Student = Students.query.filter_by(user_id=current_user.user_id).first()
+        Student = Students.query.filter_by(user_id=get_current_user().user_id).first()
         search_term = f"%{request.args.get('search')}%"
         if Student.job_drive is not None:
             eligible_drives = [x.strip() for x in Student.job_drive.split(',')]
@@ -280,7 +281,7 @@ def Student_Job_Drive():
         job1 = Job_Drives.query.filter(Job_Drives.id == job_id).first()
         action = request.form.get("action")
         if action == 'apply':
-            Student = Students.query.filter_by(user_id=current_user.user_id).first()
+            Student = Students.query.filter_by(user_id=get_current_user().user_id).first()
             if Student.resume_status == 'Verified':
                 if Applications.query.filter_by(student_id = Student.id, drive_id = job_id).first():
                     flash('Already applied for this role','Duplicate_Application_Error')
@@ -314,7 +315,7 @@ def Student_Job_Drive():
                 flash('Please wait until your resume is verified.', 'Resume_verification_Error')
         elif action == 'opt_out':
 
-            Student = Students.query.filter_by(user_id=current_user.user_id).first()
+            Student = Students.query.filter_by(user_id=get_current_user().user_id).first()
             if Applications.query.filter_by(student_id=Student.id, drive_id=job_id).first():
                 flash('Application is already in process', 'Duplicate_Application_Error')
                 return redirect(url_for('student.Student_Job_Drive'))
@@ -334,7 +335,7 @@ def Student_Job_Drive():
             db.session.commit()
             notifications(['Student_opted_out_Placement_officer',[user.email for user in Users.query.filter(Users.role == 'Placement_Officer').all()],Student.user.name, job1, job1.company.company_name])
 
-        Student = Students.query.filter_by(user_id=current_user.user_id).first()
+        Student = Students.query.filter_by(user_id=get_current_user().user_id).first()
         if Student.job_drive is not None:
             eligible_drives = [int(x.strip()) for x in Student.job_drive.split(',')]
             eligible_jobs = Job_Drives.query.filter(Job_Drives.id.in_(eligible_drives), Job_Drives.status == 'Active').all()
@@ -347,10 +348,10 @@ def Student_Job_Drive():
                 [i.id, db.session.query(Companies.company_name).filter(Companies.id == i.company_id).scalar(), i.title,
                  i.package, i.location, i.deadline, i.description,i.status])
 
-        student = Students.query.filter(Students.user_id == current_user.user_id).first()
+        student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
         return render_template('Student_Job_Drive.html', job=job, job_id = job_id, student = student)
 
-    Student = Students.query.filter_by(user_id=current_user.user_id).first()
+    Student = Students.query.filter_by(user_id=get_current_user().user_id).first()
     if Student.job_drive is not None:
         eligible_drives = [x.strip() for x in Student.job_drive.split(',')]
         if request.args.get('search'):
@@ -365,17 +366,17 @@ def Student_Job_Drive():
     for i in eligible_jobs:
         job.append([i.id, i.company.company_name, i.title, i.package, i.location, i.deadline, i.description,i.status, i.company.logo_path])
 
-    student = Students.query.filter(Students.user_id == current_user.user_id).first()
+    student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
     return render_template('Student_Job_Drive.html', job = job, student = student)
 
 
 @student_bp.route('/Student_Profile', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Student_Profile():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)  # Forbidden
 
-    student = Students.query.filter_by(user_id=current_user.user_id).first()
+    student = Students.query.filter_by(user_id=get_current_user().user_id).first()
 
     if request.args.get('Download') and request.args.get('Download') == 'download_resume':
         RESUME_FOLDER = os.path.join(current_app.root_path, "static", "Docs", "student", "resumes")
@@ -414,8 +415,8 @@ def Student_Profile():
                 FOLDER = os.path.join('static', 'Images', 'student', 'profile_photo')
                 os.makedirs(FOLDER, exist_ok=True)
 
-                safe_name = secure_filename(current_user.name)
-                filename = f"User_{current_user.user_id}_{safe_name}.{file_extension}"
+                safe_name = secure_filename(get_current_user().name)
+                filename = f"User_{get_current_user().user_id}_{safe_name}.{file_extension}"
                 filepath = os.path.join(FOLDER, filename)
                 profile_photo.save(filepath)
 
@@ -435,8 +436,8 @@ def Student_Profile():
                 RESUME_FOLDER = os.path.join('static', 'Docs', 'student', 'resumes')
                 os.makedirs(RESUME_FOLDER, exist_ok=True)
 
-                safe_name = secure_filename(current_user.name)
-                resume_filename = f"Resume_{current_user.user_id}_{safe_name}.pdf"
+                safe_name = secure_filename(get_current_user().name)
+                resume_filename = f"Resume_{get_current_user().user_id}_{safe_name}.pdf"
                 resume_file.save(os.path.join(RESUME_FOLDER, resume_filename))
                 if student.resume_path is None:
                     student.resume_path = resume_filename
@@ -460,8 +461,8 @@ def Student_Profile():
             if certification_extension == 'pdf' and certification_file_size < MAX_FILE_SIZE_BYTES:
                 CERT_FOLDER = os.path.join('static', 'Docs', 'student', 'certifications')
                 os.makedirs(CERT_FOLDER, exist_ok=True)
-                safe_name = secure_filename(current_user.name)
-                certification_filename = f"Cert_{current_user.user_id}_{safe_name}_{secure_filename(certification.filename)}"
+                safe_name = secure_filename(get_current_user().name)
+                certification_filename = f"Cert_{get_current_user().user_id}_{safe_name}_{secure_filename(certification.filename)}"
                 certification.save(os.path.join(CERT_FOLDER, certification_filename))
                 if not student.Certification:
                     student.Certification = certification.filename
@@ -483,9 +484,9 @@ def Student_Profile():
         if request.form.get('graduation_year'):
             student.graduation_year = request.form.get('graduation_year')
         if request.form.get('name'):
-            current_user.name = request.form.get('name')
+            get_current_user().name = request.form.get('name')
         if request.form.get('mobile_number'):
-            if request.form.get('mobile_number') != db.session.query(Students.mobile_number).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('mobile_number') in db.session.scalars(db.select(Students.mobile_number)).all():
+            if request.form.get('mobile_number') != db.session.query(Students.mobile_number).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('mobile_number') in db.session.scalars(db.select(Students.mobile_number)).all():
                 flash('This mobile number is already taken!', 'mobile_number_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.mobile_number = request.form.get('mobile_number')
@@ -502,7 +503,7 @@ def Student_Profile():
         if request.form.get('pin_code'):
             student.pin_code = request.form.get('pin_code')
         if request.form.get('University_Roll_Number'):
-            if request.form.get('University_Roll_Number') != db.session.query(Students.University_Roll_Number).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('University_Roll_Number') in db.session.scalars(db.select(Students.University_Roll_Number)).all():
+            if request.form.get('University_Roll_Number') != db.session.query(Students.University_Roll_Number).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('University_Roll_Number') in db.session.scalars(db.select(Students.University_Roll_Number)).all():
                 flash('This roll number is already taken!', 'roll_number_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.University_Roll_Number = request.form.get('University_Roll_Number')
@@ -520,27 +521,27 @@ def Student_Profile():
             student.Active_Backlogs = request.form.get('Active_Backlogs')
         student.updated_at = datetime.datetime.now(ZoneInfo("Asia/Kolkata"))
         if request.form.get('LinkedIn'):
-            if request.form.get('LinkedIn') != db.session.query(Students.LinkedIn).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('LinkedIn') in db.session.scalars(db.select(Students.LinkedIn)).all():
+            if request.form.get('LinkedIn') != db.session.query(Students.LinkedIn).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('LinkedIn') in db.session.scalars(db.select(Students.LinkedIn)).all():
                 flash('This LinkedIn website is already taken!', 'LinkedIn_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.LinkedIn = request.form.get('LinkedIn')
         if request.form.get('GitHub'):
-            if request.form.get('GitHub') != db.session.query(Students.GitHub).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('GitHub') in db.session.scalars(db.select(Students.GitHub)).all():
+            if request.form.get('GitHub') != db.session.query(Students.GitHub).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('GitHub') in db.session.scalars(db.select(Students.GitHub)).all():
                 flash('This GitHub website is already taken!', 'GitHub_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.GitHub = request.form.get('GitHub')
         if request.form.get('Portfolio_Website'):
-            if request.form.get('Portfolio_Website') != db.session.query(Students.Portfolio_Website).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('Portfolio_Website') in db.session.scalars(db.select(Students.Portfolio_Website)).all():
+            if request.form.get('Portfolio_Website') != db.session.query(Students.Portfolio_Website).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('Portfolio_Website') in db.session.scalars(db.select(Students.Portfolio_Website)).all():
                 flash('This Portfolio website is already taken!', 'Portfolio_Website_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.Portfolio_Website = request.form.get('Portfolio_Website')
         if request.form.get('LeetCode'):
-            if request.form.get('LeetCode') != db.session.query(Students.LeetCode).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('LeetCode') in db.session.scalars(db.select(Students.LeetCode)).all():
+            if request.form.get('LeetCode') != db.session.query(Students.LeetCode).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('LeetCode') in db.session.scalars(db.select(Students.LeetCode)).all():
                 flash('This LeetCode website is already taken!', 'LeetCode_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.LeetCode = request.form.get('LeetCode')
         if request.form.get('HackerRank'):
-            if request.form.get('HackerRank') != db.session.query(Students.HackerRank).filter(Students.user_id == current_user.user_id).scalar() and request.form.get('HackerRank') in db.session.scalars(db.select(Students.HackerRank)).all():
+            if request.form.get('HackerRank') != db.session.query(Students.HackerRank).filter(Students.user_id == get_current_user().user_id).scalar() and request.form.get('HackerRank') in db.session.scalars(db.select(Students.HackerRank)).all():
                 flash('This HackerRank website is already taken!', 'HackerRank_error')
                 return redirect(url_for('student.Student_Profile', mode='Update'))
             student.HackerRank = request.form.get('HackerRank')
@@ -550,13 +551,13 @@ def Student_Profile():
         return redirect(url_for('student.Student_Profile', mode='View'))
 
 
-    return render_template('Student_Profile.html', student = student, name=current_user.name, mode=mode)
+    return render_template('Student_Profile.html', student = student, name=get_current_user().name, mode=mode)
 
 
 @student_bp.route("/student/certification/download", methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def student_download_certifications():
-    if current_user.role != "student":
+    if get_current_user().role != "student":
         abort(403)  # Forbidden
     name = request.form.get('name')
     filename = f"Cert_{request.form.get('id')}_{db.session.query(Users.name).filter(Users.user_id == request.form.get('id')).scalar()}_{name.strip()}"
