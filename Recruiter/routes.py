@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, flash, url_for, abort, send_from_directory, current_app, send_file
-from flask_login import login_required, current_user
+from flask_jwt_extended import jwt_required
+from auth import get_current_user
 from werkzeug.utils import secure_filename
 from models import db, Users, Students, Companies, Job_Drives, Application_status, Applications, Interview_Rounds
 import os
@@ -9,16 +10,16 @@ from utils.notifications import notifications
 from sqlalchemy import or_
 
 @Recruiter_bp.route('/Recruiter_Dashboard')
-@login_required
+@jwt_required()
 def Recruiter_Dashboard():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)  # Forbidden
 
-    job_drive_count = Job_Drives.query.filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed').count()
-    total_applicants = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed').all()])).count()
-    shortlisted = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed').all()]), Applications.status == Application_status.SHORTLISTED).count()
-    selected = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed').all()]), Applications.status == Application_status.SELECTED).count()
-    Job_drive = Job_Drives.query.filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed').all()
+    job_drive_count = Job_Drives.query.filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').count()
+    total_applicants = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').all()])).count()
+    shortlisted = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').all()]), Applications.status == Application_status.SHORTLISTED).count()
+    selected = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').all()]), Applications.status == Application_status.SELECTED).count()
+    Job_drive = Job_Drives.query.filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').all()
 
     Job_drive_info = []
     for job in Job_drive:
@@ -42,9 +43,9 @@ def Recruiter_Dashboard():
 
 
 @Recruiter_bp.route('/Job_drive')
-@login_required
+@jwt_required()
 def Job_drive():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)  # Forbidden
 
     job_drives = Job_Drives.query.filter(Job_Drives.status != 'Closed').all()
@@ -60,9 +61,9 @@ def Job_drive():
 
     if request.args.get('filter') == 'Expired':
         if search:
-            job_drives_results = Job_Drives.query.join(Companies, Job_Drives.company_id == Companies.id).filter(or_(Companies.company_name.ilike(f"%{search}%"), Job_Drives.title.ilike(f"%{search}%"),Job_Drives.location.ilike(f"%{search}%")), Job_Drives.status == 'Expired', Job_Drives.creater_id == current_user.user_id)
+            job_drives_results = Job_Drives.query.join(Companies, Job_Drives.company_id == Companies.id).filter(or_(Companies.company_name.ilike(f"%{search}%"), Job_Drives.title.ilike(f"%{search}%"),Job_Drives.location.ilike(f"%{search}%")), Job_Drives.status == 'Expired', Job_Drives.creater_id == get_current_user().user_id)
         else:
-            job_drives_results = Job_Drives.query.filter_by(status='Expired', creater_id = current_user.user_id)
+            job_drives_results = Job_Drives.query.filter_by(status='Expired', creater_id = get_current_user().user_id)
 
         jobs = []
         for job in job_drives_results:
@@ -75,7 +76,7 @@ def Job_drive():
     query = Job_Drives.query.filter(Job_Drives.status != 'Closed')
 
     if search:
-        query = query.join(Companies, Job_Drives.company_id == Companies.id).filter(or_(Companies.company_name.ilike(f"%{search}%"), Job_Drives.title.ilike(f"%{search}%"), Job_Drives.location.ilike(f"%{search}%")), Job_Drives.creater_id == current_user.user_id)
+        query = query.join(Companies, Job_Drives.company_id == Companies.id).filter(or_(Companies.company_name.ilike(f"%{search}%"), Job_Drives.title.ilike(f"%{search}%"), Job_Drives.location.ilike(f"%{search}%")), Job_Drives.creater_id == get_current_user().user_id)
         # Fixed: Use Job_Drives (capital D) for the model column
         job_drives_results = query.order_by(Job_Drives.title).all()
 
@@ -86,7 +87,7 @@ def Job_drive():
 
         return render_template('Job_drive.html', Jobs=jobs)
 
-    job_drives_results = Job_Drives.query.filter_by(status = 'Active', creater_id = current_user.user_id).all()
+    job_drives_results = Job_Drives.query.filter_by(status = 'Active', creater_id = get_current_user().user_id).all()
     jobs = []
     for job in job_drives_results:
         company = Companies.query.filter_by(id=job.company_id).first()
@@ -96,30 +97,30 @@ def Job_drive():
 
 
 @Recruiter_bp.route('/Schedule_Interview', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Schedule_Interview():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)  # Forbidden
     student_id = request.form.get('student_id')
     drive_id = request.form.get('drive_id')
     application_id = request.form.get('application_id')
-    if int(drive_id) not in [row[0] for row in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == current_user.user_id).all()] and Applications.query.filter(Applications.student_id == student_id, Applications.id == application_id, Applications.drive_id == drive_id).first() is None:
+    if int(drive_id) not in [row[0] for row in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id).all()] and Applications.query.filter(Applications.student_id == student_id, Applications.id == application_id, Applications.drive_id == drive_id).first() is None:
         abort(403)
     return render_template('Recruiter_Schedule_Interview.html', student_id = student_id, drive_id = drive_id)
 
 
 @Recruiter_bp.route('/Recruiter_Application', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Recruiter_Application():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)  # Forbidden
 
     search = request.args.get("search", "").strip()
 
     if search:
-        Job_drives = Job_Drives.query.join(Companies,Job_Drives.company_id == Companies.id).filter(Job_Drives.title.ilike(f"%{search}%"),Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed')
+        Job_drives = Job_Drives.query.join(Companies,Job_Drives.company_id == Companies.id).filter(Job_Drives.title.ilike(f"%{search}%"),Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed')
     else:
-        Job_drives = Job_Drives.query.filter(Job_Drives.creater_id == current_user.user_id, Job_Drives.status != 'Closed' )
+        Job_drives = Job_Drives.query.filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed' )
 
     jobs = []
     for job in Job_drives:
@@ -171,7 +172,7 @@ def Recruiter_Application():
 
         job_id = request.form.get('drive_id')
         job1 = []
-        job = Job_Drives.query.filter_by(id = job_id, creater_id = current_user.user_id).first()
+        job = Job_Drives.query.filter_by(id = job_id, creater_id = get_current_user().user_id).first()
         company = Companies.query.filter_by(id=job.company_id).first()
         job1.extend([company.company_name, job])
 
@@ -192,9 +193,9 @@ def Recruiter_Application():
 
 
 @Recruiter_bp.route("/recruiter/certification/download", methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def download_certifications():
-    if current_user.role not in [ "Recruiter","Placement_Officer" ]:
+    if get_current_user().role not in [ "Recruiter","Placement_Officer" ]:
         abort(403)  # Forbidden
     name = request.form.get('name')
     filename = f"Cert_{request.form.get('id')}_{db.session.query(Users.name).filter(Users.user_id == int(request.form.get('id'))).scalar()}_{name}"
@@ -203,9 +204,9 @@ def download_certifications():
 
 
 @Recruiter_bp.route("/student/resume/download", methods = ['GET', 'POST'])
-@login_required
+@jwt_required()
 def download_resume():
-    if current_user.role not in ["Recruiter", "Placement_Officer"]:
+    if get_current_user().role not in ["Recruiter", "Placement_Officer"]:
         abort(403)
 
     student = Students.query.filter_by(id = request.form.get("id")).first_or_404()
@@ -226,13 +227,13 @@ def download_resume():
 
 
 @Recruiter_bp.route('/Job_drive/edit', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def edit_Job_drive():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)  # Forbidden
 
     job_id = request.args.get('id')
-    job = Job_Drives.query.filter_by(id = job_id, creater_id = current_user.user_id).first()
+    job = Job_Drives.query.filter_by(id = job_id, creater_id = get_current_user().user_id).first()
 
     if job is None:
         abort(403)
@@ -274,9 +275,9 @@ def edit_Job_drive():
 
 
 @Recruiter_bp.route('/Job_drive/add', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def add_Job_drive():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)  # Forbidden
     if request.method == 'POST':
         company_id = request.form.get('company_id')
@@ -292,7 +293,7 @@ def add_Job_drive():
             flash("Deadline cannot be less than today", "deadline")
             return redirect(url_for('Recruiter.add_Job_drive'))
         Job_Description = request.form.get('Description')
-        job_drive = Job_Drives(company_id = company_id, title = Job_Title, package = Package, location = Location, CGPA = Minimum_CGPA, Eligible_Branches = Eligible_Branches, Graduation_Year = Graduation_Year, Vacancies = Vacancies, deadline = Deadline, description = Job_Description, creater_id = current_user.user_id, application_count_email = {"email_count": 0, "student_id": []})
+        job_drive = Job_Drives(company_id = company_id, title = Job_Title, package = Package, location = Location, CGPA = Minimum_CGPA, Eligible_Branches = Eligible_Branches, Graduation_Year = Graduation_Year, Vacancies = Vacancies, deadline = Deadline, description = Job_Description, creater_id = get_current_user().user_id, application_count_email = {"email_count": 0, "student_id": []})
         db.session.add(job_drive)
         db.session.commit()
 
@@ -307,12 +308,12 @@ def add_Job_drive():
 
 
 @Recruiter_bp.route('/Job_drive/delete', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def delete_Job_drive():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)
     job_id = request.args.get('id')
-    job = Job_Drives.query.filter_by(id = job_id, creater_id = current_user.user_id).first()
+    job = Job_Drives.query.filter_by(id = job_id, creater_id = get_current_user().user_id).first()
     if job is None:
         abort(403)
     job.status = 'Closed'
@@ -321,9 +322,9 @@ def delete_Job_drive():
 
 
 @Recruiter_bp.route('/Student_Profile_Recruiter', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Student_Profile_Recruiter():
-    if current_user.role not in["Recruiter", "Placement_Officer"]:
+    if get_current_user().role not in["Recruiter", "Placement_Officer"]:
         abort(403)
     user = Students.query.filter_by(id = request.form.get("id")).first()
     application_id = request.form.get('application_id')
@@ -332,18 +333,18 @@ def Student_Profile_Recruiter():
     student = []
     student.extend([db.session.query(Users.name).filter(Users.user_id == user.user_id).scalar(),user])
     interview_rounds = Interview_Rounds.query.filter_by(application_id = application_id).all()
-    if current_user.role == 'Recruiter':
+    if get_current_user().role == 'Recruiter':
         return render_template('Student_Profile_Recruiter.html', student=student, certifications=certifications,
                                application_id=application_id, interview_rounds=interview_rounds)
-    elif current_user.role == 'Placement_Officer':
+    elif get_current_user().role == 'Placement_Officer':
         return render_template('Student_Profile_Recruiter.html', student=student, certifications=certifications,
                                application_id=application_id, interview_rounds=interview_rounds)
 
 
 @Recruiter_bp.route('/Recruiter_Interview', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Recruiter_Interview():
-    if current_user.role != "Recruiter":
+    if get_current_user().role != "Recruiter":
         abort(403)
 
     today_start = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
@@ -368,7 +369,7 @@ def Recruiter_Interview():
         round = Interview_Rounds.query.filter_by(id = round_id).first()
 
         if mode == 'feedback':
-            job_drive = Job_Drives.query.filter_by(creater_id=current_user.user_id).all()
+            job_drive = Job_Drives.query.filter_by(creater_id=get_current_user().user_id).all()
             inner_query = db.session.query(Applications.id).filter(Applications.drive_id.in_([x.id for x in job_drive])).scalar_subquery()
 
             today_interview = []
@@ -408,7 +409,7 @@ def Recruiter_Interview():
         db.session.commit()
         return redirect(url_for('Recruiter.Recruiter_Interview'))
 
-    job_drive = Job_Drives.query.filter_by(creater_id = current_user.user_id).all()
+    job_drive = Job_Drives.query.filter_by(creater_id = get_current_user().user_id).all()
     inner_query = db.session.query(Applications.id).filter(Applications.drive_id.in_([x.id for x in job_drive])).scalar_subquery()
 
     today_interview = []
