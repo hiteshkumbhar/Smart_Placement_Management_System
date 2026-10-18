@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, flash, url_for, abort, send_from_directory, current_app, send_file
-from flask_login import login_required, current_user
+from flask_jwt_extended import jwt_required
+from auth import get_current_user
 from werkzeug.utils import secure_filename
 from models import db, Users, Students, Companies, Job_Drives, Application_status, Applications, Interview_Rounds
 import os
@@ -16,13 +17,14 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.platypus.flowables import HRFlowable
 from sqlalchemy import or_
+from flask_sqlalchemy.pagination import Pagination
 
 
 
 @officer_bp.route('/Placement_officer_dashboard')
-@login_required
+@jwt_required()
 def Placement_officer_dashboard():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
 
     total_students = Students.query.filter_by(graduation_year=datetime.datetime.now(ZoneInfo("Asia/Kolkata")).year).count()
@@ -52,9 +54,9 @@ def Placement_officer_dashboard():
 
 
 @officer_bp.route('/Placement_officer_Recruiter_Job_drive')
-@login_required
+@jwt_required()
 def Placement_officer_Recruiter_Job_drive():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
 
     job_drives = Job_Drives.query.filter(Job_Drives.status != 'Closed').all()
@@ -67,7 +69,7 @@ def Placement_officer_Recruiter_Job_drive():
             db.session.commit()
 
     if request.args.get('filter') == 'Expired':
-        Job_drives = Job_Drives.query.filter(Job_Drives.posted == 'N', Job_Drives.status == 'Expired', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).all()
+        Job_drives = Job_Drives.query.filter(Job_Drives.posted == 'N', Job_Drives.status == 'Expired', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).all()
         jobs = []
         for job in Job_drives:
             if request.args.get('search'):
@@ -80,7 +82,7 @@ def Placement_officer_Recruiter_Job_drive():
             jobs.append([company.company_name, job, company.logo_path])
         return render_template('Placement_officer_Recruiter_Job_drive.html', Jobs=jobs)
 
-    Job_drives = Job_Drives.query.filter(Job_Drives.posted=='N',Job_Drives.status == 'Active', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).all()
+    Job_drives = Job_Drives.query.filter(Job_Drives.posted=='N',Job_Drives.status == 'Active', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).all()
     jobs = []
     for job in Job_drives:
         if request.args.get('search'):
@@ -96,15 +98,15 @@ def Placement_officer_Recruiter_Job_drive():
 
 
 @officer_bp.route('/Placement_officer_Job_drive', methods = ['GET', 'POST'])
-@login_required
+@jwt_required()
 def Placement_officer_Job_drive():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
 
     mode = request.form.get('mode','')
     if mode == 'view' and request.method == 'POST':
         job_id = request.form.get('drive_id')
-        job = Job_Drives.query.filter(Job_Drives.id == str(job_id), Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).first()
+        job = Job_Drives.query.filter(Job_Drives.id == str(job_id), Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).first()
         company = Companies.query.filter_by(id=job.company_id).first()
         students = Students.query.all()
         opted_out_students = job.opt_out.split(',') if job.opt_out is not None else []
@@ -124,7 +126,7 @@ def Placement_officer_Job_drive():
         jobs = [company.company_name,job,company.logo_path]
         return render_template('Placement_officer_Job_drive.html', jobs = jobs, Applicants = Applicants, mode = mode)
 
-    posted_jobs = Job_Drives.query.filter(Job_Drives.posted == 'Y', Job_Drives.status != 'Closed', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).all()
+    posted_jobs = Job_Drives.query.filter(Job_Drives.posted == 'Y', Job_Drives.status != 'Closed', Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).all()
     jobs = []
     for job in posted_jobs:
         if request.args.get('search'):
@@ -139,9 +141,9 @@ def Placement_officer_Job_drive():
 
 
 @officer_bp.route('/Placement_Officer_Interview', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def Placement_Officer_Interview():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)
 
     today_search = request.args.get('today_search', '')
@@ -194,11 +196,10 @@ def Placement_Officer_Interview():
 
     return render_template('Placement_Officer_Interview.html',Todays_interview=Todays_interview, upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews, Today_pagination=Today_pagination, Upcoming_pagination=Upcoming_pagination, Past_pagination=Past_pagination, today_search=today_search, upcoming_search=upcoming_search, past_search=past_search)
 
-
 @officer_bp.route('/students', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def Placement_officer_student():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)
 
     students = Students.query.all()
@@ -301,11 +302,10 @@ def Placement_officer_student():
     students = students_pagination.items
     return render_template('Placement_officer_student.html',students=students,students_pagination=students_pagination,graduation_years=graduation_years,branches=branches)
 
-
 @officer_bp.route('/Analytics', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def Placement_officer_analytics():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)
 
     year = request.args.get('year')
@@ -368,9 +368,9 @@ def Placement_officer_analytics():
 
 
 @officer_bp.route('/Companies_info', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def Companies_info():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
 
     mode = request.args.get('mode','ViewAll')
@@ -378,7 +378,7 @@ def Companies_info():
     page = request.args.get('page', 1, type=int)
 
     if search:
-        query = Companies.query.filter(or_(Companies.company_name.ilike(f"%{search}%"),Companies.industry.ilike(f"%{search}%"),Companies.hr_name.ilike(f"%{search}%")), Companies.creater_id == current_user.user_id)
+        query = Companies.query.filter(or_(Companies.company_name.ilike(f"%{search}%"),Companies.industry.ilike(f"%{search}%"),Companies.hr_name.ilike(f"%{search}%")), Companies.creater_id == get_current_user().user_id)
         companies_pagination = query.order_by(Companies.company_name).paginate(page=page,per_page=10,error_out=False)
         companies = companies_pagination.items
 
@@ -390,13 +390,13 @@ def Companies_info():
                       Job_Drives.query.filter(Job_Drives.company_id == company.id, Job_Drives.status != 'Closed').count(), company.id])
         return render_template('Companies_info.html', companies=a, mode=mode, companies_pagination=companies_pagination)
 
-    companies_pagination = Companies.query.filter(Companies.creater_id == current_user.user_id).order_by(Companies.company_name).paginate(page=page,per_page=10,error_out=False)
+    companies_pagination = Companies.query.filter(Companies.creater_id == get_current_user().user_id).order_by(Companies.company_name).paginate(page=page,per_page=10,error_out=False)
     companies = companies_pagination.items
     a = []
     for company in companies:
         a.append([company.company_name, company.logo_path, company.industry, company.website, company.hr_name,  company.phone, company.email,company.address, Job_Drives.query.filter(Job_Drives.company_id == company.id).count() ,company.id])
     if mode == 'view':
-        t_company =  Companies.query.filter(Companies.id == request.args.get('id'), Companies.creater_id == current_user.user_id).first()
+        t_company =  Companies.query.filter(Companies.id == request.args.get('id'), Companies.creater_id == get_current_user().user_id).first()
         if t_company is None:
             abort(403)
         target_company = [t_company.company_name, t_company.logo_path, t_company.industry, t_company.website, t_company.hr_name, t_company.phone, t_company.email, t_company.address, Job_Drives.query.filter(Job_Drives.company_id == t_company.id).count(), t_company.id]
@@ -404,18 +404,19 @@ def Companies_info():
 
     return render_template('Companies_info.html', companies = a, mode = mode, companies_pagination=companies_pagination)
 
+
 @officer_bp.route('/Company/edit', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def edit_company():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
     company_id = request.args.get('id', type=int)
-    company = Companies.query.filter(Companies.id == company_id, Companies.creater_id == current_user.user_id).first()
+    company = Companies.query.filter(Companies.id == company_id, Companies.creater_id == get_current_user().user_id).first()
     if company is None:
         abort(403)
 
     if request.method == 'POST':
-        company = Companies.query.filter(Companies.id == company_id, Companies.creater_id == current_user.user_id).first()
+        company = Companies.query.filter(Companies.id == company_id, Companies.creater_id == get_current_user().user_id).first()
         if company is None:
             abort(403)
 
@@ -464,12 +465,12 @@ def edit_company():
 
 
 @officer_bp.route('/Company/delete', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def delete_company():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
     company_id = request.args.get('id', type=int)
-    company = Companies.query.filter(Companies.id == company_id, Companies.creater_id == current_user.user_id).first()
+    company = Companies.query.filter(Companies.id == company_id, Companies.creater_id == get_current_user().user_id).first()
     if company is None:
         abort(403)
     db.session.delete(company)
@@ -478,9 +479,9 @@ def delete_company():
 
 
 @officer_bp.route('/Company/add', methods = ['GET','POST'])
-@login_required
+@jwt_required()
 def add_company():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
     if request.method == 'POST':
         name = request.form.get('name')
@@ -490,6 +491,19 @@ def add_company():
         HR_Email = request.form.get('HR_Email')
         HR_number = request.form.get('HR_number')
         Address = request.form.get('Address')
+
+        email = Companies.query.filter_by(email=HR_Email).first()
+        number = Companies.query.filter_by(phone=HR_number).first()
+        if email and number:
+            flash("Email is already taken", "email")
+            flash("Mobile number is already taken", "number")
+            return redirect(url_for('Placement_officer.add_company'))
+        elif number or email:
+            if number:
+                flash("Mobile number is already taken", "number")
+            else:
+                flash("Email is already taken", "email")
+            return redirect(url_for('Placement_officer.add_company'))
 
         MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
         logo = request.files.get('Logo')
@@ -514,7 +528,7 @@ def add_company():
                     flash('Logo size must be less that 5 mb', 'Logo_size_error')
                 return redirect(url_for('Placement_officer.add_company'))
 
-        company = Companies(company_name = name, industry=industry, website=website, hr_name=HR_Name, email=HR_Email, phone = HR_number, logo_path =  secure_filename(logo.filename), address = Address, created_at = datetime.datetime.now(ZoneInfo("Asia/Kolkata")), creater_id = current_user.user_id)
+        company = Companies(company_name = name, industry=industry, website=website, hr_name=HR_Name, email=HR_Email, phone = HR_number, logo_path =  secure_filename(logo.filename), address = Address, created_at = datetime.datetime.now(ZoneInfo("Asia/Kolkata")), creater_id = get_current_user().user_id)
         db.session.add(company)
         db.session.commit()
         return redirect(url_for('Placement_officer.Companies_info'))
@@ -523,16 +537,16 @@ def add_company():
 
 
 @officer_bp.route('/Post_Job_Drive', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Post_Job_Drive():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
 
     job_id = request.values.get('drive_id')
 
     if request.args.get('mode','N') == 'post_job_drive':
         job = Job_Drives.query.filter(Job_Drives.id == job_id, Job_Drives.company_id.in_(
-            db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).first()
+            db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).first()
         if job is None:
             abort(403)
 
@@ -561,7 +575,7 @@ def Post_Job_Drive():
         S2 = request.form.getlist('All_Students')
         S1.extend(S2)
 
-        job = Job_Drives.query.filter(Job_Drives.id == job_id, Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).first()
+        job = Job_Drives.query.filter(Job_Drives.id == job_id, Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).first()
         flag = 0
         for i in S1:
             Student = Students.query.filter_by(id = i).first()
@@ -594,7 +608,7 @@ def Post_Job_Drive():
             db.session.commit()
         if flag == 1:
             return redirect(url_for('Placement_officer.Post_Job_Drive', mode='post_job_drive', drive_id=job_id))
-        job = Job_Drives.query.filter(Job_Drives.id == job_id, Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == current_user.user_id))).first()
+        job = Job_Drives.query.filter(Job_Drives.id == job_id, Job_Drives.company_id.in_(db.session.query(Companies.id).filter(Companies.creater_id == get_current_user().user_id))).first()
         job.posted = 'Y'
         db.session.commit()
 
@@ -602,9 +616,9 @@ def Post_Job_Drive():
 
 
 @officer_bp.route('/Reports', methods=['GET', 'POST'])
-@login_required
+@jwt_required()
 def Reports():
-    if current_user.role != "Placement_Officer":
+    if get_current_user().role != "Placement_Officer":
         abort(403)  # Forbidden
     report = request.args.get('report', 'student_report')
     if report == 'student_report':
@@ -635,7 +649,7 @@ def Reports():
             elements.append(Paragraph("Placement Cell – Student Report", styles['Title']))
             elements.append(Paragraph("<br/><br/>", styles['Normal']))
             elements.append(HRFlowable(width="100%", thickness=2, color=colors.black, spaceBefore=15, spaceAfter=15))
-            elements.append(Paragraph(f"Generated By : {current_user.name}", styles['Normal']))
+            elements.append(Paragraph(f"Generated By : {get_current_user().name}", styles['Normal']))
             elements.append(Paragraph(f"Generated On : {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}", styles['Normal']))
             elements.append(Paragraph(f"Branch: {Branch if Branch != '' else 'All'}", styles['Normal']))
             elements.append(Paragraph(f"Graduation: {Year if Year != '' else 'All'}", styles['Normal']))
@@ -746,7 +760,7 @@ def Reports():
             elements.append(Paragraph("Placement Cell – Company Report", styles['Title']))
             elements.append(Paragraph("<br/><br/>", styles['Normal']))
             elements.append(HRFlowable(width="100%", thickness=2, color=colors.black, spaceBefore=15, spaceAfter=15))
-            elements.append(Paragraph(f"Generated By : {current_user.name}", styles['Normal']))
+            elements.append(Paragraph(f"Generated By : {get_current_user().name}", styles['Normal']))
             elements.append(Paragraph(f"Generated On : {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}", styles['Normal']))
             elements.append(Paragraph(f"Company: {Company if Company != '' else 'All'}", styles['Normal']))
             elements.append(Paragraph(f"Industry: {Industry if Industry != '' else 'All'}", styles['Normal']))
@@ -757,13 +771,13 @@ def Reports():
             elements.append(Paragraph(f"Company Details", styles['Title']))
             elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
-            query = Companies.query.filter(Companies.creater_id == current_user.user_id)
+            query = Companies.query.filter(Companies.creater_id == get_current_user().user_id)
             if Industry:
                 query = query.filter(Companies.industry == Industry)
             if Company:
                 query = query.filter(Companies.company_name == Company)
             if Year:
-                Job_drives = Job_Drives.query.join(Companies).filter(Companies.creater_id == current_user.user_id)
+                Job_drives = Job_Drives.query.join(Companies).filter(Companies.creater_id == get_current_user().user_id)
                 Job_drives = Job_drives.filter(db.extract('year', Job_Drives.deadline) == int(Year)).all()
                 comp_ids = list({job.company.id for job in Job_drives})
                 query = query.filter(Companies.id.in_(comp_ids))
@@ -813,7 +827,7 @@ def Reports():
             elements.append(Paragraph("<br/><br/>", styles['Normal']))
 
 
-            Job_drives = Job_Drives.query.join(Companies).filter(Companies.creater_id == current_user.user_id)
+            Job_drives = Job_Drives.query.join(Companies).filter(Companies.creater_id == get_current_user().user_id)
             if Industry:
                 Job_drives = Job_drives.filter(Companies.industry == Industry)
             if Company:
@@ -895,8 +909,8 @@ def Reports():
                 as_attachment=False,
                 download_name="Student_Report.pdf"
             )
-        Company_Name = [row.company_name for row in db.session.query(Companies.company_name).filter(Companies.creater_id == current_user.user_id).distinct().all()]
-        Industry = [row.industry for row in db.session.query(Companies.industry).filter(Companies.creater_id == current_user.user_id).distinct().all()]
+        Company_Name = [row.company_name for row in db.session.query(Companies.company_name).filter(Companies.creater_id == get_current_user().user_id).distinct().all()]
+        Industry = [row.industry for row in db.session.query(Companies.industry).filter(Companies.creater_id == get_current_user().user_id).distinct().all()]
         Years = [r.graduation_year for r in Students.query.with_entities(Students.graduation_year).distinct().order_by(Students.graduation_year.desc()) if r.graduation_year is not None]
         return render_template("Placement_officer_Reports.html", report=report, Company_Name=Company_Name, Industry=Industry, Years = Years)
 
@@ -915,7 +929,7 @@ def Reports():
             elements.append(Paragraph("Placement Cell – Placement Report", styles['Title']))
             elements.append(Paragraph("<br/><br/>", styles['Normal']))
             elements.append(HRFlowable(width="100%", thickness=2, color=colors.black, spaceBefore=15, spaceAfter=15))
-            elements.append(Paragraph(f"Generated By : {current_user.name}", styles['Normal']))
+            elements.append(Paragraph(f"Generated By : {get_current_user().name}", styles['Normal']))
             elements.append(Paragraph(f"Generated On : {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}", styles['Normal']))
             elements.append(Paragraph(f"Year: {Year if Year != '' else 'All'}", styles['Normal']))
             elements.append(Paragraph(f"Branch: {branches if branches != '' else 'All'}", styles['Normal']))
@@ -1049,7 +1063,7 @@ def Reports():
                 grand_total_job_drive += len(jds)
                 table_data.append([count, Company, len(jds), selected1, f'{max(all_package) if len(all_package)>0 else 0} LPA'])
             else:
-                companies = Companies.query.filter(Companies.creater_id == current_user.user_id)
+                companies = Companies.query.filter(Companies.creater_id == get_current_user().user_id)
                 count = 1
                 for company1 in companies:
                     jds = Job_Drives.query.filter(Job_Drives.company_id == company1.id)
@@ -1124,7 +1138,7 @@ def Reports():
             )
 
 
-        Company_Name = [row.company_name for row in db.session.query(Companies.company_name).filter(Companies.creater_id == current_user.user_id).distinct().all()]
+        Company_Name = [row.company_name for row in db.session.query(Companies.company_name).filter(Companies.creater_id == get_current_user().user_id).distinct().all()]
         Years = [r.graduation_year for r in Students.query.with_entities(Students.graduation_year).distinct().order_by(Students.graduation_year.desc()) if r.graduation_year is not None]
         branches = [row.branch for row in db.session.query(Students.branch).distinct().all() if row.branch is not None]
         return render_template("Placement_officer_Reports.html", report=report, Company_Name=Company_Name, branches=branches, Years = Years)
