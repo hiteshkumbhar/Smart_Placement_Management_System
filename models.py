@@ -3,12 +3,11 @@ from email.policy import default
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from enum import Enum
-from flask_login import UserMixin
 from zoneinfo import ZoneInfo
 
 db = SQLAlchemy()
 
-class Users(UserMixin, db.Model):
+class Users( db.Model):
 
     __tablename__ = "Users"
     user_id = db.Column(db.Integer,primary_key=True)

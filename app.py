@@ -1,10 +1,11 @@
 
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, g
+from flask import jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from models import db, Users, Students
-from flask_login import LoginManager, login_user
-from flask_login import logout_user, login_required
+from flask_jwt_extended import (create_access_token,create_refresh_token,set_access_cookies,set_refresh_cookies,unset_jwt_cookies, get_csrf_token,jwt_required, verify_jwt_in_request,get_jwt_identity,get_jwt, JWTManager)
+from auth import init_jwt, get_current_user, jwt
 import os
 from dotenv import load_dotenv
 import datetime
@@ -28,16 +29,10 @@ app.register_blueprint(Recruiter_bp)
 
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-login_manager = LoginManager(app)
-login_manager.login_view = 'home'
-
-@login_manager.user_loader
-def load_user(user_id):
-    return Users.query.get(int(user_id))
+init_jwt(app)
 
 with app.app_context():
     db.create_all()
-
 
 @app.errorhandler(400)
 def handle_bad_request(error):
@@ -99,13 +94,10 @@ def Reset_Password():
                 flash('Check your email to reset the password','reset_password')
             else:
                 flash('Unable to send reset email. Please try again later.','reset_password')
-
             return redirect(url_for('Reset_Password'))
         else:
             flash('User does not exist','reset_password')
-
             return redirect(url_for('Reset_Password'))
-
     return render_template('password_reset.html')
 
 @app.route('/reset_password/', methods=['GET', 'POST'])
@@ -130,13 +122,149 @@ def reset_token():
     return render_template('New_password.html',token=token)
 
 ############################################## Logout ###################################################
-@app.route('/logout')
-@login_required
+@app.route('/logout', methods=['POST'])
+@jwt_required()
 def logout():
-    logout_user()
-    return redirect(url_for('home'))
+    response = redirect(url_for('home'))
+    unset_jwt_cookies(response)
+    return response
 
 ############################################## Login ######################################################
+
+@app.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+
+    identity = get_jwt_identity()
+
+    # Confirm that the account still exists.
+    user = Users.query.filter_by(
+        user_id=int(identity)
+    ).first()
+
+    if user is None:
+        return jsonify({"error": "User no longer exists"}), 401
+
+    new_access_token = create_access_token(
+        identity=str(user.user_id)
+    )
+
+    response = jsonify({
+        "message": "Access token refreshed"
+    })
+
+    set_access_cookies(response, new_access_token)
+
+    return response
+
+@app.before_request
+def refresh_access_token_if_needed():
+    # Skip authentication endpoints.
+    if request.endpoint in (
+        "home",
+        "Student_login",
+        "Recruiter_login",
+        "Placement_Officer_login",
+        "refresh_and_continue",
+    ):
+        return None
+
+    # Only refresh when an access cookie exists.
+    access_cookie_name = app.config["JWT_ACCESS_COOKIE_NAME"]
+    encoded_token = request.cookies.get(access_cookie_name)
+
+    if not encoded_token:
+        return None
+
+    try:
+        # Validate the access token before using its claims.
+        verify_jwt_in_request(optional=True)
+
+        claims = get_jwt()
+        expiration = claims.get("exp")
+
+        if expiration is None:
+            return None
+
+        # Refresh when fewer than five minutes remain.
+        if expiration - time.time() < 300:
+            identity = get_jwt_identity()
+
+            if identity is not None:
+                g.new_access_token = create_access_token(
+                    identity=identity
+                )
+
+    except Exception:
+        # Let the normal JWT validation/error handling
+        # handle missing, invalid, or expired tokens.
+        return None
+
+    return None
+
+@app.after_request
+def set_refreshed_access_token(response):
+    new_token = getattr(g, "new_access_token", None)
+
+    if new_token:
+        set_access_cookies(response, new_token)
+
+    return response
+
+@app.route("/refresh-and-continue", methods=["GET"])
+@jwt_required(refresh=True)
+def refresh_and_continue():
+
+    identity = get_jwt_identity()
+
+    new_access_token = create_access_token(
+        identity=identity
+    )
+
+    # Get the page the user originally requested.
+    target = request.args.get("next", "/")
+
+    # Only allow relative paths on this application.
+    parsed_target = urlsplit(target)
+
+    if (
+        not target.startswith("/")
+        or target.startswith("//")
+        or parsed_target.scheme
+        or parsed_target.netloc
+    ):
+        target = "/"
+
+    response = redirect(target)
+
+    set_access_cookies(response, new_access_token)
+
+    return response
+
+@jwt.expired_token_loader
+def handle_expired_token(jwt_header, jwt_payload):
+
+    # Automatically recover expired tokens during
+    # normal page navigation.
+    if request.method in ("GET", "HEAD"):
+        return redirect(
+            url_for(
+                "refresh_and_continue",
+                next=request.full_path.rstrip("?")
+            )
+        )
+
+    # Do not silently discard a submitted form.
+    return (
+        "Your session expired. Please refresh the page "
+        "and submit the form again.",
+        401
+    )
+
+@jwt.unauthorized_loader
+def custom_unauthorized_response(callback):
+    # Renders an HTML page from your templates folder with a 401 Unauthorized status
+    return render_template("401.html"), 401
 
 @app.route('/Student_login', methods=['GET', 'POST'])
 def Student_login():
@@ -148,8 +276,12 @@ def Student_login():
             flash('User does not exist', 'incorrect')
             return redirect(url_for('Student_login'))
         if check_password_hash(user.password, Password):
-            login_user(user)
-            return redirect(url_for('student.Student_Dashboard'))
+            access_token = create_access_token(identity=str(user.user_id))
+            refresh_token = create_refresh_token(identity=str(user.user_id))
+            response = redirect(url_for('student.Student_Dashboard'))
+            set_access_cookies(response, access_token)
+            set_refresh_cookies(response, refresh_token)
+            return response
         else:
             flash('Wrong username or password','incorrect')
             return redirect(url_for('Student_login'))
@@ -165,8 +297,12 @@ def Recruiter_login():
             flash('User does not exist', 'incorrect')
             return redirect(url_for('Recruiter_login'))
         if check_password_hash(user.password, Password):
-            login_user(user)
-            return redirect(url_for('Recruiter.Recruiter_Dashboard'))
+            access_token = create_access_token(identity=str(user.user_id))
+            refresh_token = create_refresh_token(identity=str(user.user_id))
+            response = redirect(url_for('Recruiter.Recruiter_Dashboard'))
+            set_access_cookies(response, access_token)
+            set_refresh_cookies(response, refresh_token)
+            return response
         else:
             flash('Wrong username or password','incorrect')
             return redirect(url_for('Recruiter_login'))
@@ -182,8 +318,12 @@ def Placement_Officer_login():
             flash('User does not exist', 'incorrect')
             return redirect(url_for('Placement_Officer_login'))
         if check_password_hash(user.password, Password):
-            login_user(user)
-            return redirect(url_for('Placement_officer.Placement_officer_dashboard'))
+            access_token = create_access_token(identity=str(user.user_id))
+            refresh_token = create_refresh_token(identity=str(user.user_id))
+            response = redirect(url_for('Placement_officer.Placement_officer_dashboard'))
+            set_access_cookies(response, access_token)
+            set_refresh_cookies(response, refresh_token)
+            return response
         else:
             flash('Wrong username or password','incorrect')
             return redirect(url_for('Placement_Officer_login'))
@@ -225,6 +365,37 @@ def Register():
         notifications(['Registration',Username,Email,Role])
         return redirect(url_for('home'))
     return render_template('Register.html')
+
+@app.context_processor
+def inject_template_context():
+
+    csrf_token = None
+    current_user = None
+
+    try:
+        # Check whether a valid JWT is present.
+        verify_jwt_in_request(optional=True)
+
+        # Retrieve the authenticated user from the database.
+        current_user = get_current_user()
+
+        # Retrieve the CSRF token associated with the JWT cookie.
+        if current_user is not None:
+            encoded_token = request.cookies.get(
+                app.config["JWT_ACCESS_COOKIE_NAME"]
+            )
+
+            if encoded_token:
+                csrf_token = get_csrf_token(encoded_token)
+
+    except Exception:
+        current_user = None
+        csrf_token = None
+
+    return {
+        "current_user": current_user,
+        "csrf_token": csrf_token
+    }
 
 if __name__ == '__main__':
     app.run()
