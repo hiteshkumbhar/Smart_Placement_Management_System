@@ -14,6 +14,7 @@ from student import student_bp
 from Placement_officer import officer_bp
 from Recruiter import Recruiter_bp
 from utils.notifications import notifications, send_email
+from api import api_bp
 load_dotenv()
 
 app = Flask(__name__)
@@ -26,6 +27,7 @@ db.init_app(app)
 app.register_blueprint(student_bp)
 app.register_blueprint(officer_bp)
 app.register_blueprint(Recruiter_bp)
+app.register_blueprint(api_bp)
 
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
