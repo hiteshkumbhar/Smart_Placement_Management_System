@@ -2713,3 +2713,1581 @@ def Recruiter_Interview_api():
             "has_prev": Upcoming_pagination.has_prev
         }
     }), 200
+
+########################################## Placement Officer ###########################################
+
+@api_bp.route("/Placement_officer_dashboard", methods=["GET"])
+@jwt_required()
+def Placement_officer_dashboard_api():
+    if get_current_user().role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    total_students = Students.query.filter_by(
+        graduation_year=datetime.datetime.now(
+            ZoneInfo("Asia/Kolkata")
+        ).year
+    ).count()
+
+    placed_students = db.session.query(
+        Applications.student_id
+    ).join(
+        Students,
+        Applications.student_id == Students.id
+    ).filter(
+        Students.graduation_year == datetime.datetime.now(
+            ZoneInfo("Asia/Kolkata")
+        ).year,
+        Applications.status == Application_status.SELECTED
+    ).distinct().count()
+
+    if total_students == 0:
+        percentage = 0.0
+    else:
+        percentage = (placed_students / total_students) * 100
+
+    unverified_resumes_count = Students.query.filter(
+        Students.resume_status.in_([
+            "Pending", "Reuploaded", "Rejected"
+        ]),
+        Students.resume_path.isnot(None),
+        Students.graduation_year == datetime.datetime.now(
+            ZoneInfo("Asia/Kolkata")
+        ).year
+    ).count()
+
+    now_ist = datetime.datetime.now(ZoneInfo("Asia/Kolkata"))
+
+    start_of_today = now_ist.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+        tzinfo=None
+    )
+
+    start_of_tomorrow = start_of_today + timedelta(days=1)
+
+    today_interview = Interview_Rounds.query.filter(
+        Interview_Rounds.date >= start_of_today,
+        Interview_Rounds.date < start_of_tomorrow
+    ).count()
+
+    Posted_job_drive_count = Job_Drives.query.filter(
+        Job_Drives.posted == "Y",
+        Job_Drives.status != "Closed"
+    ).count()
+
+    Posted_job_drives = Job_Drives.query.filter(
+        Job_Drives.posted == "Y",
+        Job_Drives.status != "Closed"
+    ).order_by(
+        Job_Drives.deadline.asc()
+    ).limit(5).all()
+
+    Posted_job_drive = []
+
+    for job in Posted_job_drives:
+        Posted_job_drive.append({
+            "company_name": job.company.company_name,
+            "job_drive": {
+                "id": job.id,
+                "company_id": job.company_id,
+                "title": job.title,
+                "package": job.package,
+                "location": job.location,
+                "CGPA": job.CGPA,
+                "Eligible_Branches": job.Eligible_Branches,
+                "Graduation_Year": job.Graduation_Year,
+                "Vacancies": job.Vacancies,
+                "deadline": str(job.deadline) if job.deadline else None,
+                "description": job.description,
+                "status": job.status,
+                "posted": job.posted
+            },
+            "application_count": Applications.query.filter(
+                Applications.drive_id == job.id
+            ).count()
+        })
+
+    New_job_drives = Job_Drives.query.filter(
+        Job_Drives.posted == "N"
+    ).order_by(
+        Job_Drives.deadline.asc()
+    ).limit(5).all()
+
+    new_job_drive_list = []
+
+    for job in New_job_drives:
+        new_job_drive_list.append({
+            "id": job.id,
+            "company_id": job.company_id,
+            "company_name": job.company.company_name,
+            "title": job.title,
+            "package": job.package,
+            "location": job.location,
+            "CGPA": job.CGPA,
+            "Eligible_Branches": job.Eligible_Branches,
+            "Graduation_Year": job.Graduation_Year,
+            "Vacancies": job.Vacancies,
+            "deadline": str(job.deadline) if job.deadline else None,
+            "description": job.description,
+            "status": job.status,
+            "posted": job.posted
+        })
+
+    return jsonify({
+        "placement_percentage": percentage,
+        "unverified_resumes_count": unverified_resumes_count,
+        "today_interview_count": today_interview,
+        "Posted_job_drive_count": Posted_job_drive_count,
+        "Posted_job_drive": Posted_job_drive,
+        "New_job_drive": new_job_drive_list
+    }), 200
+
+
+@api_bp.route("/Placement_officer_Recruiter_Job_drive", methods=["GET"])
+@jwt_required()
+def Placement_officer_Recruiter_Job_drive_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    job_drives = Job_Drives.query.filter(
+        Job_Drives.status != "Closed"
+    ).all()
+
+    for job in job_drives:
+        if job.deadline.date() < datetime.date.today():
+            job.status = "Expired"
+            db.session.commit()
+        else:
+            job.status = "Active"
+            db.session.commit()
+
+    search = request.args.get("search")
+    filter_type = request.args.get("filter")
+
+    if filter_type == "Expired":
+        Job_drives = Job_Drives.query.filter(
+            Job_Drives.posted == "N",
+            Job_Drives.status == "Expired",
+            Job_Drives.company_id.in_(
+                db.session.query(Companies.id).filter(
+                    Companies.creater_id == user.user_id
+                )
+            )
+        ).all()
+
+        jobs = []
+
+        for job in Job_drives:
+            if search:
+                if (
+                    search.lower() in job.company.company_name.lower()
+                    or search.lower() in job.title.lower()
+                ):
+                    company = Companies.query.filter_by(
+                        id=job.company_id
+                    ).first()
+                else:
+                    continue
+            else:
+                company = Companies.query.filter_by(
+                    id=job.company_id
+                ).first()
+
+            jobs.append({
+                "company_name": company.company_name,
+                "job_drive": {
+                    "id": job.id,
+                    "company_id": job.company_id,
+                    "title": job.title,
+                    "package": job.package,
+                    "location": job.location,
+                    "CGPA": job.CGPA,
+                    "Eligible_Branches": job.Eligible_Branches,
+                    "Graduation_Year": job.Graduation_Year,
+                    "Vacancies": job.Vacancies,
+                    "deadline": str(job.deadline) if job.deadline else None,
+                    "description": job.description,
+                    "status": job.status,
+                    "posted": job.posted
+                },
+                "logo_path": company.logo_path
+            })
+
+        return jsonify({"Jobs": jobs}), 200
+
+    Job_drives = Job_Drives.query.filter(
+        Job_Drives.posted == "N",
+        Job_Drives.status == "Active",
+        Job_Drives.company_id.in_(
+            db.session.query(Companies.id).filter(
+                Companies.creater_id == user.user_id
+            )
+        )
+    ).all()
+
+    jobs = []
+
+    for job in Job_drives:
+        if search:
+            if (
+                search.lower() in job.company.company_name.lower()
+                or search.lower() in job.title.lower()
+            ):
+                company = Companies.query.filter_by(
+                    id=job.company_id
+                ).first()
+            else:
+                continue
+        else:
+            company = Companies.query.filter_by(
+                id=job.company_id
+            ).first()
+
+        jobs.append({
+            "company_name": company.company_name,
+            "job_drive": {
+                "id": job.id,
+                "company_id": job.company_id,
+                "title": job.title,
+                "package": job.package,
+                "location": job.location,
+                "CGPA": job.CGPA,
+                "Eligible_Branches": job.Eligible_Branches,
+                "Graduation_Year": job.Graduation_Year,
+                "Vacancies": job.Vacancies,
+                "deadline": str(job.deadline) if job.deadline else None,
+                "description": job.description,
+                "status": job.status,
+                "posted": job.posted
+            },
+            "logo_path": company.logo_path
+        })
+
+    return jsonify({"Jobs": jobs}), 200
+
+
+
+@api_bp.route("/Placement_officer_Job_drive", methods=["GET", "POST"])
+@jwt_required()
+def Placement_officer_Job_drive_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    mode = request.form.get("mode", "")
+
+    # View a specific job drive and its applicants
+    if mode == "view" and request.method == "POST":
+        job_id = request.form.get("drive_id")
+
+        job = Job_Drives.query.filter(
+            Job_Drives.id == str(job_id),
+            Job_Drives.company_id.in_(
+                db.session.query(Companies.id).filter(
+                    Companies.creater_id == user.user_id
+                )
+            )
+        ).first()
+
+        if job is None:
+            return jsonify({"error": "Job drive not found"}), 404
+
+        company = Companies.query.filter_by(
+            id=job.company_id
+        ).first()
+
+        students = Students.query.all()
+
+        opted_out_students = (
+            job.opt_out.split(",")
+            if job.opt_out is not None
+            else []
+        )
+
+        Applicants = []
+
+        for student in students:
+            Application = Applications.query.filter_by(
+                drive_id=job.id,
+                student_id=student.id
+            ).first()
+
+            if Application:
+                Applicants.append([
+                    student.University_Roll_Number,
+                    db.session.query(Users.name).filter(
+                        Users.user_id == student.user_id
+                    ).scalar(),
+                    student.branch,
+                    student.cgpa,
+                    Application.applied_at.strftime("%d-%m-%Y %H:%M"),
+                    Application.status,
+                    student.id,
+                    Application.id
+                ])
+
+            elif student.job_drive and str(job.id) in student.job_drive:
+                status = "Recommended"
+
+                Applicants.append([
+                    student.University_Roll_Number,
+                    db.session.query(Users.name).filter(
+                        Users.user_id == student.user_id
+                    ).scalar(),
+                    student.branch,
+                    student.cgpa,
+                    "Not applied Yet",
+                    status,
+                    student.id,
+                    "0"
+                ])
+
+            elif str(student.id) in opted_out_students:
+                status = "Opted out"
+
+                Applicants.append([
+                    student.University_Roll_Number,
+                    db.session.query(Users.name).filter(
+                        Users.user_id == student.user_id
+                    ).scalar(),
+                    student.branch,
+                    student.cgpa,
+                    "Not applied",
+                    status,
+                    student.id,
+                    "0"
+                ])
+
+        jobs = {
+            "company_name": company.company_name,
+            "job_drive": {
+                "id": job.id,
+                "company_id": job.company_id,
+                "title": job.title,
+                "package": job.package,
+                "location": job.location,
+                "CGPA": job.CGPA,
+                "Eligible_Branches": job.Eligible_Branches,
+                "Graduation_Year": job.Graduation_Year,
+                "Vacancies": job.Vacancies,
+                "deadline": str(job.deadline) if job.deadline else None,
+                "description": job.description,
+                "status": job.status,
+                "posted": job.posted,
+                "opt_out": job.opt_out
+            },
+            "logo_path": company.logo_path
+        }
+
+        return jsonify({
+            "jobs": jobs,
+            "Applicants": Applicants,
+            "mode": mode
+        }), 200
+
+    # List posted job drives
+    posted_jobs = Job_Drives.query.filter(
+        Job_Drives.posted == "Y",
+        Job_Drives.status != "Closed",
+        Job_Drives.company_id.in_(
+            db.session.query(Companies.id).filter(
+                Companies.creater_id == user.user_id
+            )
+        )
+    ).all()
+
+    jobs = []
+
+    for job in posted_jobs:
+        if request.args.get("search"):
+            search = request.args.get("search").lower()
+
+            if (
+                search in job.company.company_name.lower()
+                or search in job.title.lower()
+            ):
+                company = Companies.query.filter_by(
+                    id=job.company_id
+                ).first()
+            else:
+                continue
+        else:
+            company = Companies.query.filter_by(
+                id=job.company_id
+            ).first()
+
+        jobs.append({
+            "company_name": company.company_name,
+            "job_drive": {
+                "id": job.id,
+                "company_id": job.company_id,
+                "title": job.title,
+                "package": job.package,
+                "location": job.location,
+                "CGPA": job.CGPA,
+                "Eligible_Branches": job.Eligible_Branches,
+                "Graduation_Year": job.Graduation_Year,
+                "Vacancies": job.Vacancies,
+                "deadline": str(job.deadline) if job.deadline else None,
+                "description": job.description,
+                "status": job.status,
+                "posted": job.posted
+            },
+            "logo_path": company.logo_path
+        })
+
+    return jsonify({
+        "jobs": jobs,
+        "mode": mode
+    }), 200
+
+
+@api_bp.route("/Placement_Officer_Interview", methods=["GET", "POST"])
+@jwt_required()
+def Placement_Officer_Interview_api():
+    if get_current_user().role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    today_search = request.args.get("today_search", "")
+    upcoming_search = request.args.get("upcoming_search", "")
+    past_search = request.args.get("past_search", "")
+
+    # Pagination settings
+    per_page = 5
+
+    today_page = request.args.get("today_page", 1, type=int)
+    upcoming_page = request.args.get("upcoming_page", 1, type=int)
+    past_page = request.args.get("past_page", 1, type=int)
+
+    today = datetime.date.today()
+
+    today_start = datetime.datetime.combine(
+        today, datetime.time.min
+    )
+
+    tomorrow_start = today_start + datetime.timedelta(days=1)
+
+    base_query = (
+        Interview_Rounds.query
+        .join(Interview_Rounds.Application)
+        .join(Applications.student)
+        .join(Students.user)
+        .join(Applications.Job_Drive)
+        .join(Job_Drives.company)
+    )
+
+    today_query = base_query.filter(
+        Interview_Rounds.date >= today_start,
+        Interview_Rounds.date < tomorrow_start
+    )
+
+    if today_search:
+        search_term = f"%{today_search}%"
+        today_query = today_query.filter(
+            or_(
+                Companies.company_name.ilike(search_term),
+                Users.name.ilike(search_term),
+                Job_Drives.title.ilike(search_term)
+            )
+        )
+
+    upcoming_query = base_query.filter(
+        Interview_Rounds.date >= tomorrow_start
+    )
+
+    if upcoming_search:
+        search_term = f"%{upcoming_search}%"
+        upcoming_query = upcoming_query.filter(
+            or_(
+                Companies.company_name.ilike(search_term),
+                Users.name.ilike(search_term),
+                Job_Drives.title.ilike(search_term)
+            )
+        )
+
+    past_query = base_query.filter(
+        Interview_Rounds.date < today_start
+    )
+
+    if past_search:
+        search_term = f"%{past_search}%"
+        past_query = past_query.filter(
+            or_(
+                Companies.company_name.ilike(search_term),
+                Users.name.ilike(search_term),
+                Job_Drives.title.ilike(search_term)
+            )
+        )
+
+    Today_pagination = today_query.order_by(
+        Interview_Rounds.date.asc()
+    ).paginate(
+        page=today_page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    Upcoming_pagination = upcoming_query.order_by(
+        Interview_Rounds.date.asc()
+    ).paginate(
+        page=upcoming_page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    Past_pagination = past_query.order_by(
+        Interview_Rounds.date.desc()
+    ).paginate(
+        page=past_page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    def format_interviews(interviews):
+        return [
+            [
+                r.Application.Job_Drive.company.company_name,
+                r.Application.Job_Drive.title,
+                r.Application.student.user.name,
+                r.round_name,
+                r.date.isoformat() if r.date else None,
+                r.link,
+                r.result,
+                r.feedback,
+                r.Application.Job_Drive.company.logo_path,
+                r.id
+            ]
+            for r in interviews
+        ]
+
+    Todays_interview = format_interviews(
+        Today_pagination.items
+    )
+
+    upcoming_interviews = format_interviews(
+        Upcoming_pagination.items
+    )
+
+    Past_interviews = format_interviews(
+        Past_pagination.items
+    )
+
+    return jsonify({
+        "Todays_interview": Todays_interview,
+        "upcoming_interviews": upcoming_interviews,
+        "Past_interviews": Past_interviews,
+
+        "Today_pagination": {
+            "page": Today_pagination.page,
+            "per_page": Today_pagination.per_page,
+            "total": Today_pagination.total,
+            "pages": Today_pagination.pages,
+            "has_next": Today_pagination.has_next,
+            "has_prev": Today_pagination.has_prev
+        },
+
+        "Upcoming_pagination": {
+            "page": Upcoming_pagination.page,
+            "per_page": Upcoming_pagination.per_page,
+            "total": Upcoming_pagination.total,
+            "pages": Upcoming_pagination.pages,
+            "has_next": Upcoming_pagination.has_next,
+            "has_prev": Upcoming_pagination.has_prev
+        },
+
+        "Past_pagination": {
+            "page": Past_pagination.page,
+            "per_page": Past_pagination.per_page,
+            "total": Past_pagination.total,
+            "pages": Past_pagination.pages,
+            "has_next": Past_pagination.has_next,
+            "has_prev": Past_pagination.has_prev
+        },
+
+        "today_search": today_search,
+        "upcoming_search": upcoming_search,
+        "past_search": past_search
+    }), 200
+
+
+@api_bp.route("/students", methods=["GET", "POST"])
+@jwt_required()
+def Placement_officer_student_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    students = Students.query.all()
+
+    graduation_years = sorted({
+        student.graduation_year
+        for student in students
+        if student.graduation_year is not None
+    })
+
+    branches = sorted({
+        student.branch
+        for student in students
+        if student.branch is not None
+    })
+
+    # Helper: serialize student model for JSON
+    def serialize_student(student):
+        return {
+            "id": student.id,
+            "user_id": student.user_id,
+            "name": student.user.name if student.user else None,
+            "University_Roll_Number": student.University_Roll_Number,
+            "branch": student.branch,
+            "cgpa": student.cgpa,
+            "graduation_year": student.graduation_year,
+            "resume_path": student.resume_path,
+            "resume_status": student.resume_status,
+            "resume_remark": student.resume_remark,
+            "Certification": student.Certification,
+            "job_drive": student.job_drive,
+            "placement_status": student.placement_status
+        }
+
+    # Helper: serialize pagination metadata
+    def serialize_pagination(pagination):
+        return {
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "pages": pagination.pages,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev
+        }
+
+    # Search students by name
+    if request.args.get("Search") is not None:
+        search = request.args.get("Search")
+        page = request.args.get("page", 1, type=int)
+
+        query = Students.query.filter(
+            Students.user.has(Users.name.ilike(f"%{search}%"))
+        )
+
+        students_pagination = query.paginate(
+            page=page,
+            per_page=5,
+            error_out=False
+        )
+
+        students = students_pagination.items
+
+        return jsonify({
+            "students": [
+                serialize_student(student) for student in students
+            ],
+            "students_pagination": serialize_pagination(
+                students_pagination
+            ),
+            "graduation_years": graduation_years,
+            "branches": branches
+        }), 200
+
+    # Filter students
+    if (
+        request.args.get("status")
+        or request.args.get("graduation_year")
+        or request.args.get("branch")
+    ):
+        status = request.args.get("status")
+        graduation_year = request.args.get("graduation_year")
+        branch = request.args.get("branch")
+
+        query = Students.query
+
+        if status:
+            query = query.filter(
+                Students.resume_status == status
+            )
+
+        if graduation_year:
+            query = query.filter(
+                Students.graduation_year == graduation_year
+            )
+
+        if branch:
+            query = query.filter(
+                Students.branch == branch
+            )
+
+        page = request.args.get("page", 1, type=int)
+
+        students_pagination = query.paginate(
+            page=page,
+            per_page=5,
+            error_out=False
+        )
+
+        students = students_pagination.items
+
+        return jsonify({
+            "students": [
+                serialize_student(student) for student in students
+            ],
+            "students_pagination": serialize_pagination(
+                students_pagination
+            ),
+            "graduation_years": graduation_years,
+            "branches": branches
+        }), 200
+
+    # POST actions for a selected student
+    if request.method == "POST":
+        student_id = request.form.get("Student_details")
+
+        student = Students.query.filter_by(
+            id=student_id
+        ).first()
+
+        if student is None:
+            return jsonify({"error": "Student not found"}), 404
+
+        applications = Applications.query.filter_by(
+            student_id=student_id
+        ).all()
+
+        student_drives = (
+            student.job_drive.split(",")
+            if student.job_drive
+            else None
+        )
+
+        opted_outs = [
+            job for job in Job_Drives.query.all()
+            if job.opt_out and str(student_id) in job.opt_out
+        ]
+
+        apps = []
+
+        if applications:
+            for app in applications:
+                apps.append([
+                    app.Job_Drive.company.company_name,
+                    app.Job_Drive.title,
+                    app.status.value,
+                    app.id
+                ])
+
+        if student_drives:
+            for drive in student_drives:
+                student_job_drive = Job_Drives.query.filter(
+                    Job_Drives.id == int(drive.strip())
+                ).first()
+
+                apps.append([
+                    student_job_drive.company.company_name,
+                    student_job_drive.title,
+                    "Recommended"
+                ])
+
+        if len(opted_outs) > 0:
+            for job in opted_outs:
+                apps.append([
+                    job.company.company_name,
+                    job.title,
+                    "Opted Out"
+                ])
+
+        mode = request.form.get("mode")
+
+        # View student details
+        if mode == "view_details":
+            certifications = [
+                x.strip()
+                for x in student.Certification.split(",")
+            ] if (
+                student.Certification
+                and student.Certification.strip()
+            ) else None
+
+            return jsonify({
+                "student": serialize_student(student),
+                "certifications": certifications,
+                "graduation_years": graduation_years,
+                "branches": branches,
+                "applications": apps
+            }), 200
+
+        # Verify or reject resume
+        elif mode == "resume_status":
+            student = Students.query.filter_by(
+                id=student_id
+            ).first()
+
+            if student is None:
+                return jsonify({"error": "Student not found"}), 404
+
+            certifications = [
+                x.strip()
+                for x in student.Certification.split(",")
+            ] if (
+                student.Certification
+                and student.Certification.strip()
+            ) else None
+
+            action = request.form.get("action")
+
+            if action == "verify":
+                student.resume_status = "Verified"
+                db.session.commit()
+
+                notifications([
+                    "resumeverified",
+                    student.user.email
+                ])
+
+            elif action == "reject":
+                student.resume_status = "Rejected"
+                db.session.commit()
+
+                notifications([
+                    "resumerejected",
+                    student.user.email,
+                    student.resume_remark
+                ])
+
+            return jsonify({
+                "message": "Resume status processed",
+                "student": serialize_student(student),
+                "certifications": certifications,
+                "graduation_years": graduation_years,
+                "branches": branches,
+                "applications": apps
+            }), 200
+
+        # Add a remark to the resume
+        elif mode == "give_remark":
+            student = Students.query.filter_by(
+                id=student_id
+            ).first()
+
+            if student is None:
+                return jsonify({"error": "Student not found"}), 404
+
+            certifications = [
+                x.strip()
+                for x in student.Certification.split(",")
+            ] if (
+                student.Certification
+                and student.Certification.strip()
+            ) else None
+
+            if request.form.get("remark") != "":
+                student.resume_remark = request.form.get("remark")
+                db.session.commit()
+
+                return jsonify({
+                    "message": "Remark saved successfully",
+                    "student": serialize_student(student),
+                    "certifications": certifications,
+                    "applications": apps
+                }), 200
+
+            return jsonify({
+                "mode": "remark",
+                "student": serialize_student(student),
+                "certifications": certifications,
+                "graduation_years": graduation_years,
+                "branches": branches,
+                "applications": apps
+            }), 200
+
+        # Mark student as placed
+        elif mode == "placement_status":
+            student = Students.query.filter_by(
+                id=student_id
+            ).first()
+
+            if student is None:
+                return jsonify({"error": "Student not found"}), 404
+
+            certifications = [
+                x.strip()
+                for x in student.Certification.split(",")
+            ] if (
+                student.Certification
+                and student.Certification.strip()
+            ) else None
+
+            student.placement_status = "Placed"
+            db.session.commit()
+
+            return jsonify({
+                "message": "Student placement status updated",
+                "student": serialize_student(student),
+                "certifications": certifications,
+                "graduation_years": graduation_years,
+                "branches": branches,
+                "applications": apps
+            }), 200
+
+    # Default: return paginated students
+    page = request.args.get("page", 1, type=int)
+    per_page = 5
+
+    students_pagination = Students.query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    students = students_pagination.items
+
+    return jsonify({
+        "students": [
+            serialize_student(student) for student in students
+        ],
+        "students_pagination": serialize_pagination(
+            students_pagination
+        ),
+        "graduation_years": graduation_years,
+        "branches": branches
+    }), 200
+
+
+@api_bp.route("/Companies_info", methods=["GET", "POST"])
+@jwt_required()
+def Companies_info_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    mode = request.args.get("mode", "ViewAll")
+    search = request.args.get("search", "").strip()
+    page = request.args.get("page", 1, type=int)
+
+    # Helper to format company information
+    def format_company(company, include_closed=True):
+        if include_closed:
+            job_drive_count = Job_Drives.query.filter(
+                Job_Drives.company_id == company.id
+            ).count()
+        else:
+            job_drive_count = Job_Drives.query.filter(
+                Job_Drives.company_id == company.id,
+                Job_Drives.status != "Closed"
+            ).count()
+
+        return [
+            company.company_name,
+            company.logo_path,
+            company.industry,
+            company.website,
+            company.hr_name,
+            company.phone,
+            company.email,
+            company.address,
+            job_drive_count,
+            company.id
+        ]
+
+    # Search companies
+    if search:
+        query = Companies.query.filter(
+            or_(
+                Companies.company_name.ilike(f"%{search}%"),
+                Companies.industry.ilike(f"%{search}%"),
+                Companies.hr_name.ilike(f"%{search}%")
+            ),
+            Companies.creater_id == user.user_id
+        )
+
+        companies_pagination = query.order_by(
+            Companies.company_name
+        ).paginate(
+            page=page,
+            per_page=10,
+            error_out=False
+        )
+
+        companies = companies_pagination.items
+
+        a = []
+
+        for company in companies:
+            a.append(format_company(company, include_closed=False))
+
+        return jsonify({
+            "companies": a,
+            "mode": mode,
+            "companies_pagination": {
+                "page": companies_pagination.page,
+                "per_page": companies_pagination.per_page,
+                "total": companies_pagination.total,
+                "pages": companies_pagination.pages,
+                "has_next": companies_pagination.has_next,
+                "has_prev": companies_pagination.has_prev
+            }
+        }), 200
+
+    # Retrieve all companies belonging to the current placement officer
+    companies_pagination = Companies.query.filter(
+        Companies.creater_id == user.user_id
+    ).order_by(
+        Companies.company_name
+    ).paginate(
+        page=page,
+        per_page=10,
+        error_out=False
+    )
+
+    companies = companies_pagination.items
+
+    a = []
+
+    for company in companies:
+        a.append(format_company(company, include_closed=True))
+
+    # View a specific company
+    if mode == "view":
+        t_company = Companies.query.filter(
+            Companies.id == request.args.get("id"),
+            Companies.creater_id == user.user_id
+        ).first()
+
+        if t_company is None:
+            return jsonify({"error": "Forbidden"}), 403
+
+        target_company = format_company(
+            t_company,
+            include_closed=True
+        )
+
+        return jsonify({
+            "companies": a,
+            "mode": mode,
+            "target_company": target_company,
+            "companies_pagination": {
+                "page": companies_pagination.page,
+                "per_page": companies_pagination.per_page,
+                "total": companies_pagination.total,
+                "pages": companies_pagination.pages,
+                "has_next": companies_pagination.has_next,
+                "has_prev": companies_pagination.has_prev
+            }
+        }), 200
+
+    return jsonify({
+        "companies": a,
+        "mode": mode,
+        "companies_pagination": {
+            "page": companies_pagination.page,
+            "per_page": companies_pagination.per_page,
+            "total": companies_pagination.total,
+            "pages": companies_pagination.pages,
+            "has_next": companies_pagination.has_next,
+            "has_prev": companies_pagination.has_prev
+        }
+    }), 200
+
+
+@api_bp.route("/Company/edit", methods=["GET", "POST"])
+@jwt_required()
+def edit_company_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    company_id = request.args.get("id", type=int)
+
+    company = Companies.query.filter(
+        Companies.id == company_id,
+        Companies.creater_id == user.user_id
+    ).first()
+
+    if company is None:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "POST":
+        company = Companies.query.filter(
+            Companies.id == company_id,
+            Companies.creater_id == user.user_id
+        ).first()
+
+        if company is None:
+            return jsonify({"error": "Forbidden"}), 403
+
+        if request.form.get("name"):
+            company.company_name = request.form.get("name")
+
+        if request.form.get("Industry"):
+            company.industry = request.form.get("Industry")
+
+        if request.form.get("website"):
+            company.website = request.form.get("website")
+
+        if request.form.get("HR_Name"):
+            company.hr_name = request.form.get("HR_Name")
+
+        if request.form.get("HR_Email"):
+            company.email = request.form.get("HR_Email")
+
+        if request.form.get("HR_number"):
+            company.phone = request.form.get("HR_number")
+
+        if request.form.get("Address"):
+            company.address = request.form.get("Address")
+
+        MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+        logo = request.files.get("Logo")
+
+        if logo and logo.filename != "":
+            logo.seek(0, os.SEEK_END)
+            file_size = logo.tell()
+            logo.seek(0)
+
+            file_extension = (
+                logo.filename.rsplit(".", 1)[1].lower()
+                if "." in logo.filename
+                else ""
+            )
+
+            if (
+                file_extension in ["jpg", "jpeg", "png"]
+                and file_size < MAX_FILE_SIZE_BYTES
+            ):
+                FOLDER = os.path.join(
+                    current_app.root_path,
+                    "static",
+                    "Images",
+                    "company",
+                    "logo"
+                )
+
+                os.makedirs(FOLDER, exist_ok=True)
+
+                filename = logo.filename
+                filepath = os.path.join(FOLDER, filename)
+
+                logo.save(filepath)
+                company.logo_path = logo.filename
+
+            else:
+                errors = []
+
+                if file_extension not in ["jpg", "jpeg", "png"]:
+                    errors.append(
+                        "Upload file in jpg or jpeg or png format"
+                    )
+
+                if file_size > MAX_FILE_SIZE_BYTES:
+                    errors.append("Logo size must be less than 5 MB")
+
+                return jsonify({"errors": errors}), 400
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Company updated successfully",
+            "company_id": company.id
+        }), 200
+
+    return jsonify({
+        "mode": "edit",
+        "company": {
+            "id": company.id,
+            "company_name": company.company_name,
+            "industry": company.industry,
+            "website": company.website,
+            "hr_name": company.hr_name,
+            "email": company.email,
+            "phone": company.phone,
+            "address": company.address,
+            "logo_path": company.logo_path
+        }
+    }), 200
+
+
+@api_bp.route("/Company/delete", methods=["GET", "POST"])
+@jwt_required()
+def delete_company_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    company_id = request.args.get("id", type=int)
+
+    company = Companies.query.filter(
+        Companies.id == company_id,
+        Companies.creater_id == user.user_id
+    ).first()
+
+    if company is None:
+        return jsonify({"error": "Forbidden"}), 403
+
+    db.session.delete(company)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Company deleted successfully",
+        "company_id": company_id
+    }), 200
+
+
+@api_bp.route("/Company/add", methods=["GET", "POST"])
+@jwt_required()
+def add_company_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        industry = request.form.get("Industry")
+        website = request.form.get("website")
+        HR_Name = request.form.get("HR_Name")
+        HR_Email = request.form.get("HR_Email")
+        HR_number = request.form.get("HR_number")
+        Address = request.form.get("Address")
+
+        email = Companies.query.filter_by(email=HR_Email).first()
+        number = Companies.query.filter_by(phone=HR_number).first()
+
+        if email and number:
+            return jsonify({
+                "errors": [
+                    "Email is already taken",
+                    "Mobile number is already taken"
+                ]
+            }), 409
+
+        elif number or email:
+            if number:
+                return jsonify({
+                    "error": "Mobile number is already taken"
+                }), 409
+            else:
+                return jsonify({
+                    "error": "Email is already taken"
+                }), 409
+
+        MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+        logo = request.files.get("Logo")
+        logo_filename = None
+
+        if logo and logo.filename != "":
+            logo.seek(0, os.SEEK_END)
+            file_size = logo.tell()
+            logo.seek(0)
+
+            file_extension = (
+                logo.filename.rsplit(".", 1)[1].lower()
+                if "." in logo.filename
+                else ""
+            )
+
+            if (
+                file_extension in ["jpg", "jpeg", "png"]
+                and file_size < MAX_FILE_SIZE_BYTES
+            ):
+                FOLDER = os.path.join(
+                    current_app.root_path,
+                    "static",
+                    "Images",
+                    "company",
+                    "logo"
+                )
+                os.makedirs(FOLDER, exist_ok=True)
+
+                filename = logo.filename
+                filepath = os.path.join(FOLDER, filename)
+                logo.save(filepath)
+
+                logo_filename = secure_filename(logo.filename)
+
+            else:
+                errors = []
+
+                if file_extension not in ["jpg", "jpeg", "png"]:
+                    errors.append(
+                        "Upload file in jpg or jpeg or png format"
+                    )
+
+                if file_size > MAX_FILE_SIZE_BYTES:
+                    errors.append(
+                        "Logo size must be less than 5 MB"
+                    )
+
+                return jsonify({"errors": errors}), 400
+
+        company = Companies(
+            company_name=name,
+            industry=industry,
+            website=website,
+            hr_name=HR_Name,
+            email=HR_Email,
+            phone=HR_number,
+            logo_path=logo_filename,
+            address=Address,
+            created_at=datetime.datetime.now(
+                ZoneInfo("Asia/Kolkata")
+            ),
+            creater_id=user.user_id
+        )
+
+        db.session.add(company)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Company added successfully",
+            "company_id": company.id
+        }), 201
+
+    return jsonify({
+        "message": "Provide company details using a POST request."
+    }), 200
+
+
+@api_bp.route("/Post_Job_Drive", methods=["GET", "POST"])
+@jwt_required()
+def Post_Job_Drive_api():
+    user = get_current_user()
+
+    if user.role != "Placement_Officer":
+        return jsonify({"error": "Forbidden"}), 403
+
+    job_id = request.values.get("drive_id")
+
+    # Display job drive details and student lists
+    if request.args.get("mode", "N") == "post_job_drive":
+        job = Job_Drives.query.filter(
+            Job_Drives.id == job_id,
+            Job_Drives.company_id.in_(
+                db.session.query(Companies.id).filter(
+                    Companies.creater_id == user.user_id
+                )
+            )
+        ).first()
+
+        if job is None:
+            return jsonify({"error": "Forbidden"}), 403
+
+        company = Companies.query.filter_by(
+            id=job.company_id
+        ).first()
+
+        job1 = [
+            company.company_name,
+            {
+                "id": job.id,
+                "company_id": job.company_id,
+                "title": job.title,
+                "package": job.package,
+                "location": job.location,
+                "CGPA": job.CGPA,
+                "Eligible_Branches": job.Eligible_Branches,
+                "Graduation_Year": job.Graduation_Year,
+                "Vacancies": job.Vacancies,
+                "deadline": str(job.deadline) if job.deadline else None,
+                "description": job.description,
+                "status": job.status,
+                "posted": job.posted
+            }
+        ]
+
+        eligible_students = Students.query.filter(
+            Students.cgpa >= job.CGPA,
+            Students.branch.in_(job.Eligible_Branches.split(",")),
+            Students.graduation_year.in_(job.Graduation_Year.split(","))
+        ).all()
+
+        E_Students = []
+
+        for student in eligible_students:
+            E_Students.append([
+                student.id,
+                db.session.query(Users.name).filter(
+                    Users.user_id == student.user_id
+                ).scalar()
+            ])
+
+        All_students = []
+        Student = Students.query.all()
+
+        for student in Student:
+            All_students.append([
+                student.id,
+                db.session.query(Users.name).filter(
+                    Users.user_id == student.user_id
+                ).scalar()
+            ])
+
+        return jsonify({
+            "job": job1,
+            "eligible_students": E_Students,
+            "All_Student": All_students,
+            "job_id": job_id
+        }), 200
+
+    # POST: recommend selected students and publish the job drive
+    if request.method == "POST":
+        S1 = request.form.getlist("Students")
+        S2 = request.form.getlist("All_Students")
+        S1.extend(S2)
+
+        job = Job_Drives.query.filter(
+            Job_Drives.id == job_id,
+            Job_Drives.company_id.in_(
+                db.session.query(Companies.id).filter(
+                    Companies.creater_id == user.user_id
+                )
+            )
+        ).first()
+
+        if job is None:
+            return jsonify({"error": "Forbidden"}), 403
+
+        flag = 0
+        errors = []
+
+        for i in S1:
+            Student = Students.query.filter_by(id=i).first()
+
+            if Student is None:
+                errors.append({
+                    "student_id": i,
+                    "error": "Student not found"
+                })
+                flag = 1
+                continue
+
+            if not Applications.query.filter_by(
+                student_id=Student.id,
+                drive_id=job_id
+            ).first():
+
+                if Student.job_drive is None or str(job_id) not in Student.job_drive:
+
+                    if job.opt_out is None or str(Student.id) not in job.opt_out:
+                        if Student.job_drive is None:
+                            Student.job_drive = job_id
+
+                            notifications([
+                                "Postjobdrive",
+                                Student.user.email,
+                                job.company.company_name,
+                                job.title,
+                                job.package,
+                                job.deadline
+                            ])
+                        else:
+                            Student.job_drive = (
+                                Student.job_drive + "," + str(job_id)
+                            )
+
+                            notifications([
+                                "Postjobdrive",
+                                Student.user.email,
+                                job.company.company_name,
+                                job.title,
+                                job.package,
+                                job.deadline
+                            ])
+
+                    else:
+                        list1 = job.opt_out.split(",")
+                        list1.remove(str(Student.id))
+                        job.opt_out = ",".join(list1)
+
+                        if Student.job_drive is None:
+                            Student.job_drive = job_id
+
+                            notifications([
+                                "Postjobdrive",
+                                Student.user.email,
+                                job.company.company_name,
+                                job.title,
+                                job.package,
+                                job.deadline
+                            ])
+                        else:
+                            Student.job_drive = (
+                                Student.job_drive + "," + str(job_id)
+                            )
+
+                            notifications([
+                                "Postjobdrive",
+                                Student.user.email,
+                                job.company.company_name,
+                                job.title,
+                                job.package,
+                                job.deadline
+                            ])
+
+                else:
+                    student_name = db.session.query(Users.name).filter(
+                        Users.user_id == Student.user_id
+                    ).scalar()
+
+                    errors.append({
+                        "student_id": Student.id,
+                        "student_name": student_name,
+                        "error": "Student is already recommended"
+                    })
+
+                    flag = 1
+
+            else:
+                student_name = db.session.query(Users.name).filter(
+                    Users.user_id == Student.user_id
+                ).scalar()
+
+                errors.append({
+                    "student_id": Student.id,
+                    "student_name": student_name,
+                    "error": "Application already exists"
+                })
+
+                flag = 1
+
+            db.session.commit()
+
+        # Preserve original behavior: do not publish if duplicates occurred
+        if flag == 1:
+            return jsonify({
+                "message": "Some students could not be recommended. The job drive has not been published.",
+                "errors": errors,
+                "job_id": job_id
+            }), 400
+
+        job = Job_Drives.query.filter(
+            Job_Drives.id == job_id,
+            Job_Drives.company_id.in_(
+                db.session.query(Companies.id).filter(
+                    Companies.creater_id == user.user_id
+                )
+            )
+        ).first()
+
+        if job is None:
+            return jsonify({"error": "Forbidden"}), 403
+
+        job.posted = "Y"
+        db.session.commit()
+
+        return jsonify({
+            "message": "Job drive posted successfully",
+            "job_id": job.id,
+            "posted": job.posted
+        }), 200
+
+    return jsonify({
+        "error": "Invalid request. Use mode=post_job_drive for viewing or POST to recommend students."
+    }), 400
