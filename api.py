@@ -2095,3 +2095,109 @@ def edit_Job_drive_api():
         },
         "companies": list1
     }), 200
+
+@api_bp.route("/Job_drive/add", methods=["GET", "POST"])
+@jwt_required()
+def add_Job_drive_api():
+    user = get_current_user()
+
+    if user.role != "Recruiter":
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "POST":
+        company_id = request.form.get("company_id")
+        Job_Title = request.form.get("Title")
+        Package = request.form.get("Package")
+        Location = request.form.get("Location")
+        Minimum_CGPA = request.form.get("CGPA")
+        Eligible_Branches = ",".join(request.form.getlist("Branches"))
+        Graduation_Year = request.form.get("Graduation_Year")
+        Vacancies = request.form.get("Vacancies")
+        Deadline = request.form.get("Deadline")
+
+        if datetime.datetime.strptime(
+            request.form.get("Deadline"), "%Y-%m-%d"
+        ).date() < datetime.date.today():
+            return jsonify({
+                "error": "Deadline cannot be less than today"
+            }), 400
+
+        Job_Description = request.form.get("Description")
+
+        job_drive = Job_Drives(
+            company_id=company_id,
+            title=Job_Title,
+            package=Package,
+            location=Location,
+            CGPA=Minimum_CGPA,
+            Eligible_Branches=Eligible_Branches,
+            Graduation_Year=Graduation_Year,
+            Vacancies=Vacancies,
+            deadline=Deadline,
+            description=Job_Description,
+            creater_id=user.user_id,
+            application_count_email={
+                "email_count": 0,
+                "student_id": []
+            }
+        )
+
+        db.session.add(job_drive)
+        db.session.commit()
+
+        notifications([
+            'recruiter_job_drive_create',
+            [
+                user.email
+                for user in Users.query.filter(
+                    Users.role == 'Placement_Officer'
+                ).all()
+            ],
+            job_drive,
+            db.session.query(Companies.company_name).filter(
+                Companies.id == company_id
+            ).scalar()
+        ])
+
+        return jsonify({
+            "message": "Job drive created successfully",
+            "job_drive_id": job_drive.id
+        }), 201
+
+    companies = Companies.query.all()
+
+    list1 = []
+    for company in companies:
+        list1.append([company.id, company.company_name])
+
+    return jsonify({
+        "companies": list1
+    }), 200
+
+
+@api_bp.route("/Job_drive/delete", methods=["GET", "POST"])
+@jwt_required()
+def delete_Job_drive_api():
+    user = get_current_user()
+
+    if user.role != "Recruiter":
+        return jsonify({"error": "Forbidden"}), 403
+
+    job_id = request.args.get("id")
+
+    job = Job_Drives.query.filter_by(
+        id=job_id,
+        creater_id=user.user_id
+    ).first()
+
+    if job is None:
+        return jsonify({"error": "Forbidden"}), 403
+
+    job.status = "Closed"
+    db.session.commit()
+
+    return jsonify({
+        "message": "Job drive closed successfully",
+        "job_id": job.id,
+        "status": job.status
+    }), 200
