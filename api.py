@@ -2201,3 +2201,515 @@ def delete_Job_drive_api():
         "job_id": job.id,
         "status": job.status
     }), 200
+
+
+
+@api_bp.route("/Student_Profile_Recruiter", methods=["GET", "POST"])
+@jwt_required()
+def Student_Profile_Recruiter_api():
+    user_role = get_current_user().role
+
+    if user_role not in ["Recruiter", "Placement_Officer"]:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "GET":
+        student_id = request.args.get("id")
+        application_id = request.args.get("application_id")
+    else:
+        student_id = request.form.get("id")
+        application_id = request.form.get("application_id")
+
+    user = Students.query.filter_by(id=student_id).first()
+
+    if user is None:
+        return jsonify({"error": "Student not found"}), 404
+
+    certs_list = [
+        x.strip() for x in user.Certification.split(",") if x.strip()
+    ] if user.Certification else None
+
+    certifications = certs_list if certs_list else None
+
+    student = []
+    student.extend([
+        db.session.query(Users.name)
+        .filter(Users.user_id == user.user_id)
+        .scalar(),
+        user
+    ])
+
+    interview_rounds = Interview_Rounds.query.filter_by(
+        application_id=application_id
+    ).all()
+
+    if user_role == "Recruiter":
+        return jsonify({
+            "student": [
+                student[0],
+                {
+                    "id": student[1].id,
+                    "user_id": student[1].user_id,
+                    "Certification": student[1].Certification,
+                    "resume_path": student[1].resume_path
+                }
+            ],
+            "certifications": certifications,
+            "application_id": application_id,
+            "interview_rounds": [
+                {
+                    "id": round.id,
+                    "application_id": round.application_id,
+                    "round_name": getattr(round, "round_name", None),
+                    "date": str(getattr(round, "date", None))
+                }
+                for round in interview_rounds
+            ]
+        }), 200
+
+    elif user_role == "Placement_Officer":
+        return jsonify({
+            "student": [
+                student[0],
+                {
+                    "id": student[1].id,
+                    "user_id": student[1].user_id,
+                    "Certification": student[1].Certification,
+                    "resume_path": student[1].resume_path
+                }
+            ],
+            "certifications": certifications,
+            "application_id": application_id,
+            "interview_rounds": [
+                {
+                    "id": round.id,
+                    "application_id": round.application_id,
+                    "round_name": getattr(round, "round_name", None),
+                    "date": str(getattr(round, "date", None))
+                }
+                for round in interview_rounds
+            ]
+        }), 200
+
+
+@api_bp.route("/Recruiter_Interview", methods=["GET", "POST"])
+@jwt_required()
+def Recruiter_Interview_api():
+    current_user = get_current_user()
+
+    if current_user.role != "Recruiter":
+        return jsonify({"error": "Forbidden"}), 403
+
+    today_start = datetime.datetime.combine(
+        datetime.date.today(), datetime.time.min
+    )
+    tomorrow_start = today_start + datetime.timedelta(days=1)
+    PER_PAGE = 5
+
+    try:
+        today_page = int(request.args.get("today_page", 1))
+        upcoming_page = int(request.args.get("upcoming_page", 1))
+    except (ValueError, TypeError):
+        today_page = 1
+        upcoming_page = 1
+
+    today_search = request.args.get("today_search", "").strip()
+    upcoming_search = request.args.get("upcoming_search", "").strip()
+
+    # Helper to convert an interview round into JSON
+    def serialize_round(round):
+        return {
+            "id": round.id,
+            "application_id": round.application_id,
+            "round_name": round.round_name,
+            "date": str(round.date) if round.date else None,
+            "feedback": round.feedback,
+            "result": round.result,
+            "company_name": round.Application.Job_Drive.company.company_name,
+            "job_title": round.Application.Job_Drive.title,
+            "student_name": round.Application.student.user.name
+        }
+
+    # Helper to convert interview lists into JSON
+    def serialize_interviews(interviews):
+        return [
+            {
+                "company_name": item[0],
+                "job_title": item[1],
+                "student_name": item[2],
+                "interview_round": serialize_round(item[3])
+            }
+            for item in interviews
+        ]
+
+    if request.method == "POST":
+        round_id = request.form.get("round_id")
+        mode = request.form.get("mode", "")
+
+        round = Interview_Rounds.query.filter_by(id=round_id).first()
+
+        if round is None:
+            return jsonify({"error": "Interview round not found"}), 404
+
+        if mode == "feedback":
+            job_drive = Job_Drives.query.filter_by(
+                creater_id=current_user.user_id
+            ).all()
+
+            inner_query = db.session.query(Applications.id).filter(
+                Applications.drive_id.in_([x.id for x in job_drive])
+            ).scalar_subquery()
+
+            today_interview = []
+            upcoming_interview = []
+
+            Today_pagination = (
+                Interview_Rounds.query
+                .join(
+                    Applications,
+                    Interview_Rounds.application_id == Applications.id
+                )
+                .join(
+                    Job_Drives,
+                    Applications.drive_id == Job_Drives.id
+                )
+                .join(
+                    Companies,
+                    Job_Drives.company_id == Companies.id
+                )
+                .filter(
+                    Interview_Rounds.application_id.in_(inner_query),
+                    Interview_Rounds.date >= today_start,
+                    Interview_Rounds.date < tomorrow_start
+                )
+                .paginate(
+                    page=today_page,
+                    per_page=PER_PAGE,
+                    error_out=False
+                )
+            )
+
+            Upcoming_pagination = (
+                Interview_Rounds.query
+                .join(
+                    Applications,
+                    Interview_Rounds.application_id == Applications.id
+                )
+                .join(
+                    Job_Drives,
+                    Applications.drive_id == Job_Drives.id
+                )
+                .join(
+                    Companies,
+                    Job_Drives.company_id == Companies.id
+                )
+                .filter(
+                    Interview_Rounds.application_id.in_(inner_query),
+                    Interview_Rounds.date > tomorrow_start
+                )
+                .paginate(
+                    page=upcoming_page,
+                    per_page=PER_PAGE,
+                    error_out=False
+                )
+            )
+
+            for interview_round in Today_pagination.items:
+                today_interview.append([
+                    interview_round.Application.Job_Drive.company.company_name,
+                    interview_round.Application.Job_Drive.title,
+                    interview_round.Application.student.user.name,
+                    interview_round
+                ])
+
+            for interview_round in Upcoming_pagination.items:
+                upcoming_interview.append([
+                    interview_round.Application.Job_Drive.company.company_name,
+                    interview_round.Application.Job_Drive.title,
+                    interview_round.Application.student.user.name,
+                    interview_round
+                ])
+
+            return jsonify({
+                "mode": "feedback",
+                "round_id": round_id,
+                "today_interview": serialize_interviews(today_interview),
+                "upcoming_interview": serialize_interviews(upcoming_interview),
+                "Today_pagination": {
+                    "page": Today_pagination.page,
+                    "per_page": Today_pagination.per_page,
+                    "total": Today_pagination.total,
+                    "pages": Today_pagination.pages,
+                    "has_next": Today_pagination.has_next,
+                    "has_prev": Today_pagination.has_prev
+                },
+                "Upcoming_pagination": {
+                    "page": Upcoming_pagination.page,
+                    "per_page": Upcoming_pagination.per_page,
+                    "total": Upcoming_pagination.total,
+                    "pages": Upcoming_pagination.pages,
+                    "has_next": Upcoming_pagination.has_next,
+                    "has_prev": Upcoming_pagination.has_prev
+                }
+            }), 200
+
+        elif mode == "submit_feedback":
+            feedback = request.form.get("feedback")
+            round.feedback = feedback
+            db.session.commit()
+
+            return jsonify({
+                "message": "Feedback submitted successfully",
+                "round_id": round.id,
+                "feedback": round.feedback
+            }), 200
+
+        result = request.form.get("result")
+        round.result = result
+
+        if result == "Cleared":
+            notifications([
+                "Cleared",
+                round.Application.student.user.email,
+                round.Application.Job_Drive.company.company_name,
+                round.Application.Job_Drive.title,
+                round.round_name
+            ])
+
+            notifications([
+                "student_cleared_placement_officer",
+                [
+                    user.email
+                    for user in Users.query.filter(
+                        Users.role == "Placement_Officer"
+                    ).all()
+                ],
+                round.Application.student.user.name,
+                round.Application.Job_Drive.company.company_name,
+                round.Application.Job_Drive.title,
+                round.round_name
+            ])
+
+        elif result == "Rejected":
+            application = Applications.query.filter_by(
+                id=round.application_id
+            ).first()
+
+            application.status = Application_status.REJECTED
+
+            notifications([
+                "rejected",
+                round.Application.student.user.email,
+                round.Application.Job_Drive.company.company_name,
+                round.Application.Job_Drive.title
+            ])
+
+            notifications([
+                "student_rejected_round_placement_officer",
+                [
+                    user.email
+                    for user in Users.query.filter(
+                        Users.role == "Placement_Officer"
+                    ).all()
+                ],
+                round.Application.student.user.name,
+                round.Application.Job_Drive.company.company_name,
+                round.Application.Job_Drive.title,
+                round.round_name
+            ])
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Interview result updated successfully",
+            "round_id": round.id,
+            "result": round.result
+        }), 200
+
+    # GET request: retrieve today's and upcoming interviews
+    job_drive = Job_Drives.query.filter_by(
+        creater_id=current_user.user_id
+    ).all()
+
+    inner_query = db.session.query(Applications.id).filter(
+        Applications.drive_id.in_([x.id for x in job_drive])
+    ).scalar_subquery()
+
+    today_interview = []
+    upcoming_interview = []
+
+    if today_search:
+        base_query = (
+            Interview_Rounds.query
+            .join(
+                Applications,
+                Interview_Rounds.application_id == Applications.id
+            )
+            .join(
+                Job_Drives,
+                Applications.drive_id == Job_Drives.id
+            )
+            .join(
+                Students,
+                Applications.student_id == Students.id
+            )
+            .join(
+                Users,
+                Students.user_id == Users.user_id
+            )
+            .filter(
+                Interview_Rounds.application_id.in_(inner_query),
+                Interview_Rounds.date >= today_start,
+                Interview_Rounds.date < tomorrow_start,
+                or_(
+                    Job_Drives.title.ilike(f"%{today_search.strip()}%"),
+                    Users.name.ilike(f"%{today_search.strip()}%")
+                )
+            )
+        )
+
+        Today_pagination = base_query.paginate(
+            page=today_page,
+            per_page=PER_PAGE,
+            error_out=False
+        )
+
+        if Today_pagination.pages and today_page > Today_pagination.pages:
+            today_page = Today_pagination.pages
+            Today_pagination = base_query.paginate(
+                page=today_page,
+                per_page=PER_PAGE,
+                error_out=False
+            )
+
+    else:
+        Today_pagination = (
+            Interview_Rounds.query
+            .join(
+                Applications,
+                Interview_Rounds.application_id == Applications.id
+            )
+            .join(
+                Job_Drives,
+                Applications.drive_id == Job_Drives.id
+            )
+            .join(
+                Companies,
+                Job_Drives.company_id == Companies.id
+            )
+            .filter(
+                Interview_Rounds.application_id.in_(inner_query),
+                Interview_Rounds.date >= today_start,
+                Interview_Rounds.date < tomorrow_start
+            )
+            .paginate(
+                page=today_page,
+                per_page=PER_PAGE,
+                error_out=False
+            )
+        )
+
+    if upcoming_search:
+        base_query = (
+            Interview_Rounds.query
+            .join(
+                Applications,
+                Interview_Rounds.application_id == Applications.id
+            )
+            .join(
+                Job_Drives,
+                Applications.drive_id == Job_Drives.id
+            )
+            .join(
+                Students,
+                Applications.student_id == Students.id
+            )
+            .join(
+                Users,
+                Students.user_id == Users.user_id
+            )
+            .filter(
+                Interview_Rounds.application_id.in_(inner_query),
+                Interview_Rounds.date > tomorrow_start,
+                or_(
+                    Job_Drives.title.ilike(f"%{upcoming_search.strip()}%"),
+                    Users.name.ilike(f"%{upcoming_search.strip()}%")
+                )
+            )
+        )
+
+        Upcoming_pagination = base_query.paginate(
+            page=upcoming_page,
+            per_page=PER_PAGE,
+            error_out=False
+        )
+
+        if Upcoming_pagination.pages and upcoming_page > Upcoming_pagination.pages:
+            upcoming_page = Upcoming_pagination.pages
+            Upcoming_pagination = base_query.paginate(
+                page=upcoming_page,
+                per_page=PER_PAGE,
+                error_out=False
+            )
+
+    else:
+        Upcoming_pagination = (
+            Interview_Rounds.query
+            .join(
+                Applications,
+                Interview_Rounds.application_id == Applications.id
+            )
+            .join(
+                Job_Drives,
+                Applications.drive_id == Job_Drives.id
+            )
+            .join(
+                Companies,
+                Job_Drives.company_id == Companies.id
+            )
+            .filter(
+                Interview_Rounds.application_id.in_(inner_query),
+                Interview_Rounds.date > tomorrow_start
+            )
+            .paginate(
+                page=upcoming_page,
+                per_page=PER_PAGE,
+                error_out=False
+            )
+        )
+
+    for interview_round in Today_pagination.items:
+        today_interview.append([
+            interview_round.Application.Job_Drive.company.company_name,
+            interview_round.Application.Job_Drive.title,
+            interview_round.Application.student.user.name,
+            interview_round
+        ])
+
+    for interview_round in Upcoming_pagination.items:
+        upcoming_interview.append([
+            interview_round.Application.Job_Drive.company.company_name,
+            interview_round.Application.Job_Drive.title,
+            interview_round.Application.student.user.name,
+            interview_round
+        ])
+
+    return jsonify({
+        "today_interview": serialize_interviews(today_interview),
+        "upcoming_interview": serialize_interviews(upcoming_interview),
+        "Today_pagination": {
+            "page": Today_pagination.page,
+            "per_page": Today_pagination.per_page,
+            "total": Today_pagination.total,
+            "pages": Today_pagination.pages,
+            "has_next": Today_pagination.has_next,
+            "has_prev": Today_pagination.has_prev
+        },
+        "Upcoming_pagination": {
+            "page": Upcoming_pagination.page,
+            "per_page": Upcoming_pagination.per_page,
+            "total": Upcoming_pagination.total,
+            "pages": Upcoming_pagination.pages,
+            "has_next": Upcoming_pagination.has_next,
+            "has_prev": Upcoming_pagination.has_prev
+        }
+    }), 200
