@@ -1934,3 +1934,72 @@ def recruiter_applications_api():
         "applicants": applicants,
         "total_applicants": len(applicants)
     }), 200
+
+
+@api_bp.route("/recruiter/certification/download", methods=["GET", "POST"])
+@jwt_required()
+def download_certifications_api():
+
+    # Check authorization
+    user = get_current_user()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 401
+
+    if user.role not in ["Recruiter", "Placement_Officer"]:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "GET":
+        name = request.args.get("name")
+        user_id = request.args.get("id")
+
+    else:
+        name = request.form.get("name")
+        user_id = request.form.get("id")
+
+    if not name or not user_id:
+        return jsonify({
+            "error": "Both name and id are required"
+        }), 400
+
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid user ID"}), 400
+
+    student_name = db.session.query(Users.name).filter(
+        Users.user_id == user_id
+    ).scalar()
+
+    if not student_name:
+        return jsonify({"error": "User not found"}), 404
+
+    filename = (
+        f"Cert_{user_id}_{student_name}_{name}"
+    )
+
+    certification_folder = os.path.join(
+        current_app.root_path,
+        "static",
+        "Docs",
+        "student",
+        "certifications"
+    )
+
+    safe_filename = secure_filename(filename)
+
+    filepath = os.path.join(
+        certification_folder,
+        safe_filename
+    )
+
+    if not os.path.isfile(filepath):
+        return jsonify({"error": "Certification file not found"}), 404
+
+    return send_from_directory(
+        directory=certification_folder,
+        path=safe_filename,
+        as_attachment=True,
+        download_name=name
+    )
+
