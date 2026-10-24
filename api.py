@@ -2003,3 +2003,95 @@ def download_certifications_api():
         download_name=name
     )
 
+
+
+@api_bp.route("/Job_drive/edit", methods=["GET", "POST"])
+@jwt_required()
+def edit_Job_drive_api():
+    user = get_current_user()
+
+    if user.role != "Recruiter":
+        return jsonify({"error": "Forbidden"}), 403
+
+    job_id = request.args.get("id")
+    job = Job_Drives.query.filter_by(
+        id=job_id,
+        creater_id=user.user_id
+    ).first()
+
+    if job is None:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "POST":
+
+        if request.form.get("company_id"):
+            job.company_id = request.form.get("company_id")
+
+        if request.form.get("Title"):
+            job.title = request.form.get("Title")
+
+        if request.form.get("Package"):
+            job.package = request.form.get("Package")
+
+        if request.form.get("Location"):
+            job.location = request.form.get("Location")
+
+        if request.form.get("CGPA"):
+            job.CGPA = request.form.get("CGPA")
+
+        if request.form.getlist("Branches"):
+            job.Eligible_Branches = ",".join(
+                request.form.getlist("Branches")
+            )
+
+        if request.form.get("Graduation_Year"):
+            job.Graduation_Year = request.form.get("Graduation_Year")
+
+        if request.form.get("Vacancies"):
+            job.Vacancies = request.form.get("Vacancies")
+
+        if request.form.get("Deadline"):
+            if datetime.datetime.strptime(
+                request.form.get("Deadline"), "%Y-%m-%d"
+            ).date() < datetime.date.today():
+
+                return jsonify({
+                    "error": "Deadline cannot be less than today"
+                }), 400
+
+            job.deadline = request.form.get("Deadline")
+
+        if request.form.get("Description"):
+            job.description = request.form.get("Description")
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Job drive updated successfully",
+            "job_id": job.id
+        }), 200
+
+    # GET request: return job drive details and companies
+    companies = Companies.query.all()
+
+    list1 = []
+    for company in companies:
+        list1.append([company.id, company.company_name])
+
+    return jsonify({
+        "mode": "edit",
+        "job_drive": {
+            "id": job.id,
+            "company_id": job.company_id,
+            "title": job.title,
+            "package": job.package,
+            "location": job.location,
+            "CGPA": job.CGPA,
+            "Eligible_Branches": job.Eligible_Branches,
+            "Graduation_Year": job.Graduation_Year,
+            "Vacancies": job.Vacancies,
+            "deadline": str(job.deadline) if job.deadline else None,
+            "description": job.description
+        },
+        "companies": list1
+    }), 200
