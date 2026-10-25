@@ -1001,3 +1001,1992 @@ def test_JOB_07_closed_job_drive_is_not_displayed(
 
     assert response.status_code == 200
     assert b"Closed Job Role" not in response.data
+
+# ============================================================
+# STUDENT PROFILE — ADDITIONAL AUTHENTICATION, NAVIGATION,
+# DUPLICATE VALIDATION, PHOTO, RESUME AND CERTIFICATION TESTS
+# ============================================================
+
+import os
+from pathlib import Path
+
+from flask_jwt_extended import create_access_token, decode_token
+
+
+# ============================================================
+# ADDITIONAL FIXTURES AND HELPERS
+# ============================================================
+
+@pytest.fixture
+def second_student(test_database):
+    """
+    Creates a second student for duplicate-value and document
+    ownership tests.
+
+    Scenario:
+        Two distinct student accounts exist in the test database.
+
+    Expected result:
+        Each student has unique profile values that can be used
+        to test duplicate validation and document isolation.
+    """
+    user = Users(
+        name="Second Test Student",
+        email="second_student_profile@example.com",
+        password=generate_password_hash("StudentPass123"),
+        role="student",
+    )
+
+    test_database.session.add(user)
+    test_database.session.commit()
+
+    student = Students(
+        user_id=user.user_id,
+        registration_no="REG-STU-002",
+        branch="Information Technology",
+        cgpa=7.5,
+        skills="Java, SQL",
+        resume_path=None,
+        resume_status="Pending",
+        graduation_year=datetime.date.today().year,
+        placement_status="Not Placed",
+        mobile_number="9000000002",
+        Gender="Other",
+        Address="Second Test Address",
+        City="Second Test City",
+        State="Second Test State",
+        pin_code=400002,
+        University_Roll_Number="ROLL-STU-002",
+        Semester=6,
+        tenth_Percentage=80.0,
+        twelth_Percentage=81.0,
+        Total_Backlogs="0",
+        Active_Backlogs="0",
+        LinkedIn="https://linkedin.com/in/second-test-student",
+        GitHub="https://github.com/second-test-student",
+        Portfolio_Website="https://second-test-student.example.com",
+        LeetCode="https://leetcode.com/second-test-student",
+        HackerRank="https://hackerrank.com/second-test-student",
+        Certification="",
+        job_drive=None,
+    )
+
+    test_database.session.add(student)
+    test_database.session.commit()
+
+    return {
+        "user": user,
+        "student": student,
+    }
+
+
+@pytest.fixture
+def profile_test_directory(tmp_path, monkeypatch):
+    """
+    Scenario:
+        Profile tests need to upload photos, resumes, and certifications.
+
+    Expected result:
+        All files are written under a temporary directory instead
+        of modifying the application's real static directories.
+    """
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+@pytest.fixture
+def profile_post_client(client, student_test_data):
+    """
+    Scenario:
+        Tests need to submit profile POST requests without relying
+        on a browser-generated JWT cookie CSRF header.
+
+    Expected result:
+        The client authenticates using a valid Bearer access token.
+    """
+    with app.app_context():
+        token = create_access_token(
+            identity=str(student_test_data["student_user"].user_id)
+        )
+
+    client.environ_base.pop("HTTP_X_CSRF_TOKEN", None)
+    client.set_cookie(
+        app.config.get("JWT_ACCESS_COOKIE_NAME", "access_token_cookie"),
+        "",
+    )
+    client.set_cookie(
+        app.config.get("JWT_ACCESS_CSRF_COOKIE_NAME", "csrf_access_token"),
+        "",
+    )
+    client.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+
+    return client
+
+
+def _profile_bearer_client(client, user_id):
+    """
+    Helper:
+        Authenticate a client as the user identified by user_id.
+
+    Expected result:
+        Requests made through the returned client carry a valid
+        Bearer access token for that user.
+    """
+    with app.app_context():
+        token = create_access_token(identity=str(user_id))
+
+    client.set_cookie(
+        app.config.get("JWT_ACCESS_COOKIE_NAME", "access_token_cookie"),
+        "",
+    )
+    client.set_cookie(
+        app.config.get("JWT_ACCESS_CSRF_COOKIE_NAME", "csrf_access_token"),
+        "",
+    )
+    client.environ_base.pop("HTTP_X_CSRF_TOKEN", None)
+    client.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+
+    return client
+
+
+def _profile_duplicate_payload(field, value):
+    """
+    Helper:
+        Build a form submission containing a duplicate profile value.
+
+    Expected result:
+        The submitted field can be tested independently without
+        modifying unrelated profile fields.
+    """
+    return {field: value}
+
+
+# ============================================================
+# AUTHENTICATION AND AUTHORIZATION
+# ============================================================
+
+# AUTH-PROF-01
+def test_AUTH_PROF_01_profile_requires_authentication(client):
+    # Scenario:
+    # An unauthenticated visitor opens /Student_Profile.
+    # Expected result:
+    # The application rejects the request with HTTP 401 or redirects
+    # the visitor to authentication.
+    response = client.get("/Student_Profile")
+
+    assert response.status_code in (302, 401)
+
+
+# AUTH-PROF-03
+def test_AUTH_PROF_03_recruiter_cannot_open_student_profile(
+    client, student_test_data
+):
+    # Scenario:
+    # An authenticated recruiter attempts to open /Student_Profile.
+    # Expected result:
+    # The application returns HTTP 403 Forbidden.
+    recruiter_client = _profile_bearer_client(
+        client,
+        student_test_data["recruiter_user"].user_id,
+    )
+
+    response = recruiter_client.get("/Student_Profile")
+
+    assert response.status_code == 403
+
+
+# AUTH-PROF-04
+def test_AUTH_PROF_04_placement_officer_cannot_open_student_profile(
+    client, student_test_data
+):
+    # Scenario:
+    # An authenticated placement officer attempts to open
+    # /Student_Profile.
+    # Expected result:
+    # The application returns HTTP 403 Forbidden.
+    officer_client = _profile_bearer_client(
+        client,
+        student_test_data["officer_user"].user_id,
+    )
+
+    response = officer_client.get("/Student_Profile")
+
+    assert response.status_code == 403
+
+
+# AUTH-PROF-05
+def test_AUTH_PROF_05_unauthenticated_profile_update_is_rejected(
+    client, student_test_data, test_database
+):
+    # Scenario:
+    # An unauthenticated visitor submits a profile update.
+    # Expected result:
+    # The request is rejected, and the student's existing profile
+    # values remain unchanged.
+    original_branch = student_test_data["student"].branch
+
+    response = client.post(
+        "/Student_Profile",
+        data={"branch": "Unauthorized Branch"},
+    )
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert response.status_code in (302, 401)
+    assert student.branch == original_branch
+
+
+# AUTH-PROF-06
+@pytest.mark.parametrize(
+    "role_key",
+    ["recruiter_user", "officer_user"],
+)
+def test_AUTH_PROF_06_non_student_cannot_update_profile(
+    client,
+    student_test_data,
+    test_database,
+    role_key,
+):
+    # Scenario:
+    # An authenticated recruiter or placement officer submits
+    # a profile update.
+    # Expected result:
+    # The application returns HTTP 403 and the student's data
+    # remains unchanged.
+    original_branch = student_test_data["student"].branch
+
+    non_student_client = _profile_bearer_client(
+        client,
+        student_test_data[role_key].user_id,
+    )
+
+    response = non_student_client.post(
+        "/Student_Profile",
+        data={"branch": "Unauthorized Branch"},
+    )
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert response.status_code == 403
+    assert student.branch == original_branch
+
+
+# AUTH-PROF-07
+@pytest.mark.parametrize(
+    "role_key",
+    ["recruiter_user", "officer_user"],
+)
+def test_AUTH_PROF_07_non_student_cannot_upload_profile_photo(
+    client,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+    role_key,
+):
+    # Scenario:
+    # A recruiter or placement officer attempts to upload a
+    # profile photo using the student profile route.
+    # Expected result:
+    # The application returns HTTP 403 and no photo is saved.
+    non_student_client = _profile_bearer_client(
+        client,
+        student_test_data[role_key].user_id,
+    )
+
+    response = non_student_client.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"fake image bytes"),
+                "profile.png",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 403
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+
+    assert (
+        not photo_directory.exists()
+        or not any(photo_directory.iterdir())
+    )
+
+
+# ============================================================
+# PROFILE NAVIGATION AND UPDATE
+# ============================================================
+
+# NAV-PROF-01
+def test_NAV_PROF_01_profile_defaults_to_view_mode(student_auth):
+    # Scenario:
+    # An authenticated student opens /Student_Profile without
+    # providing a mode query parameter.
+    # Expected result:
+    # The profile renders successfully in View mode.
+    response = student_auth.get("/Student_Profile")
+
+    assert response.status_code == 200
+    assert b"Update" in response.data
+
+
+# NAV-PROF-02
+def test_NAV_PROF_02_explicit_view_mode_loads(student_auth):
+    # Scenario:
+    # An authenticated student opens /Student_Profile?mode=View.
+    # Expected result:
+    # The profile renders successfully.
+    response = student_auth.get("/Student_Profile?mode=View")
+
+    assert response.status_code == 200
+
+
+# NAV-PROF-05
+def test_NAV_PROF_05_cancel_returns_to_view_without_saving(
+    student_auth, student_test_data, test_database
+):
+    # Scenario:
+    # A student opens Update mode and clicks Cancel.
+    # Expected result:
+    # The browser navigates to View mode, and the database remains
+    # unchanged because Cancel is a navigation link, not a submission.
+    original_branch = student_test_data["student"].branch
+
+    update_response = student_auth.get(
+        "/Student_Profile?mode=Update"
+    )
+
+    assert update_response.status_code == 200
+
+    cancel_response = student_auth.get(
+        "/Student_Profile?mode=View"
+    )
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert cancel_response.status_code == 200
+    assert student.branch == original_branch
+
+
+# NAV-PROF-06
+def test_NAV_PROF_06_valid_update_redirects_to_view(
+    student_auth, student_test_data, test_database
+):
+    # Scenario:
+    # A student submits a valid profile update.
+    # Expected result:
+    # The application redirects to View mode, and the new branch
+    # is persisted in the database.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={"branch": "Information Technology"},
+    )
+
+    assert response.status_code == 302
+    assert "mode=View" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.branch == "Information Technology"
+
+
+# NAV-PROF-07
+def test_NAV_PROF_07_duplicate_mobile_update_is_rejected(
+    student_auth,
+    student_test_data,
+    second_student,
+    test_database,
+):
+    # Scenario:
+    # A student submits another student's mobile number.
+    # Expected result:
+    # The application redirects back to Update mode and preserves
+    # the original mobile number.
+    original_mobile = student_test_data["student"].mobile_number
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "mobile_number": second_student["student"].mobile_number,
+        },
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.mobile_number == original_mobile
+
+
+# ============================================================
+# DUPLICATE-VALUE VALIDATION
+# ============================================================
+
+@pytest.mark.parametrize(
+    "test_id,field,second_student_field",
+    [
+        ("DUP-01", "mobile_number", "mobile_number"),
+        ("DUP-02", "University_Roll_Number", "University_Roll_Number"),
+        ("DUP-03", "LinkedIn", "LinkedIn"),
+        ("DUP-04", "GitHub", "GitHub"),
+        ("DUP-05", "Portfolio_Website", "Portfolio_Website"),
+        ("DUP-06", "LeetCode", "LeetCode"),
+        ("DUP-07", "HackerRank", "HackerRank"),
+    ],
+)
+def test_profile_duplicate_values_are_rejected(
+    student_auth,
+    student_test_data,
+    second_student,
+    test_database,
+    test_id,
+    field,
+    second_student_field,
+):
+    # Scenario:
+    # The student submits a mobile number, roll number, or
+    # professional URL already owned by another student.
+    # Expected result:
+    # The application rejects the duplicate and redirects to
+    # Update mode without replacing the existing value.
+    #
+    # Parametrized test IDs:
+    # DUP-01: Duplicate mobile number.
+    # DUP-02: Duplicate university roll number.
+    # DUP-03: Duplicate LinkedIn URL.
+    # DUP-04: Duplicate GitHub URL.
+    # DUP-05: Duplicate portfolio URL.
+    # DUP-06: Duplicate LeetCode URL.
+    # DUP-07: Duplicate HackerRank URL.
+
+    original_value = getattr(
+        student_test_data["student"],
+        field,
+    )
+
+    duplicate_value = getattr(
+        second_student["student"],
+        second_student_field,
+    )
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data=_profile_duplicate_payload(field, duplicate_value),
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert getattr(student, field) == original_value
+
+
+# ============================================================
+# PROFILE PHOTO UPLOAD
+# ============================================================
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "profile.jpg",
+        "profile.jpeg",
+    ],
+)
+def test_PHOTO_02_03_valid_jpg_and_jpeg_uploads_succeed(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+    filename,
+):
+    # Scenario:
+    # A student uploads a JPG or JPEG profile photo smaller than
+    # the configured 5 MB maximum.
+    # Expected result:
+    # The application redirects to View mode, saves the photo,
+    # and persists the generated filename in profile_pic.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"test image content"),
+                filename,
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=View" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic is not None
+    assert student.profile_pic.lower().endswith(
+        Path(filename).suffix.lower()
+    )
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+        / student.profile_pic
+    )
+
+    assert saved_file.is_file()
+    assert saved_file.read_bytes() == b"test image content"
+
+
+# PHOTO-05
+def test_PHOTO_05_pdf_profile_photo_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a PDF instead of an allowed image format.
+    # Expected result:
+    # The upload is rejected, the original profile photo remains
+    # unchanged, and no file is saved.
+    original_photo = student_test_data["student"].profile_pic
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"fake pdf"),
+                "profile.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic == original_photo
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+
+    assert (
+        not photo_directory.exists()
+        or not any(photo_directory.iterdir())
+    )
+
+
+# PHOTO-06
+def test_PHOTO_06_photo_larger_than_5_mb_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a profile photo larger than 5 MB.
+    # Expected result:
+    # The upload is rejected and the saved profile photo remains
+    # unchanged.
+    original_photo = student_test_data["student"].profile_pic
+
+    oversized_content = b"x" * (5 * 1024 * 1024 + 1)
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(oversized_content),
+                "large_photo.png",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic == original_photo
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+
+    assert (
+        not photo_directory.exists()
+        or not any(photo_directory.iterdir())
+    )
+
+
+# PHOTO-07
+def test_PHOTO_07_photo_without_extension_is_rejected_gracefully(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a photo whose filename has no extension.
+    # Expected result:
+    # The application rejects the upload without raising an
+    # unhandled exception, and the existing photo is unchanged.
+    original_photo = student_test_data["student"].profile_pic
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"image content"),
+                "profilephoto",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic == original_photo
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+
+    assert (
+        not photo_directory.exists()
+        or not any(photo_directory.iterdir())
+    )
+
+
+# PHOTO-08
+def test_PHOTO_08_photo_submission_without_file_changes_nothing(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student submits the change-photo action without selecting
+    # a file.
+    # Expected result:
+    # The request completes without crashing and the existing
+    # profile photo remains unchanged.
+    original_photo = student_test_data["student"].profile_pic
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={"action": "change_photo"},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic == original_photo
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+
+    assert (
+        not photo_directory.exists()
+        or not any(photo_directory.iterdir())
+    )
+
+
+# PHOTO-09
+def test_PHOTO_09_uploaded_photo_filename_is_saved_in_database(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a valid PNG profile photo.
+    # Expected result:
+    # The generated filename is saved in profile_pic, and the
+    # corresponding file exists on disk.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"test png content"),
+                "avatar.png",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic
+    assert student.profile_pic.endswith(".png")
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+        / student.profile_pic
+    )
+
+    assert saved_file.is_file()
+    assert saved_file.read_bytes() == b"test png content"
+
+
+# PHOTO-10
+def test_PHOTO_10_second_photo_replaces_profile_reference(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a second profile photo after uploading
+    # an initial photo.
+    # Expected result:
+    # profile_pic references the newly uploaded photo, and the
+    # new file exists on disk.
+    first_response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"first photo"),
+                "first.png",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert first_response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+    first_filename = student.profile_pic
+
+    second_response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"second photo"),
+                "second.jpg",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert second_response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic is not None
+    assert student.profile_pic.endswith(".jpg")
+    assert student.profile_pic != first_filename
+
+    second_file = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+        / student.profile_pic
+    )
+
+    assert second_file.is_file()
+    assert second_file.read_bytes() == b"second photo"
+
+
+# PHOTO-11
+def test_PHOTO_11_invalid_photo_preserves_existing_photo(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student already has a saved profile photo and uploads
+    # a GIF, which is not an allowed format.
+    # Expected result:
+    # The existing profile photo remains unchanged and the
+    # invalid upload is not saved.
+    student = student_test_data["student"]
+    student.profile_pic = "existing_photo.png"
+    test_database.session.commit()
+
+    existing_content = b"existing photo content"
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+    photo_directory.mkdir(parents=True, exist_ok=True)
+
+    (photo_directory / "existing_photo.png").write_bytes(
+        existing_content
+    )
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"invalid gif"),
+                "invalid.gif",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.profile_pic == "existing_photo.png"
+    assert (
+        photo_directory / "existing_photo.png"
+    ).read_bytes() == existing_content
+
+    assert not (photo_directory / "invalid.gif").exists()
+
+
+# PHOTO-12
+def test_PHOTO_12_photo_is_saved_in_profile_photo_directory(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a valid PNG profile photo.
+    # Expected result:
+    # The file is stored in static/Images/student/profile_photo
+    # under the temporary test working directory.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "action": "change_photo",
+            "profile_photo": (
+                io.BytesIO(b"directory test image"),
+                "directory_test.png",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    photo_directory = (
+        profile_test_directory
+        / "static"
+        / "Images"
+        / "student"
+        / "profile_photo"
+    )
+
+    assert photo_directory.is_dir()
+    assert (photo_directory / student.profile_pic).is_file()
+
+
+# ============================================================
+# RESUME UPLOAD AND DOWNLOAD
+# ============================================================
+
+# RESUME-01
+def test_RESUME_01_valid_pdf_resume_is_uploaded(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a PDF resume smaller than 5 MB.
+    # Expected result:
+    # The PDF is saved, resume_path is updated, and the request
+    # redirects to View mode.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(b"%PDF-1.4 test resume"),
+                "resume.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=View" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path
+    assert student.resume_path.endswith(".pdf")
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+        / student.resume_path
+    )
+
+    assert saved_file.is_file()
+    assert saved_file.read_bytes() == b"%PDF-1.4 test resume"
+
+
+# RESUME-02
+def test_RESUME_02_txt_resume_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student attempts to upload a TXT file as a resume.
+    # Expected result:
+    # The application rejects the file, redirects to Update mode,
+    # and does not save the invalid resume.
+    original_resume = student_test_data["student"].resume_path
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(b"text resume"),
+                "resume.txt",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path == original_resume
+
+    resume_directory = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+    )
+
+    assert (
+        not resume_directory.exists()
+        or not any(resume_directory.iterdir())
+    )
+
+
+# RESUME-03
+def test_RESUME_03_docx_resume_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student attempts to upload a DOCX file as a resume.
+    # Expected result:
+    # The application rejects the file and leaves resume_path
+    # unchanged.
+    original_resume = student_test_data["student"].resume_path
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(b"fake docx content"),
+                "resume.docx",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path == original_resume
+
+
+# RESUME-04
+def test_RESUME_04_resume_larger_than_5_mb_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a PDF resume larger than 5 MB.
+    # Expected result:
+    # The application rejects the upload and does not replace
+    # an existing resume.
+    original_resume = student_test_data["student"].resume_path
+
+    oversized_content = b"x" * (5 * 1024 * 1024 + 1)
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(oversized_content),
+                "large_resume.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path == original_resume
+
+    resume_directory = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+    )
+
+    assert (
+        not resume_directory.exists()
+        or not any(resume_directory.iterdir())
+    )
+
+
+# RESUME-05
+def test_RESUME_05_resume_without_extension_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a resume whose filename has no extension.
+    # Expected result:
+    # The application rejects the upload gracefully and preserves
+    # the existing resume reference.
+    original_resume = student_test_data["student"].resume_path
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(b"resume content"),
+                "resume",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path == original_resume
+
+
+# RESUME-06
+def test_RESUME_06_reupload_sets_resume_status_to_reuploaded(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student who already has a resume uploads a replacement PDF.
+    # Expected result:
+    # The new resume is saved, resume_path is updated, and
+    # resume_status becomes "Reuploaded".
+    student = student_test_data["student"]
+    student.resume_path = "old_resume.pdf"
+    student.resume_status = "Pending"
+    test_database.session.commit()
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(b"%PDF-1.4 replacement resume"),
+                "replacement.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path != "old_resume.pdf"
+    assert student.resume_path.endswith(".pdf")
+    assert student.resume_status == "Reuploaded"
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+        / student.resume_path
+    )
+
+    assert saved_file.is_file()
+    assert saved_file.read_bytes() == b"%PDF-1.4 replacement resume"
+
+
+# RESUME-07
+def test_RESUME_07_invalid_resume_preserves_existing_resume(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student has an existing resume and attempts to replace it
+    # with a TXT file.
+    # Expected result:
+    # The existing resume reference and file contents remain unchanged.
+    student = student_test_data["student"]
+    student.resume_path = "existing_resume.pdf"
+    test_database.session.commit()
+
+    resume_directory = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+    )
+    resume_directory.mkdir(parents=True, exist_ok=True)
+
+    existing_content = b"%PDF-1.4 existing resume"
+
+    (resume_directory / "existing_resume.pdf").write_bytes(
+        existing_content
+    )
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "resume_file": (
+                io.BytesIO(b"invalid text resume"),
+                "invalid.txt",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path == "existing_resume.pdf"
+    assert (
+        resume_directory / "existing_resume.pdf"
+    ).read_bytes() == existing_content
+
+
+# RESUME-08
+def test_RESUME_08_submitting_without_resume_preserves_existing_resume(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student has an existing resume and submits the profile form
+    # without selecting a replacement resume.
+    # Expected result:
+    # The saved resume remains unchanged.
+    student = student_test_data["student"]
+    student.resume_path = "existing_resume.pdf"
+    test_database.session.commit()
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={"branch": "Computer Science"},
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.resume_path == "existing_resume.pdf"
+
+
+# RESUME-10
+def test_RESUME_10_existing_resume_download_succeeds(
+    student_auth,
+    student_test_data,
+    test_database,
+):
+    # Scenario:
+    # An authenticated student downloads an existing resume.
+    # Expected result:
+    # HTTP 200 is returned, the downloaded bytes match the saved
+    # file, and the response is an attachment.
+
+    from flask import current_app
+
+    student = student_test_data["student"]
+    filename = "Resume_Test_Student.pdf"
+
+    resume_directory = (
+        Path(current_app.root_path)
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+    )
+
+    resume_directory.mkdir(parents=True, exist_ok=True)
+
+    resume_file = resume_directory / filename
+    expected_content = b"%PDF-1.4 download test"
+
+    previous_resume = student.resume_path
+    student.resume_path = filename
+    test_database.session.commit()
+
+    try:
+        resume_file.write_bytes(expected_content)
+
+        response = student_auth.get(
+            "/Student_Profile?Download=download_resume"
+        )
+
+        assert response.status_code == 200
+        assert response.data == expected_content
+        assert "attachment" in response.headers.get(
+            "Content-Disposition",
+            "",
+        ).lower()
+
+    finally:
+        student.resume_path = previous_resume
+        test_database.session.commit()
+
+        if resume_file.exists():
+            resume_file.unlink()
+
+# RESUME-12
+def test_RESUME_12_missing_resume_file_returns_404(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # The database contains a resume filename, but the file has
+    # been removed from disk.
+    # Expected result:
+    # The download request returns HTTP 404.
+    student = student_test_data["student"]
+    student.resume_path = "missing_resume.pdf"
+    test_database.session.commit()
+
+    response = student_auth.get(
+        "/Student_Profile?Download=download_resume"
+    )
+
+    assert response.status_code == 404
+
+
+# RESUME-13
+def test_RESUME_13_student_cannot_download_another_students_resume(
+    student_auth,
+    student_test_data,
+    second_student,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # Student B has a resume, but Student A attempts to download
+    # a resume using the profile download endpoint.
+    # Expected result:
+    # Student A cannot retrieve Student B's file.
+    second_student_record = second_student["student"]
+    second_student_record.resume_path = "Resume_Second_Student.pdf"
+    test_database.session.commit()
+
+    resume_directory = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "resumes"
+    )
+    resume_directory.mkdir(parents=True, exist_ok=True)
+
+    other_student_content = b"%PDF-1.4 private second student resume"
+
+    (
+        resume_directory / second_student_record.resume_path
+    ).write_bytes(other_student_content)
+
+    # The authenticated client belongs to Student A, whose resume
+    # is unset in the test fixture.
+    response = student_auth.get(
+        "/Student_Profile?Download=download_resume"
+    )
+
+    assert response.status_code == 404
+    assert response.data != other_student_content
+
+
+# ============================================================
+# CERTIFICATION UPLOAD AND DOWNLOAD
+# ============================================================
+
+# CERT-01
+def test_CERT_01_valid_pdf_certification_upload_succeeds(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a valid PDF certification.
+    # Expected result:
+    # The certification is saved and its filename is recorded
+    # in the Certification database field.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"%PDF-1.4 test certification"),
+                "Python_Certificate.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.Certification
+    assert "Python_Certificate.pdf" in student.Certification
+
+    certification_filename = (
+        f"Cert_{student.user_id}_Test_Student_Python_Certificate.pdf"
+    )
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "certifications"
+        / certification_filename
+    )
+
+    assert saved_file.is_file()
+    assert saved_file.read_bytes() == b"%PDF-1.4 test certification"
+
+
+# CERT-02
+def test_CERT_02_non_pdf_certification_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student attempts to upload a TXT certification.
+    # Expected result:
+    # The upload is rejected and the existing Certification
+    # database value remains unchanged.
+    original_certification = student_test_data["student"].Certification
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"text certification"),
+                "certificate.txt",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.Certification == original_certification
+
+
+# CERT-03
+def test_CERT_03_certification_larger_than_5_mb_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a PDF certification larger than 5 MB.
+    # Expected result:
+    # The application rejects the upload and does not update the
+    # Certification database field.
+    original_certification = student_test_data["student"].Certification
+
+    oversized_content = b"x" * (5 * 1024 * 1024 + 1)
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(oversized_content),
+                "large_certificate.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.Certification == original_certification
+
+    certification_directory = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "certifications"
+    )
+
+    assert (
+        not certification_directory.exists()
+        or not any(certification_directory.iterdir())
+    )
+
+
+# CERT-04
+def test_CERT_04_certification_without_extension_is_rejected(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a certification whose filename has
+    # no extension.
+    # Expected result:
+    # The application rejects the upload gracefully and does not
+    # modify the existing certification list.
+    original_certification = student_test_data["student"].Certification
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"certificate content"),
+                "certificate",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+    assert "mode=Update" in response.headers["Location"]
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.Certification == original_certification
+
+
+# CERT-05
+def test_CERT_05_first_certification_is_recorded(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student without existing certifications uploads a PDF.
+    # Expected result:
+    # The certification filename is stored in the Certification
+    # database field and the corresponding file exists.
+    student = student_test_data["student"]
+    student.Certification = ""
+    test_database.session.commit()
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"%PDF-1.4 first certificate"),
+                "First_Certificate.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.Certification == "First_Certificate.pdf"
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "certifications"
+        / (
+            f"Cert_{student.user_id}_Test_Student_"
+            "First_Certificate.pdf"
+        )
+    )
+
+    assert saved_file.is_file()
+
+
+# CERT-06
+def test_CERT_06_second_certification_is_appended(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student already has one certification and uploads another PDF.
+    # Expected result:
+    # The new certification is appended without removing the first
+    # certification, and the new file is saved.
+    student = student_test_data["student"]
+    student.Certification = "First_Certificate.pdf"
+    test_database.session.commit()
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"%PDF-1.4 second certificate"),
+                "Second_Certificate.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert "First_Certificate.pdf" in student.Certification
+    assert "Second_Certificate.pdf" in student.Certification
+
+    saved_file = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "certifications"
+        / (
+            f"Cert_{student.user_id}_Test_Student_"
+            "Second_Certificate.pdf"
+        )
+    )
+
+    assert saved_file.is_file()
+    assert saved_file.read_bytes() == b"%PDF-1.4 second certificate"
+
+
+# CERT-07
+def test_CERT_07_uploaded_certification_can_be_downloaded(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a PDF certification and requests its download.
+    # Expected result:
+    # The download returns HTTP 200, includes the expected content,
+    # and is delivered as an attachment.
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"%PDF-1.4 downloadable certificate"),
+                "Download_Certificate.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    student = student_test_data["student"]
+
+    download_response = student_auth.post(
+        "/student/certification/download",
+        data={
+            "id": str(student.user_id),
+            "name": "Download_Certificate.pdf",
+        },
+    )
+
+    assert download_response.status_code == 200
+    assert download_response.data == (
+        b"%PDF-1.4 downloadable certificate"
+    )
+    assert "attachment" in download_response.headers.get(
+        "Content-Disposition",
+        "",
+    ).lower()
+
+
+# CERT-08
+def test_CERT_08_downloaded_certification_matches_uploaded_content(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student uploads a certification and downloads the same file.
+    # Expected result:
+    # The downloaded bytes exactly match the uploaded bytes.
+    uploaded_content = b"%PDF-1.4 exact content verification"
+
+    student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(uploaded_content),
+                "Content_Verification.pdf",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    response = student_auth.post(
+        "/student/certification/download",
+        data={
+            "id": str(student_test_data["student_user"].user_id),
+            "name": "Content_Verification.pdf",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.data == uploaded_content
+
+
+# CERT-09
+def test_CERT_09_missing_certification_file_returns_404(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # The student's Certification field references a PDF that
+    # does not exist on disk.
+    # Expected result:
+    # The download request returns HTTP 404.
+    student = student_test_data["student"]
+    student.Certification = "Missing_Certificate.pdf"
+    test_database.session.commit()
+
+    response = student_auth.post(
+        "/student/certification/download",
+        data={
+            "id": str(student.user_id),
+            "name": "Missing_Certificate.pdf",
+        },
+    )
+
+    assert response.status_code == 404
+
+
+# CERT-10
+def test_CERT_10_non_student_cannot_download_certification(
+    client,
+    student_test_data,
+    profile_test_directory,
+):
+    # Scenario:
+    # A recruiter attempts to use the student certification
+    # download endpoint.
+    # Expected result:
+    # The application returns HTTP 403 Forbidden.
+    recruiter_client = _profile_bearer_client(
+        client,
+        student_test_data["recruiter_user"].user_id,
+    )
+
+    response = recruiter_client.post(
+        "/student/certification/download",
+        data={
+            "id": str(student_test_data["student_user"].user_id),
+            "name": "Certificate.pdf",
+        },
+    )
+
+    assert response.status_code == 403
+
+
+# CERT-11
+def test_CERT_11_invalid_upload_preserves_existing_certifications(
+    student_auth,
+    student_test_data,
+    test_database,
+    profile_test_directory,
+):
+    # Scenario:
+    # A student already has a certification and attempts to upload
+    # a non-PDF file.
+    # Expected result:
+    # The existing Certification database value remains unchanged,
+    # and the invalid file is not saved.
+    student = student_test_data["student"]
+    student.Certification = "Existing_Certificate.pdf"
+    test_database.session.commit()
+
+    response = student_auth.post(
+        "/Student_Profile",
+        data={
+            "Certification": (
+                io.BytesIO(b"invalid text"),
+                "Invalid_Certificate.txt",
+            ),
+        },
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.expire_all()
+
+    student = test_database.session.get(
+        Students,
+        student_test_data["student"].id,
+    )
+
+    assert student.Certification == "Existing_Certificate.pdf"
+
+    certification_directory = (
+        profile_test_directory
+        / "static"
+        / "Docs"
+        / "student"
+        / "certifications"
+    )
+
+    assert (
+        not certification_directory.exists()
+        or not any(certification_directory.iterdir())
+    )
