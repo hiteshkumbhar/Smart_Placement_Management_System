@@ -268,18 +268,19 @@ def test_AUTH_04_placement_officer_cannot_open_recruiter_dashboard(
 
 
 def test_AUTH_05_invalid_token_cannot_open_dashboard(client, test_database):
-    # Scenario: A visitor sends an invalid JWT access token.
-    # Expected result: The application denies access with HTTP 401.
+    # Scenario: A visitor sends a malformed JWT access token.
+    # Expected result: Flask-JWT-Extended rejects the malformed token with HTTP 422.
     response = client.get(
         DASHBOARD_URL,
         headers={"Authorization": "Bearer invalid.token.value"},
     )
-    assert response.status_code == 401
+    assert response.status_code == 422
 
 
 def test_AUTH_06_unknown_user_token_cannot_open_dashboard(client, test_database):
-    # Scenario: A JWT identifies a user ID that does not exist in the database.
-    # Expected result: The request is rejected rather than showing dashboard data.
+    # Scenario: A valid JWT contains an identity for a user absent from the database.
+    # Expected result: The dashboard rejects the request with HTTP 401,
+    # instead of raising an exception and returning HTTP 500.
     with app.app_context():
         token = create_access_token(identity="99999999")
 
@@ -287,7 +288,8 @@ def test_AUTH_06_unknown_user_token_cannot_open_dashboard(client, test_database)
         DASHBOARD_URL,
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code in (401, 403, 500)
+
+    assert response.status_code == 401
 
 
 def test_AUTH_07_recruiter_dashboard_does_not_expose_anonymous_data(
@@ -799,8 +801,7 @@ def test_STAT_20_dashboard_displays_todays_interview(
     response = get_dashboard(recruiter_dashboard_client)
 
     assert response.status_code == 200
-    assert b"Today's Interview Role" in response.data
-
+    assert b"Today&#39;s Interview Role" in response.data
 
 def test_STAT_21_dashboard_excludes_interviews_from_other_recruiters(
     recruiter_dashboard_client,
