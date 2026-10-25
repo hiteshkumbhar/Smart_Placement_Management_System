@@ -66,21 +66,24 @@ The notifications.py module integrates with Brevo's transactional email client.
 ## 🛠️ Technology Stack
 
 The **Smart Placement Management System** is built using Python, Flask, SQLAlchemy, and supporting libraries for authentication, database management, PDF report generation, and email notifications.
-
 | 💻 Technology / Package | 📌 Version in Project | 🎯 Purpose |
 |---|---|---|
-| 🐍 **Python** |  | Core programming language used to develop and run the application. |
-| 🌐 **Flask** | `3.1.3` | Web framework responsible for routing, request handling, templates, redirects, and flash messages. |
-| 🎨 **Jinja2** | `3.1.6` | Server-side template engine used to render dynamic HTML pages. |
-| 🔐 **Flask-Login** | `0.6.3` | Manages user login sessions and provides `current_user` and `login_required` functionality. |
-| 🗄️ **Flask-SQLAlchemy** | `3.1.1` | Integrates SQLAlchemy with Flask for database models and session management. |
-| 🔗 **SQLAlchemy** | `2.0.49` | ORM used for database access and interaction with application models. |
-| 🐘 **psycopg2-binary** | `2.9.12` | PostgreSQL database driver, when PostgreSQL is used in the configured database URI. |
-| 🛡️ **Werkzeug** | `3.1.8` | Provides password hashing and verification utilities, along with secure filename handling. |
-| 🔑 **itsdangerous** | `2.2.0` | Supports signed, time-limited tokens used in the password-reset workflow. |
+| 🐍 **Python** | Not specified in the repository | Main programming language. The code uses standard-library features including `zoneinfo`. |
+| 🌐 **Flask** | `3.1.3` | Web framework for routes, request handling, blueprints, redirects, flash messages, and responses. |
+| 🧩 **Flask-JWT-Extended** |  | Creates and validates access/refresh JWTs and supports JWT authentication in headers and cookies. |
+| 🗄️ **Flask-SQLAlchemy** | `3.1.1` | Connects Flask to SQLAlchemy models and database sessions. |
+| 🔗 **SQLAlchemy** | `2.0.49` | ORM and query layer for users, student profiles, companies, job drives, applications, and interview rounds. |
+| 🐘 **psycopg2-binary** | `2.9.12` | PostgreSQL driver when the configured `SQLALCHEMY_DATABASE_URI` uses PostgreSQL. The database URI is supplied through environment configuration. |
+| 🛡️ **Werkzeug** | `3.1.8` | Password hashing and verification, secure filename handling, and Flask's underlying WSGI utilities. |
+| 🎨 **Jinja2** | `3.1.6` | Server-side HTML templating for dynamic pages in `templates/`. |
+| 🧾 **HTML, CSS and JavaScript** | Browser technologies; no package versions specified | User interface built from HTML templates and CSS. No separate frontend framework or JavaScript package manager manifest is present in the archive. |
+| 🔤 **Font Awesome** | `4.7.0` (bundled assets) | Icon font and CSS assets used by the interface. |
+| 🔣 **Material Design Iconic Font** | Bundled assets; version not specified | Additional icon font assets used by the interface. |
+| 🔠 **Poppins** | | Typography assets included in the repository. |
 | ⚙️ **python-dotenv** | `1.2.3` | Loads environment variables from a `.env` file. |
-| 📄 **ReportLab** | `5.0.0` | Generates PDF reports through the placement-officer functionality. |
-| 📧 **Brevo Python SDK** |  | Integrates with Brevo's transactional email API for application notifications. |
-| 🚀 **Gunicorn** | `23.0.0` | WSGI server dependency intended for serving the Flask application. Deployment commands and container configuration are not included in the supplied project archive. |
-| 🧩 **HTML, CSS & Jinja2 Templates** | Browser-provided / No separate package version | Build the server-rendered user interface, page layouts, and styling. The repository also includes Font Awesome and Material Design Iconic Font assets. |
+| 🔑 **itsdangerous** | `2.2.0` | Supports signed, time-limited tokens used in password-reset functionality. |
+| 📄 **ReportLab** | `5.0.0` | Generates PDF reports for placement-officer reporting. |
+| 📧 **Brevo Python SDK** (`brevo-python`) | Version not pinned in `requirements.txt` | Sends transactional email notifications through Brevo. |
+| 🚀 **Gunicorn** | `23.0.0` | WSGI HTTP server dependency for running the Flask application in a deployment environment. |
+| 🧪 **pytest** |  | Test framework used by the tests under `tests/` and the project test configuration. |
 
