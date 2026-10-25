@@ -12,8 +12,13 @@ from sqlalchemy import or_
 @Recruiter_bp.route('/Recruiter_Dashboard')
 @jwt_required()
 def Recruiter_Dashboard():
-    if get_current_user().role != "Recruiter":
-        abort(403)  # Forbidden
+    current_user = get_current_user()
+
+    if current_user is None:
+        abort(401)
+
+    if current_user.role != "Recruiter":
+        abort(403)
 
     job_drive_count = Job_Drives.query.filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').count()
     total_applicants = Applications.query.filter(Applications.drive_id.in_([result[0] for result in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id, Job_Drives.status != 'Closed').all()])).count()
