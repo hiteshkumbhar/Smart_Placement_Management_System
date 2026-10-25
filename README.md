@@ -79,7 +79,7 @@ The **Smart Placement Management System** is built using Python, Flask, SQLAlche
 | 🧾 **HTML, CSS and JavaScript** | User interface built from HTML templates and CSS. No separate frontend framework or JavaScript package manager manifest is present in the archive. |
 | 🔤 **Font Awesome** | Icon font and CSS assets used by the interface. |
 | 🔣 **Material Design Iconic Font** | Additional icon font assets used by the interface. |
-| 🔠 **Poppins** | | Typography assets included in the repository. |
+| 🔠 **Poppins** | Typography assets included in the repository. |
 | ⚙️ **python-dotenv** | Loads environment variables from a `.env` file. |
 | 🔑 **itsdangerous** | Supports signed, time-limited tokens used in password-reset functionality. |
 | 📄 **ReportLab** | Generates PDF reports for placement-officer reporting. |
