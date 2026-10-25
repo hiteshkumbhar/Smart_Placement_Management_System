@@ -968,7 +968,7 @@
                     {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                     {% for category, message in messages %}
-                    {% if category in ["profile_photo_extension_error", "profile_photo_size_error"] %}
+                    {% if category in ["profile_photo_extension_error", "profile_photo_size_error","profile_photo_error"] %}
                     <div class="profile-pic-alert">{{ message | safe }}</div>
                     {% endif %}
                     {% endfor %}
