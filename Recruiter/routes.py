@@ -29,15 +29,21 @@ def Recruiter_Dashboard():
         selected = Applications.query.filter(Applications.drive_id == job.id, Applications.status == Application_status.SELECTED).count()
         Job_drive_info.append([job.title, job.Vacancies, Applied, shortlisted, Interview, selected])
 
-    inner_query = [r[0] for r in db.session.query(Applications.id).filter(Applications.drive_id.in_([x.id for x in Job_drive])).all()]
-    interview_rounds = Interview_Rounds.query.filter(Interview_Rounds.application_id.in_(inner_query)).all()
+    today = datetime.date.today()
+    start_of_today = datetime.datetime.combine(today,datetime.time.min)
+    start_of_tomorrow = start_of_today + datetime.timedelta(days=1)
+
+    interview_rounds = (Interview_Rounds.query.join(Applications,Interview_Rounds.application_id == Applications.id).join(Job_Drives,Applications.drive_id == Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id,Job_Drives.status != 'Closed',Interview_Rounds.date >= start_of_today,Interview_Rounds.date < start_of_tomorrow).order_by(Interview_Rounds.date.asc()).limit(5).all())
 
     today_interview = []
-    count = 0
-    for round in interview_rounds:
-        if round.date.date() == datetime.date.today() and count < 5:
-            today_interview.append([round.Application.Job_Drive.company.company_name, round.Application.Job_Drive.title,round.Application.student.user.name, round])
-            count += 1
+
+    for interview_round in interview_rounds:
+        today_interview.append([
+            interview_round.Application.Job_Drive.company.company_name,
+            interview_round.Application.Job_Drive.title,
+            interview_round.Application.student.user.name,
+            interview_round
+        ])
 
     return render_template('Recruiter_Dashboard.html', job_drive_count = job_drive_count, total_applicants = total_applicants, shortlisted = shortlisted, selected = selected, Job_drive_info = Job_drive_info, today_interview = today_interview)
 
@@ -107,7 +113,6 @@ def Schedule_Interview():
     if int(drive_id) not in [row[0] for row in db.session.query(Job_Drives.id).filter(Job_Drives.creater_id == get_current_user().user_id).all()] and Applications.query.filter(Applications.student_id == student_id, Applications.id == application_id, Applications.drive_id == drive_id).first() is None:
         abort(403)
     return render_template('Recruiter_Schedule_Interview.html', student_id = student_id, drive_id = drive_id)
-
 
 @Recruiter_bp.route('/Recruiter_Application', methods=['GET', 'POST'])
 @jwt_required()
