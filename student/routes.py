@@ -280,6 +280,17 @@ def Student_Job_Drive():
         action = request.form.get("action")
         if action == 'apply':
             Student = Students.query.filter_by(user_id=get_current_user().user_id).first()
+            # 3. Safely get the student's eligible drives.
+            eligible_drives = (
+                [x.strip() for x in Student.job_drive.split(',') if x.strip()]
+                if Student.job_drive
+                else []
+            )
+
+            if str(job1.id) not in eligible_drives:
+                flash('You are not eligible to apply for this drive.', 'Duplicate_Application_Error')
+                return redirect(url_for('student.Student_Job_Drive'))
+
             if Student.resume_status == 'Verified':
                 if Applications.query.filter_by(student_id = Student.id, drive_id = job_id).first():
                     flash('Already applied for this role','Duplicate_Application_Error')
