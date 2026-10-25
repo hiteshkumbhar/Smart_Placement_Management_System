@@ -67,7 +67,7 @@ The notifications.py module integrates with Brevo's transactional email client.
 
 The **Smart Placement Management System** is built using Python, Flask, SQLAlchemy, and supporting libraries for authentication, database management, PDF report generation, and email notifications.
 | 💻 Technology / Package | 🎯 Purpose |
-|---|---|---|
+|------|
 | 🐍 **Python** |  Main programming language. The code uses standard-library features including `zoneinfo`. |
 | 🌐 **Flask** | Web framework for routes, request handling, blueprints, redirects, flash messages, and responses. |
 | 🧩 **Flask-JWT-Extended** | Creates and validates access/refresh JWTs and supports JWT authentication in headers and cookies. |
