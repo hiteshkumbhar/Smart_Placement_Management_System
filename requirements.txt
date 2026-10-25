@@ -46,3 +46,4 @@ Werkzeug==3.1.8
 gunicorn==23.0.0
 brevo-python
 Flask-JWT-Extended
+flasgger
