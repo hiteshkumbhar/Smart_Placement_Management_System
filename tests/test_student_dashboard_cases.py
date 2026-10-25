@@ -2990,3 +2990,802 @@ def test_CERT_11_invalid_upload_preserves_existing_certifications(
         not certification_directory.exists()
         or not any(certification_directory.iterdir())
     )
+
+# ============================================================
+# STUDENT JOB DRIVE — ADDITIONAL AUTHORIZATION, LISTING,
+# APPLY AND OPT-OUT TESTS
+# Append this section to tests/test_student_dashboard_cases.py
+# ============================================================
+
+
+# ============================================================
+# ADDITIONAL HELPER FIXTURE
+# ============================================================
+
+@pytest.fixture
+def job_drive_notifications(monkeypatch):
+    """
+    Scenario:
+        Job-drive actions may send notifications to recruiters or placement officers.
+
+    Expected result:
+        Notification calls are captured during tests instead of sending real
+        notifications. The captured calls can be checked where necessary.
+    """
+    import student.routes as student_routes
+
+    calls = []
+
+    def fake_notifications(*args, **kwargs):
+        calls.append({"args": args, "kwargs": kwargs})
+
+    monkeypatch.setattr(
+        student_routes,
+        "notifications",
+        fake_notifications,
+    )
+
+    return calls
+
+
+# ============================================================
+# AUTH-JOB-04 AND AUTH-JOB-05
+# ============================================================
+
+# AUTH-JOB-04
+def test_AUTH_JOB_04_placement_officer_cannot_open_job_drive_page(
+    officer_auth,
+):
+    # Scenario:
+    # An authenticated placement officer attempts to access
+    # /Student_Job_Drive using a valid JWT.
+    # Expected result:
+    # The route rejects the request with HTTP 403 Forbidden.
+
+    response = officer_auth.get("/Student_Job_Drive")
+
+    assert response.status_code == 403
+
+
+# AUTH-JOB-05
+def test_AUTH_JOB_05_non_student_cannot_submit_job_drive_action(
+    client,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+):
+    # Scenario:
+    # An authenticated recruiter submits an application action for a job drive.
+    # Expected result:
+    # The route rejects the request with HTTP 403 Forbidden, and no application
+    # is created for the student.
+
+    drive = job_drive_factory(title="Recruiter POST Protection Role")
+
+    recruiter_client = _profile_bearer_client(
+        client,
+        student_test_data["recruiter_user"].user_id,
+    )
+
+    response = recruiter_client.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 403
+
+    application = Applications.query.filter_by(
+        student_id=student_test_data["student"].id,
+        drive_id=drive.id,
+    ).first()
+
+    assert application is None
+
+
+# ============================================================
+# JOB-08, JOB-09, JOB-11, JOB-13, JOB-14 AND JOB-16
+# ============================================================
+
+# JOB-08
+def test_JOB_08_empty_eligible_drive_list_displays_empty_state(
+    student_auth,
+    student_test_data,
+    test_database,
+):
+    # Scenario:
+    # The student has no eligible job drives (job_drive is None).
+    # Expected result:
+    # The job-drive page loads successfully and displays its empty-state message.
+
+    student_test_data["student"].job_drive = None
+    test_database.session.commit()
+
+    response = student_auth.get("/Student_Job_Drive")
+
+    assert response.status_code == 200
+    assert b"No job drives available" in response.data
+
+
+# JOB-09
+def test_JOB_09_multiple_eligible_active_drives_are_displayed(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+):
+    # Scenario:
+    # The student's eligible-drive list contains two active job drives.
+    # Expected result:
+    # Both eligible job-drive titles appear on the page.
+
+    first_drive = job_drive_factory(
+        title="Eligible Multiple Role Alpha",
+    )
+    second_drive = job_drive_factory(
+        title="Eligible Multiple Role Beta",
+    )
+
+    student_test_data["student"].job_drive = (
+        f"{first_drive.id},{second_drive.id}"
+    )
+    test_database.session.commit()
+
+    response = student_auth.get("/Student_Job_Drive")
+
+    assert response.status_code == 200
+    assert b"Eligible Multiple Role Alpha" in response.data
+    assert b"Eligible Multiple Role Beta" in response.data
+
+
+# JOB-11
+def test_JOB_11_expired_drive_is_not_shown_in_active_listing(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+):
+    # Scenario:
+    # An eligible job drive has a deadline before today's date.
+    # Expected result:
+    # The expired drive is excluded from the default active listing.
+
+    expired_drive = job_drive_factory(
+        title="Expired Listing Test Role",
+        deadline=(
+            datetime.datetime.now()
+            - datetime.timedelta(days=2)
+        ),
+    )
+
+    student_test_data["student"].job_drive = str(expired_drive.id)
+    test_database.session.commit()
+
+    response = student_auth.get("/Student_Job_Drive")
+
+    assert response.status_code == 200
+    assert b"Expired Listing Test Role" not in response.data
+
+
+# JOB-13
+def test_JOB_13_expired_filter_displays_eligible_expired_drive(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+):
+    # Scenario:
+    # The student is eligible for a drive whose deadline has passed and opens
+    # the job-drive page with filter=Expired.
+    # Expected result:
+    # The expired drive appears in the filtered results.
+
+    expired_drive = job_drive_factory(
+        title="Expired Filter Test Role",
+        deadline=(
+            datetime.datetime.now()
+            - datetime.timedelta(days=2)
+        ),
+    )
+
+    student_test_data["student"].job_drive = str(expired_drive.id)
+    test_database.session.commit()
+
+    response = student_auth.get("/Student_Job_Drive?filter=Expired")
+
+    assert response.status_code == 200
+    assert b"Expired Filter Test Role" in response.data
+
+
+# JOB-14
+def test_JOB_14_job_drive_search_matches_company_name(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+):
+    # Scenario:
+    # The student searches using a distinctive part of the company name
+    # associated with an eligible active drive.
+    # Expected result:
+    # The matching job drive appears in the results.
+
+    drive = job_drive_factory(
+        title="Company Search Test Role",
+        company_name="UniqueSearchCompanyXYZ",
+    )
+
+    student_test_data["student"].job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.get(
+        "/Student_Job_Drive?search=UniqueSearchCompanyXYZ"
+    )
+
+    assert response.status_code == 200
+    assert b"Company Search Test Role" in response.data
+    assert b"UniqueSearchCompanyXYZ" in response.data
+
+
+# JOB-16
+def test_JOB_16_job_drive_search_with_no_matches_returns_no_results(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+):
+    # Scenario:
+    # The student has an eligible active drive but searches for text that
+    # matches neither its company name nor its title.
+    # Expected result:
+    # The page responds successfully and the unrelated drive is not displayed.
+
+    drive = job_drive_factory(
+        title="Search No Match Test Role",
+        company_name="Search No Match Test Company",
+    )
+
+    student_test_data["student"].job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.get(
+        "/Student_Job_Drive?search=NoSuchCompanyOrRoleXYZ"
+    )
+
+    assert response.status_code == 200
+    assert b"Search No Match Test Role" not in response.data
+
+
+# ============================================================
+# APPLY-JOB-01, APPLY-JOB-02, APPLY-JOB-03, APPLY-JOB-04,
+# APPLY-JOB-06, APPLY-JOB-08, APPLY-JOB-09 AND APPLY-JOB-10
+# ============================================================
+
+# APPLY-JOB-01
+def test_APPLY_JOB_01_verified_student_can_apply_successfully(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student with a Verified resume applies for an eligible active drive
+    # and has not previously applied for that drive.
+    # Expected result:
+    # An application is created with APPLIED status, the drive is removed
+    # from the student's eligible-drive list, and application tracking updates.
+
+    student = student_test_data["student"]
+    student.resume_status = "Verified"
+
+    drive = job_drive_factory(
+        title="Verified Resume Apply Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 200
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=drive.id,
+    ).first()
+
+    assert application is not None
+    assert application.status == Application_status.APPLIED
+
+    test_database.session.refresh(student)
+    test_database.session.refresh(drive)
+
+    assert student.job_drive is None
+
+    assert drive.application_count_email["email_count"] == 1
+    assert student.id in drive.application_count_email["student_id"]
+
+    assert len(job_drive_notifications) >= 1
+
+
+# APPLY-JOB-02
+def test_APPLY_JOB_02_unverified_resume_cannot_apply(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student whose resume is Pending attempts to apply for an eligible
+    # active job drive.
+    # Expected result:
+    # No application is created, the eligible-drive list remains unchanged,
+    # and no application notification is sent.
+
+    student = student_test_data["student"]
+    student.resume_status = "Pending"
+
+    drive = job_drive_factory(
+        title="Pending Resume Apply Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 200
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=drive.id,
+    ).first()
+
+    assert application is None
+
+    test_database.session.refresh(student)
+    test_database.session.refresh(drive)
+
+    assert student.job_drive == str(drive.id)
+    assert drive.application_count_email["email_count"] == 0
+    assert drive.application_count_email["student_id"] == []
+    assert job_drive_notifications == []
+
+
+# APPLY-JOB-03
+def test_APPLY_JOB_03_duplicate_application_is_not_created(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    application_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student with a Verified resume submits an application for a drive
+    # for which an application already exists.
+    # Expected result:
+    # No second application is created, and application tracking is not
+    # incremented again.
+
+    student = student_test_data["student"]
+    student.resume_status = "Verified"
+
+    drive = job_drive_factory(
+        title="Duplicate Apply Protection Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    application_factory(drive)
+
+    test_database.session.refresh(drive)
+    original_count = drive.application_count_email["email_count"]
+    original_students = list(
+        drive.application_count_email["student_id"]
+    )
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 302
+
+    applications = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=drive.id,
+    ).all()
+
+    assert len(applications) == 1
+
+    test_database.session.refresh(drive)
+
+    assert drive.application_count_email["email_count"] == original_count
+    assert drive.application_count_email["student_id"] == original_students
+    assert job_drive_notifications == []
+
+
+# APPLY-JOB-04
+def test_APPLY_JOB_04_applying_to_only_eligible_drive_clears_eligibility(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student with a Verified resume applies for their only eligible
+    # active job drive.
+    # Expected result:
+    # The application is saved, and Students.job_drive becomes None because
+    # the student has no remaining eligible drives.
+
+    student = student_test_data["student"]
+    student.resume_status = "Verified"
+
+    drive = job_drive_factory(
+        title="Only Eligible Apply Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 200
+
+    test_database.session.refresh(student)
+
+    assert student.job_drive is None
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=drive.id,
+    ).first()
+
+    assert application is not None
+    assert application.status == Application_status.APPLIED
+
+
+# APPLY-JOB-06
+def test_APPLY_JOB_06_applying_removes_only_selected_drive_from_eligibility(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student with a Verified resume is eligible for two active drives
+    # and applies for only one of them.
+    # Expected result:
+    # The application is created for the selected drive, which is removed
+    # from Students.job_drive, while the other eligible drive remains.
+
+    student = student_test_data["student"]
+    student.resume_status = "Verified"
+
+    first_drive = job_drive_factory(
+        title="Selected Apply Role",
+    )
+    second_drive = job_drive_factory(
+        title="Remaining Eligible Role",
+    )
+
+    student.job_drive = f"{first_drive.id},{second_drive.id}"
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={first_drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 200
+
+    test_database.session.refresh(student)
+
+    assert student.job_drive == str(second_drive.id)
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=first_drive.id,
+    ).first()
+
+    assert application is not None
+    assert application.status == Application_status.APPLIED
+
+    other_application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=second_drive.id,
+    ).first()
+
+    assert other_application is None
+
+
+# APPLY-JOB-08
+def test_APPLY_JOB_08_student_cannot_apply_for_ineligible_drive(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # An authenticated student with a Verified resume attempts to apply for
+    # an active drive that is not in their eligible-drive list.
+    # Expected result:
+    # The request is rejected or safely redirected, no application is created,
+    # and the student's eligible-drive list remains unchanged.
+
+    student = student_test_data["student"]
+    student.resume_status = "Verified"
+
+    eligible_drive = job_drive_factory(
+        title="Student Eligible Apply Role",
+    )
+    ineligible_drive = job_drive_factory(
+        title="Student Ineligible Apply Role",
+    )
+
+    student.job_drive = str(eligible_drive.id)
+    test_database.session.commit()
+
+    # Follow redirects so that a redirect-based rejection can be checked.
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={ineligible_drive.id}",
+        data={"action": "apply"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (302, 400, 403)
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=ineligible_drive.id,
+    ).first()
+
+    assert application is None
+
+    test_database.session.refresh(student)
+
+    assert student.job_drive == str(eligible_drive.id)
+
+# APPLY-JOB-10
+def test_APPLY_JOB_10_successful_application_updates_tracking_once(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student with a Verified resume applies successfully for an eligible
+    # active drive whose application-tracking counter starts at zero.
+    # Expected result:
+    # The counter increments by one and the student's ID is recorded once
+    # in the tracking list.
+
+    student = student_test_data["student"]
+    student.resume_status = "Verified"
+
+    drive = job_drive_factory(
+        title="Application Tracking Test Role",
+        application_count_email={
+            "email_count": 0,
+            "student_id": [],
+        },
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "apply"},
+    )
+
+    assert response.status_code == 200
+
+    test_database.session.refresh(drive)
+
+    tracking = drive.application_count_email
+
+    assert tracking["email_count"] == 1
+    assert tracking["student_id"].count(student.id) == 1
+
+
+# ============================================================
+# OPTOUT-JOB-01, OPTOUT-JOB-02, OPTOUT-JOB-03 AND OPTOUT-JOB-06
+# ============================================================
+
+# OPTOUT-JOB-01
+def test_OPTOUT_JOB_01_student_can_opt_out_of_eligible_drive(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # A student opts out of an eligible active drive for which they have
+    # not already applied.
+    # Expected result:
+    # The drive is removed from the student's eligible-drive list, and the
+    # student's ID is recorded in the drive's opt_out field.
+
+    student = student_test_data["student"]
+
+    drive = job_drive_factory(
+        title="Successful Opt Out Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "opt_out"},
+    )
+
+    assert response.status_code == 200
+
+    test_database.session.refresh(student)
+    test_database.session.refresh(drive)
+
+    assert student.job_drive is None
+    assert str(student.id) in str(drive.opt_out)
+
+
+# OPTOUT-JOB-02
+def test_OPTOUT_JOB_02_opt_out_of_only_drive_clears_eligibility(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # The student is eligible for only one active drive and opts out of it.
+    # Expected result:
+    # Students.job_drive becomes None, and the student's ID is recorded
+    # in the drive's opt_out field.
+
+    student = student_test_data["student"]
+
+    drive = job_drive_factory(
+        title="Only Drive Opt Out Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "opt_out"},
+    )
+
+    assert response.status_code == 200
+
+    test_database.session.refresh(student)
+    test_database.session.refresh(drive)
+
+    assert student.job_drive is None
+    assert str(student.id) in str(drive.opt_out)
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=drive.id,
+    ).first()
+
+    assert application is None
+
+
+# OPTOUT-JOB-03
+def test_OPTOUT_JOB_03_opt_out_preserves_other_eligible_drives(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # The student is eligible for two active drives and opts out of one.
+    # Expected result:
+    # Only the opted-out drive is removed from the eligible-drive list.
+    # The other drive remains available to the student.
+
+    student = student_test_data["student"]
+
+    opted_out_drive = job_drive_factory(
+        title="Opted Out Selected Role",
+    )
+    remaining_drive = job_drive_factory(
+        title="Opt Out Remaining Role",
+    )
+
+    student.job_drive = (
+        f"{opted_out_drive.id},{remaining_drive.id}"
+    )
+    test_database.session.commit()
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={opted_out_drive.id}",
+        data={"action": "opt_out"},
+    )
+
+    assert response.status_code == 200
+
+    test_database.session.refresh(student)
+    test_database.session.refresh(opted_out_drive)
+
+    assert student.job_drive == str(remaining_drive.id)
+    assert str(student.id) in str(opted_out_drive.opt_out)
+
+    application = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=opted_out_drive.id,
+    ).first()
+
+    assert application is None
+
+
+# OPTOUT-JOB-06
+def test_OPTOUT_JOB_06_student_who_already_applied_cannot_opt_out(
+    student_auth,
+    student_test_data,
+    job_drive_factory,
+    application_factory,
+    test_database,
+    job_drive_notifications,
+):
+    # Scenario:
+    # The student already has an application for a drive and then attempts
+    # to opt out of that same drive.
+    # Expected result:
+    # The existing application remains unchanged, the drive is not recorded
+    # as an opt-out, and the eligible-drive list is not modified.
+
+    student = student_test_data["student"]
+
+    drive = job_drive_factory(
+        title="Already Applied Opt Out Protection Role",
+    )
+
+    student.job_drive = str(drive.id)
+    test_database.session.commit()
+
+    existing_application = application_factory(drive)
+
+    response = student_auth.post(
+        f"/Student_Job_Drive?id={drive.id}",
+        data={"action": "opt_out"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    test_database.session.refresh(student)
+    test_database.session.refresh(drive)
+
+    assert student.job_drive == str(drive.id)
+    assert drive.opt_out is None
+
+    applications = Applications.query.filter_by(
+        student_id=student.id,
+        drive_id=drive.id,
+    ).all()
+
+    assert len(applications) == 1
+    assert applications[0].id == existing_application.id
