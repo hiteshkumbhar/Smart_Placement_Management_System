@@ -143,6 +143,7 @@ def Application():
     return render_template('Student_Application.html', applications = applications, student = student, applications_pagination = applications_pagination, total_applications = total_applications, shortlisted_count = shortlisted_count, interview_count = interview_count, select_count = select_count, reject_count = reject_count)
 
 
+
 @student_bp.route('/Student_Application_Details')
 @jwt_required()
 def Student_Application_Details():
@@ -235,10 +236,7 @@ def Student_interview():
 
     student = Students.query.filter(Students.user_id == get_current_user().user_id).first()
 
-    return render_template('Student_interview.html',Todays_interview=Todays_interview,upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews,Past_pagination=Past_pagination, Today_pagination = Today_pagination, Upcoming_pagination=Upcoming_pagination, student=student,page=Past_pagination.page,
-        total_pages=Past_pagination.pages,
-        page_numbers=page_numbers
-    )
+    return render_template('Student_interview.html',Todays_interview=Todays_interview,upcoming_interviews=upcoming_interviews,Past_interviews=Past_interviews,Past_pagination=Past_pagination, Today_pagination = Today_pagination, Upcoming_pagination=Upcoming_pagination, student=student,page=Past_pagination.page, total_pages=Past_pagination.pages,page_numbers=page_numbers)
 
 @student_bp.route('/Student_Job_Drive', methods = ['GET','POST'])
 @jwt_required()
@@ -407,7 +405,14 @@ def Student_Profile():
                     flash('File size must be less that 5 mb', 'profile_photo_size_error')
                     return redirect(url_for('student.Student_Profile', mode='View'))
 
-                file_extension = profile_photo.filename.rsplit('.', 1)[1].lower()
+                filename = profile_photo.filename or ""
+
+                if "." not in filename or filename.rsplit(".", 1)[1] == "":
+                    flash("Invalid profile photo format.", "profile_photo_error")
+                    return redirect(url_for("student.Student_Profile", mode="View"))
+
+                file_extension = filename.rsplit(".", 1)[1].lower()
+
                 if file_extension not in ['jpg', 'jpeg', 'png']:
                     flash('Upload file in jpg or jpeg or png format', 'profile_photo_extension_error')
                     return redirect(url_for('student.Student_Profile', mode='View'))
@@ -558,8 +563,25 @@ def Student_Profile():
 @jwt_required()
 def student_download_certifications():
     if get_current_user().role != "student":
-        abort(403)  # Forbidden
-    name = request.form.get('name')
-    filename = f"Cert_{request.form.get('id')}_{db.session.query(Users.name).filter(Users.user_id == request.form.get('id')).scalar()}_{name.strip()}"
-    RESUME_FOLDER = os.path.join(current_app.root_path, "static", "Docs", "student", "certifications")
-    return send_from_directory(directory=RESUME_FOLDER, path=secure_filename(filename), as_attachment=True, download_name=name)
+        abort(403)
+    user_id = request.form.get("id")
+    name = request.form.get("name")
+    if not user_id or not name or not name.strip():
+        abort(400)
+    user_name = (db.session.query(Users.name).filter(Users.user_id == user_id).scalar())
+    if not user_name:
+        abort(404)
+    filename = secure_filename(f"Cert_{user_id}_{user_name}_{name.strip()}")
+    certification_folder = os.path.join(
+        os.getcwd(),
+        "static",
+        "Docs",
+        "student",
+        "certifications",
+    )
+    return send_from_directory(
+        directory=certification_folder,
+        path=filename,
+        as_attachment=True,
+        download_name=name.strip(),
+    )
