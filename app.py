@@ -15,6 +15,7 @@ from Placement_officer import officer_bp
 from Recruiter import Recruiter_bp
 from utils.notifications import notifications, send_email
 from api import api_bp
+from flasgger import Swagger
 load_dotenv()
 
 app = Flask(__name__)
@@ -30,6 +31,56 @@ app.register_blueprint(Recruiter_bp)
 app.register_blueprint(api_bp)
 
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": "apispec",
+            "route": "/apispec.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "swagger_ui": True,
+    "specs_route": "/swagger/",
+    "static_url_path": "/flasgger_static",
+
+}
+
+swagger_template = {
+    "swagger": "2.0",
+    "info": {
+        "title": "Smart Placement Management System API",
+        "description": (
+            "API documentation for the Smart Placement "
+            "Management System."
+        ),
+        "version": "1.0.0",
+    },
+    "basePath": "/",
+    "schemes": ["http", "https"],
+
+    # JWT authentication for protected API endpoints
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": (
+                "Enter your JWT access token in this format: "
+                "Bearer <access_token>"
+            ),
+        }
+    },
+}
+
+swagger = Swagger(
+    app,
+    config=swagger_config,
+    template=swagger_template,
+)
+
 
 init_jwt(app)
 
