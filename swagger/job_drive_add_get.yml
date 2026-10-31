@@ -1,0 +1,52 @@
+tags:
+  - Job Drives
+
+summary: Get available companies
+
+description: >
+  Retrieves all companies registered in the placement management system.
+  Each company is returned as a pair containing its company ID and
+  company name. This operation does not create or modify any records.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+responses:
+  200:
+    description: Companies retrieved successfully.
+    schema:
+      type: object
+      properties:
+        companies:
+          type: array
+          description: >
+            List of companies. Each entry is an array containing
+            the company ID followed by the company name.
+          items:
+            type: array
+            items:
+              type: string
+          example:
+            - [1, "Example Technologies"]
+            - [2, "Sample Solutions"]
+
+  401:
+    description: Authentication failed or JWT is missing, invalid, or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a recruiter.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

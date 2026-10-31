@@ -1,0 +1,112 @@
+tags:
+  - Authentication
+
+summary: User Login
+
+description: >
+  Authenticates a registered user using their email address
+  and password. If the credentials are valid, generates a JWT
+  access token and returns the token along with the user's
+  basic profile information.
+
+  This endpoint is public and does not require a JWT token.
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+parameters:
+  - in: body
+    name: credentials
+    required: true
+    description: User login credentials.
+    schema:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Registered email address.
+          example: student@example.com
+        password:
+          type: string
+          format: password
+          description: Account password.
+          example: ExamplePassword123
+
+responses:
+  200:
+    description: >
+      Authentication successful. Returns a JWT access token
+      and basic information about the authenticated user.
+    schema:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - user
+      properties:
+        access_token:
+          type: string
+          description: JWT access token for authenticated API requests.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        token_type:
+          type: string
+          enum:
+            - Bearer
+          example: Bearer
+        user:
+          type: object
+          required:
+            - id
+            - name
+            - email
+            - role
+          properties:
+            id:
+              type: integer
+              example: 12
+            name:
+              type: string
+              example: Rahul Sharma
+            email:
+              type: string
+              format: email
+              example: student@example.com
+            role:
+              type: string
+              example: student
+
+  400:
+    description: >
+      The email address or password is missing, or the request
+      does not contain usable JSON credentials.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: email and password are required
+
+  401:
+    description: >
+      The account does not exist or the supplied password
+      is incorrect.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - User does not exist
+            - Invalid password
+          example: Invalid password

@@ -1,0 +1,252 @@
+tags:
+  - Recruiter Dashboard
+
+summary: Get recruiter dashboard
+
+description: >
+  Retrieves dashboard statistics for the authenticated recruiter.
+
+  The dashboard includes the number of non-closed job drives,
+  total applicants, shortlisted applicants, selected applicants,
+  application statistics for each job drive, and interviews
+  scheduled for the current date.
+
+  Only job drives created by the authenticated recruiter
+  whose status is not Closed are included.
+
+  The today_interviews field contains up to five interview
+  rounds scheduled for the current date.
+
+  A valid JWT access token is required. Only users with
+  the Recruiter role can access this endpoint.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+responses:
+
+  200:
+    description: >
+      Recruiter dashboard data retrieved successfully.
+      Returns overall recruitment statistics, job-drive
+      application statistics, and today's scheduled interviews.
+
+    schema:
+      type: object
+      properties:
+
+        job_drive_count:
+          type: integer
+          description: >
+            Number of job drives created by the authenticated
+            recruiter whose status is not Closed.
+          example: 4
+
+        total_applicants:
+          type: integer
+          description: >
+            Total number of application records associated
+            with the recruiter's non-closed job drives,
+            regardless of application status.
+          example: 45
+
+        shortlisted:
+          type: integer
+          description: >
+            Total number of applications with SHORTLISTED
+            status across the recruiter's non-closed job drives.
+          example: 12
+
+        selected:
+          type: integer
+          description: >
+            Total number of applications with SELECTED
+            status across the recruiter's non-closed job drives.
+          example: 5
+
+        job_drive_info:
+          type: array
+          description: >
+            Application statistics for each non-closed job
+            drive created by the authenticated recruiter.
+
+          items:
+            type: object
+            properties:
+
+              title:
+                type: string
+                description: Title of the job drive.
+                example: Software Engineer
+
+              vacancies:
+                type: integer
+                description: Number of vacancies for the job drive.
+                example: 10
+
+              applied:
+                type: integer
+                description: >
+                  Number of applications with APPLIED status
+                  for this job drive.
+                example: 20
+
+              shortlisted:
+                type: integer
+                description: >
+                  Number of applications with SHORTLISTED status
+                  for this job drive.
+                example: 8
+
+              interview:
+                type: integer
+                description: >
+                  Number of applications with INTERVIEW status
+                  for this job drive.
+                example: 5
+
+              selected:
+                type: integer
+                description: >
+                  Number of applications with SELECTED status
+                  for this job drive.
+                example: 2
+
+        today_interviews:
+          type: array
+          description: >
+            Up to five interview rounds scheduled for the current
+            date across applications associated with the
+            recruiter's non-closed job drives.
+
+          items:
+            type: object
+            properties:
+
+              company_name:
+                type: string
+                description: Name of the company offering the job.
+                example: Acme Technologies
+
+              job_title:
+                type: string
+                description: Title of the job associated with the interview.
+                example: Software Engineer
+
+              student_name:
+                type: string
+                description: Name of the student being interviewed.
+                example: Rahul Sharma
+
+              interview:
+                type: object
+                description: Details of the scheduled interview round.
+
+                properties:
+
+                  id:
+                    type: integer
+                    description: Unique ID of the interview round.
+                    example: 17
+
+                  round_name:
+                    type: string
+                    description: Name of the interview round.
+                    example: Technical Interview
+
+                  date:
+                    type: string
+                    format: date-time
+                    description: >
+                      Scheduled interview date and time in ISO 8601 format.
+                    example: "2026-10-31T14:30:00"
+
+                  link:
+                    type: string
+                    x-nullable: true
+                    description: Interview meeting URL, if available.
+                    example: "https://example.com/interview"
+
+                  result:
+                    type: string
+                    x-nullable: true
+                    description: >
+                      Interview result, or null if no result
+                      has been recorded.
+                    example: Pending
+
+                  feedback:
+                    type: string
+                    x-nullable: true
+                    description: >
+                      Interviewer feedback, or null if no feedback
+                      has been recorded.
+                    example: Good technical understanding
+
+    examples:
+      application/json:
+        job_drive_count: 4
+        total_applicants: 45
+        shortlisted: 12
+        selected: 5
+
+        job_drive_info:
+          - title: Software Engineer
+            vacancies: 10
+            applied: 20
+            shortlisted: 8
+            interview: 5
+            selected: 2
+
+          - title: Data Analyst
+            vacancies: 5
+            applied: 15
+            shortlisted: 4
+            interview: 3
+            selected: 2
+
+        today_interviews:
+          - company_name: Acme Technologies
+            job_title: Software Engineer
+            student_name: Rahul Sharma
+            interview:
+              id: 17
+              round_name: Technical Interview
+              date: "2026-10-31T14:30:00"
+              link: "https://example.com/interview"
+              result: Pending
+              feedback: null
+
+  401:
+    description: >
+      Unauthorized. The JWT access token is missing,
+      invalid, or expired, or the authenticated user
+      account could not be found.
+
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error message returned by JWT authentication.
+          example: Missing Authorization Header
+
+        error:
+          type: string
+          description: Error message returned by the route.
+          example: User not found
+
+  403:
+    description: >
+      Forbidden. The authenticated user does not have
+      the Recruiter role.
+
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: recruiters only"

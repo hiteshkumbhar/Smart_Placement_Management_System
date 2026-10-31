@@ -1,0 +1,45 @@
+tags:
+  - Companies
+  - Placement Officer
+
+summary: Get company creation endpoint information
+
+description: >
+  This endpoint does not retrieve company records.
+  It returns an informational message instructing the
+  client to submit company details using a POST request.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+responses:
+  200:
+    description: Informational message returned successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Instructions for submitting company details.
+          example: Provide company details using a POST request.
+
+  401:
+    description: Authentication is missing, invalid, or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

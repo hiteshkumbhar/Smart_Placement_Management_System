@@ -1,0 +1,228 @@
+tags:
+  - Student Job Drives
+
+summary: Get eligible job drives
+
+description: >
+  Retrieves job drives for which the authenticated student is eligible.
+  Eligibility is determined by the job-drive IDs stored in the student's
+  job_drive field.
+
+  The optional filter parameter selects Active or Expired job drives.
+  The optional search parameter searches company names and job titles
+  using case-insensitive partial matching.
+
+  Before retrieving the results, the endpoint updates the status of
+  all job drives that are not Closed. A job drive whose deadline is
+  earlier than the current date is marked Expired; otherwise, it is
+  marked Active. The endpoint commits these status changes to the
+  database.
+
+  Only job drives whose IDs appear in the authenticated student's
+  eligibility list and whose status matches the requested filter
+  are returned.
+
+  A valid JWT access token is required. Only authenticated users
+  with the student role can access this endpoint.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: filter
+    in: query
+    type: string
+    required: false
+    default: Active
+    enum:
+      - Active
+      - Expired
+    description: >
+      Filters eligible job drives by status.
+      Active returns drives with deadlines on or after the current date,
+      or drives without a deadline.
+      Expired returns drives with deadlines earlier than the current date.
+      Job drives with status Closed are excluded.
+      The value must be exactly Active or Expired.
+    example: Active
+
+  - name: search
+    in: query
+    type: string
+    required: false
+    default: ""
+    description: >
+      Optional search term matched against the company name or job title.
+      Matching is case-insensitive and supports partial matches.
+      Leading and trailing whitespace is removed.
+    example: Software Engineer
+
+responses:
+  200:
+    description: >
+      Eligible job drives retrieved successfully.
+      Returns the applied filter, search term, total number of matching
+      job drives, and the matching job-drive details.
+    schema:
+      type: object
+      required:
+        - filter
+        - search
+        - total
+        - jobs
+      properties:
+        filter:
+          type: string
+          enum:
+            - Active
+            - Expired
+          description: Status filter applied to the request.
+          example: Active
+
+        search:
+          type: string
+          description: Search term applied to the request, or an empty string.
+          example: Software
+
+        total:
+          type: integer
+          description: Number of job drives matching the eligibility, filter, and search criteria.
+          example: 1
+
+        jobs:
+          type: array
+          description: >
+            Eligible job drives matching the requested filters,
+            ordered by application deadline in ascending order.
+          items:
+            type: object
+            required:
+              - id
+              - company_name
+              - title
+              - status
+            properties:
+              id:
+                type: integer
+                description: Unique job-drive ID.
+                example: 25
+
+              company_name:
+                type: string
+                description: Name of the company offering the job.
+                example: Acme Technologies
+
+              title:
+                type: string
+                description: Job title.
+                example: Software Engineer
+
+              package:
+                type: number
+                x-nullable: true
+                description: Compensation package offered for the job.
+                example: 8.5
+
+              location:
+                type: string
+                x-nullable: true
+                description: Job location.
+                example: Bengaluru
+
+              deadline:
+                type: string
+                format: date-time
+                x-nullable: true
+                description: >
+                  Application deadline returned as an ISO-formatted string,
+                  or null if no deadline is configured.
+                example: "2026-12-31T23:59:00"
+
+              description:
+                type: string
+                x-nullable: true
+                description: Description of the job opportunity.
+                example: Software development and API design.
+
+              status:
+                type: string
+                description: Current job-drive status.
+                enum:
+                  - Active
+                  - Expired
+                  - Closed
+                example: Active
+
+              company_logo:
+                type: string
+                x-nullable: true
+                description: Stored company logo path, if available.
+                example: uploads/company_logos/acme.png
+
+    examples:
+      application/json:
+        filter: Active
+        search: Software
+        total: 1
+        jobs:
+          - id: 25
+            company_name: Acme Technologies
+            title: Software Engineer
+            package: 8.5
+            location: Bengaluru
+            deadline: "2026-12-31T23:59:00"
+            description: Software development and API design.
+            status: Active
+            company_logo: uploads/company_logos/acme.png
+
+  400:
+    description: Invalid filter value.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Invalid filter. Use Active or Expired.
+
+  401:
+    description: >
+      Authentication failed, the JWT is missing or invalid,
+      or the authenticated user's account could not be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error returned by Flask-JWT-Extended.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned by the route.
+          example: User not found
+
+  403:
+    description: The authenticated user does not have the student role.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: No student profile was found for the authenticated user.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Student profile not found

@@ -1,0 +1,89 @@
+tags:
+  - Student Profile
+
+summary: Upload student resume
+
+description: >
+  Uploads or replaces the resume of the currently authenticated student.
+  Only PDF files smaller than 5 MB are accepted.
+  If a resume is uploaded again, the resume status is changed to
+  Reuploaded and placement officers are notified.
+
+security:
+  - Bearer: []
+
+consumes:
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - in: formData
+    name: resume_file
+    type: file
+    required: true
+    description: >
+      Student resume in PDF format.
+      The file size must be smaller than 5 MB.
+
+responses:
+  200:
+    description: Resume uploaded successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Resume uploaded successfully
+        resume_path:
+          type: string
+          example: Resume_12_Rahul_Sharma.pdf
+        resume_status:
+          type: string
+          example: Reuploaded
+
+  400:
+    description: Missing resume or invalid file format.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Resume file is required
+
+  401:
+    description: User not found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found
+
+  403:
+    description: Only students can access this endpoint.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  413:
+    description: Resume file is 5 MB or larger.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Resume must be smaller than 5 MB
+
+  500:
+    description: Unable to save resume.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unable to save resume

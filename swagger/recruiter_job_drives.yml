@@ -1,0 +1,230 @@
+tags:
+  - Recruiter Job Drives
+
+summary: Get recruiter job drives
+
+description: >
+  Retrieves job drives created by the authenticated recruiter.
+
+  By default, the endpoint returns Active job drives belonging
+  to the authenticated recruiter.
+
+  The filter parameter can be set to Expired to retrieve
+  expired job drives.
+
+  The search parameter searches job drives by company name,
+  job title, or job location. Matching is case-insensitive
+  and supports partial matches.
+
+  When a search term is supplied without filter=Expired,
+  matching non-closed job drives are returned regardless
+  of whether their status is Active or Expired.
+
+  When filter=Expired is supplied, only expired job drives
+  are returned, optionally matching the search term.
+
+  The endpoint updates the status of non-closed job drives
+  based on their application deadlines before retrieving
+  the results.
+
+  Only authenticated users with the Recruiter role can
+  access this endpoint.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: filter
+    in: query
+    type: string
+    required: false
+    default: Active
+    enum:
+      - Active
+      - Expired
+    description: >
+      Determines which job drives to retrieve.
+
+      Active is the default and returns active job drives
+      when no search term is supplied.
+
+      Expired returns expired job drives.
+
+      If a search term is supplied with Active or no filter,
+      matching non-closed job drives are returned regardless
+      of their Active or Expired status.
+    example: Active
+
+  - name: search
+    in: query
+    type: string
+    required: false
+    description: >
+      Optional search term used to search job drives by
+      company name, job title, or job location.
+
+      Matching is case-insensitive and supports partial
+      matches. Leading and trailing whitespace is removed.
+
+      When omitted or empty, no search is performed.
+    example: Software Engineer
+
+responses:
+  200:
+    description: >
+      Job drives retrieved successfully. Returns the applied
+      filter, search term, total number of matching job drives,
+      and the matching job-drive details.
+
+    schema:
+      type: object
+      required:
+        - filter
+        - search
+        - total
+        - jobs
+
+      properties:
+        filter:
+          type: string
+          description: >
+            Filter label returned by the endpoint.
+            Active for the default branch, Expired for
+            the expired branch, and All when searching
+            without filter=Expired.
+          enum:
+            - Active
+            - Expired
+            - All
+          example: Active
+
+        search:
+          type: string
+          description: Search term applied to the request.
+          example: Software Engineer
+
+        total:
+          type: integer
+          description: Number of job drives returned.
+          example: 2
+
+        jobs:
+          type: array
+          description: List of matching job drives.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                description: Name of the company offering the job.
+                example: Acme Technologies
+
+              job_drive:
+                type: object
+                description: Job-drive information.
+                properties:
+                  id:
+                    type: integer
+                    description: Unique job-drive ID.
+                    example: 25
+
+                  title:
+                    type: string
+                    description: Job title.
+                    example: Software Engineer
+
+                  status:
+                    type: string
+                    description: Current job-drive status.
+                    enum:
+                      - Active
+                      - Expired
+                    example: Active
+
+                  package:
+                    type: number
+                    x-nullable: true
+                    description: Compensation package offered.
+                    example: 8.5
+
+                  location:
+                    type: string
+                    x-nullable: true
+                    description: Job location.
+                    example: Bengaluru
+
+                  deadline:
+                    type: string
+                    x-nullable: true
+                    description: >
+                      Application deadline returned as an ISO
+                      formatted string, or null if unavailable.
+                    example: "2026-12-31"
+
+                  description:
+                    type: string
+                    x-nullable: true
+                    description: Description of the job opportunity.
+                    example: Backend development and API design.
+
+                  vacancies:
+                    type: integer
+                    description: Number of available vacancies.
+                    example: 10
+
+              company_logo:
+                type: string
+                x-nullable: true
+                description: Stored company logo path.
+                example: uploads/company_logos/acme.png
+
+    examples:
+      application/json:
+        filter: Active
+        search: ""
+        total: 2
+        jobs:
+          - company_name: Acme Technologies
+            job_drive:
+              id: 25
+              title: Software Engineer
+              status: Active
+              package: 8.5
+              location: Bengaluru
+              deadline: "2026-12-31"
+              description: Backend development and API design.
+              vacancies: 10
+            company_logo: uploads/company_logos/acme.png
+
+  401:
+    description: >
+      Unauthorized. The JWT access token is missing,
+      invalid, or expired, or the authenticated user
+      could not be found.
+
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error generated by JWT authentication.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error generated by the route.
+          example: User not found
+
+  403:
+    description: >
+      Forbidden. The authenticated user does not have
+      the Recruiter role.
+
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: recruiters only"

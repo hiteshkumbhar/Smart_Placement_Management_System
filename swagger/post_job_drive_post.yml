@@ -1,0 +1,153 @@
+tags:
+  - Placement Officer
+  - Job Drives
+
+summary: Recommend students and publish a job drive
+
+description: >
+  Associates selected students with the specified job drive.
+  Student IDs can be submitted through the Students and
+  All_Students form fields. If all selected students are
+  processed successfully, the job drive is published.
+
+  If a selected student does not exist, is already recommended,
+  or already has an application for the job drive, the endpoint
+  returns HTTP 400 with details of the students who could not
+  be processed. The job drive is not published in that case.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: drive_id
+    in: query
+    type: integer
+    required: false
+    description: >
+      ID of the job drive to publish. Can be supplied in the
+      query string or as form data. Supply it in one location.
+    example: 12
+
+  - name: drive_id
+    in: formData
+    type: integer
+    required: false
+    description: >
+      ID of the job drive to publish. Can be supplied in the
+      form body or as a query parameter. Supply it in one location.
+    example: 12
+
+  - name: Students
+    in: formData
+    type: array
+    items:
+      type: string
+    collectionFormat: multi
+    required: false
+    description: >
+      IDs of students selected from the eligible-student list.
+      Submit this field multiple times to recommend multiple students.
+      These IDs are combined with the All_Students field.
+    example: "25"
+
+  - name: All_Students
+    in: formData
+    type: array
+    items:
+      type: string
+    collectionFormat: multi
+    required: false
+    description: >
+      IDs of additional students selected from the complete student list.
+      Submit this field multiple times to recommend multiple students.
+      These IDs are combined with the Students field.
+    example: "26"
+
+responses:
+  200:
+    description: Job drive published successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Job drive posted successfully
+        job_id:
+          type: integer
+          example: 12
+        posted:
+          type: string
+          enum:
+            - Y
+          description: Indicates that the job drive has been published.
+          example: Y
+
+  400:
+    description: >
+      One or more selected students could not be recommended.
+      The job drive has not been published.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: >
+            Some students could not be recommended.
+            The job drive has not been published.
+
+        errors:
+          type: array
+          description: Details of students who could not be recommended.
+          items:
+            type: object
+            properties:
+              student_id:
+                type: string
+                example: "25"
+              student_name:
+                type: string
+                x-nullable: true
+                description: >
+                  Student name is included for existing students.
+                  It is omitted when the student does not exist.
+                example: Rahul Sharma
+              error:
+                type: string
+                enum:
+                  - Student not found
+                  - Student is already recommended
+                  - Application already exists
+                example: Application already exists
+
+        job_id:
+          type: string
+          description: ID of the job drive being processed.
+          example: "12"
+
+  401:
+    description: Authentication is missing or invalid.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a placement officer,
+      or the job drive does not belong to a company created
+      by that placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

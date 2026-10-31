@@ -1,0 +1,131 @@
+tags:
+  - Placement Officer
+  - Job Drives
+
+summary: Retrieve job drive details and student lists
+
+description: >
+  Retrieves the selected job drive details, students who meet the
+  job drive eligibility criteria, and the complete student list.
+  The job drive must belong to a company created by the authenticated
+  placement officer.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: mode
+    in: query
+    type: string
+    required: true
+    enum:
+      - post_job_drive
+    description: >
+      Must be set to post_job_drive to retrieve the job drive
+      details and student lists.
+    example: post_job_drive
+
+  - name: drive_id
+    in: query
+    type: integer
+    required: true
+    description: ID of the job drive to retrieve.
+    example: 12
+
+responses:
+  200:
+    description: >
+      Job drive details, eligible students, and all student
+      records retrieved successfully.
+    schema:
+      type: object
+      properties:
+        job:
+          type: array
+          description: >
+            First element is the company name. Second element
+            is an object containing the job drive details.
+          items: {}
+          example:
+            - Example Technologies
+            - id: 12
+              company_id: 3
+              title: Software Engineer
+              package: "12 LPA"
+              location: Mumbai
+              CGPA: 7.5
+              Eligible_Branches: "Computer Science,Information Technology"
+              Graduation_Year: "2027"
+              Vacancies: 5
+              deadline: "2026-12-15"
+              description: Software development role.
+              status: Active
+              posted: "N"
+
+        eligible_students:
+          type: array
+          description: >
+            Students who meet the job drive's CGPA, branch,
+            and graduation-year eligibility requirements.
+            Each item contains a student ID and student name.
+          items:
+            type: array
+            items:
+              type: string
+          example:
+            - ["25", "Rahul Sharma"]
+            - ["26", "Priya Patel"]
+
+        All_Student:
+          type: array
+          description: >
+            Complete list of students, regardless of eligibility.
+            Each item contains a student ID and student name.
+          items:
+            type: array
+            items:
+              type: string
+          example:
+            - ["25", "Rahul Sharma"]
+            - ["26", "Priya Patel"]
+
+        job_id:
+          type: string
+          description: ID of the retrieved job drive.
+          example: "12"
+
+  400:
+    description: >
+      The required viewing mode was not supplied or is invalid.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: >
+            Invalid request. Use mode=post_job_drive for viewing
+            or POST to recommend students.
+
+  401:
+    description: Authentication is missing or invalid.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a placement officer,
+      or the job drive does not belong to a company created
+      by that placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

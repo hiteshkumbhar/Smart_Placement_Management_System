@@ -1,0 +1,135 @@
+tags:
+  - Recruiter Applications
+
+summary: Get recruiter's job drives
+
+description: >
+  Retrieves job drives created by the authenticated recruiter.
+  Job drives with a status of Closed are excluded.
+  An optional search term filters job drives by job title.
+  Only job drives belonging to the authenticated recruiter
+  are returned.
+
+operationId: getRecruiterApplications
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: search
+    in: query
+    type: string
+    required: false
+    description: >
+      Optional search term used to filter the recruiter's
+      job drives by job title. Matching is case-insensitive
+      and supports partial matches. Closed job drives are
+      excluded.
+    example: Software
+
+responses:
+  200:
+    description: >
+      Job drives retrieved successfully. Returns the list
+      of job drives belonging to the authenticated recruiter
+      and the total number of job drives returned.
+    schema:
+      type: object
+      properties:
+        jobs:
+          type: array
+          description: List of the recruiter's non-closed job drives.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                description: Name of the company.
+                example: Example Technologies
+
+              company_logo:
+                type: string
+                x-nullable: true
+                description: Stored company logo path.
+                example: uploads/company_logo.png
+
+              job:
+                type: object
+                description: Job drive details.
+                properties:
+                  id:
+                    type: integer
+                    description: Unique job drive ID.
+                    example: 12
+
+                  title:
+                    type: string
+                    description: Job title.
+                    example: Software Engineer
+
+                  status:
+                    type: string
+                    description: Current job drive status.
+                    example: Active
+
+                  package:
+                    type: string
+                    description: Package offered for the job.
+                    example: "8 LPA"
+
+                  location:
+                    type: string
+                    description: Job location.
+                    example: Mumbai
+
+                  deadline:
+                    type: string
+                    x-nullable: true
+                    description: Job application deadline in ISO 8601 format.
+                    example: "2026-11-15"
+
+                  description:
+                    type: string
+                    x-nullable: true
+                    description: Description of the job.
+                    example: Software development role.
+
+                  vacancies:
+                    type: integer
+                    description: Number of vacancies.
+                    example: 5
+
+        total:
+          type: integer
+          description: Total number of job drives returned.
+          example: 1
+
+  401:
+    description: >
+      Unauthorized. The JWT is missing, invalid, or expired,
+      or the authenticated user's account cannot be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: JWT authentication error, when returned by Flask-JWT-Extended.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned when the user account cannot be found.
+          example: User not found
+
+  403:
+    description: >
+      Forbidden. The authenticated user does not have
+      the Recruiter role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: recruiters only"

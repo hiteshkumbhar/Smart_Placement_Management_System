@@ -1,0 +1,196 @@
+tags:
+  - Placement Officer
+  - Students
+
+summary: List, search, and filter students
+
+description: >
+  Retrieves student records for placement officers.
+  The endpoint supports three GET operations:
+  1. List all students with pagination.
+  2. Search students by name using the Search parameter.
+  3. Filter students by resume status, graduation year, and branch.
+
+  Search takes precedence over filtering when Search is supplied.
+  If neither Search nor filter parameters are supplied, all students
+  are returned with pagination.
+
+  Each page contains up to five students. The response also includes
+  the available graduation years and academic branches.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: Search
+    in: query
+    type: string
+    required: false
+    description: >
+      Case-insensitive partial search of student names.
+      When supplied, this search takes precedence over status,
+      graduation_year, and branch filters.
+    example: Rahul
+
+  - name: status
+    in: query
+    type: string
+    required: false
+    description: >
+      Filters students by exact resume_status value.
+      Used only when Search is not supplied.
+    example: Pending
+
+  - name: graduation_year
+    in: query
+    type: string
+    required: false
+    description: >
+      Filters students by graduation year.
+      Used only when Search is not supplied.
+    example: "2027"
+
+  - name: branch
+    in: query
+    type: string
+    required: false
+    description: >
+      Filters students by exact academic branch.
+      Used only when Search is not supplied.
+    example: Computer Science
+
+  - name: page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for the student list, search results,
+      or filtered results. Each page contains up to five students.
+    example: 1
+
+responses:
+  200:
+    description: >
+      Student records retrieved successfully. Returns the student
+      list, pagination metadata, available graduation years,
+      and available academic branches.
+    schema:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 25
+              user_id:
+                type: integer
+                example: 108
+              name:
+                type: string
+                x-nullable: true
+                example: Rahul Sharma
+              University_Roll_Number:
+                type: string
+                x-nullable: true
+                example: UNI2025001
+              branch:
+                type: string
+                x-nullable: true
+                example: Computer Science
+              cgpa:
+                type: number
+                x-nullable: true
+                example: 8.5
+              graduation_year:
+                type: integer
+                x-nullable: true
+                example: 2027
+              resume_path:
+                type: string
+                x-nullable: true
+                example: static/Docs/student/resume.pdf
+              resume_status:
+                type: string
+                x-nullable: true
+                example: Pending
+              resume_remark:
+                type: string
+                x-nullable: true
+                example: Please upload a clearer copy.
+              Certification:
+                type: string
+                x-nullable: true
+                example: Python,SQL
+              job_drive:
+                type: string
+                x-nullable: true
+                example: "12,15"
+              placement_status:
+                type: string
+                x-nullable: true
+                example: Placed
+
+        students_pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 5
+            total:
+              type: integer
+              example: 24
+            pages:
+              type: integer
+              example: 5
+            has_next:
+              type: boolean
+              example: true
+            has_prev:
+              type: boolean
+              example: false
+
+        graduation_years:
+          type: array
+          items:
+            type: integer
+          example:
+            - 2026
+            - 2027
+            - 2028
+
+        branches:
+          type: array
+          items:
+            type: string
+          example:
+            - Computer Science
+            - Information Technology
+
+  401:
+    description: Missing, invalid, or expired JWT access token.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

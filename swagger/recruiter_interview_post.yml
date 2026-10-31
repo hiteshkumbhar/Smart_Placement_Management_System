@@ -1,0 +1,291 @@
+tags:
+  - Recruiter Interviews
+
+summary: Manage interview feedback and results
+
+description: >
+  Performs one of three operations for an interview round.
+
+  1. Use mode=feedback to retrieve today's and upcoming interview
+     records with pagination.
+  2. Use mode=submit_feedback to save feedback for an interview round.
+  3. Omit mode or use another value to update the interview result.
+
+  The round_id identifies the interview round to process.
+  The authenticated user must have the Recruiter role.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: today_page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    description: >
+      Page number for today's interviews when mode=feedback.
+      This parameter is read from the query string, not form data.
+    example: 1
+
+  - name: upcoming_page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    description: >
+      Page number for upcoming interviews when mode=feedback.
+      This parameter is read from the query string, not form data.
+    example: 1
+
+  - name: round_id
+    in: formData
+    type: integer
+    required: true
+    description: ID of the interview round to process.
+    example: 15
+
+  - name: mode
+    in: formData
+    type: string
+    required: false
+    description: >
+      Selects the operation.
+      Use feedback to retrieve interview lists.
+      Use submit_feedback to save feedback.
+      If omitted or set to another value, the endpoint updates the result.
+    enum:
+      - feedback
+      - submit_feedback
+    example: submit_feedback
+
+  - name: feedback
+    in: formData
+    type: string
+    required: false
+    description: >
+      Feedback text to save. Used when mode=submit_feedback.
+    example: Strong technical knowledge and good communication skills.
+
+  - name: result
+    in: formData
+    type: string
+    required: false
+    description: >
+      Interview result to update. Used when mode is neither feedback
+      nor submit_feedback. Cleared and Rejected have special handling.
+    example: Cleared
+
+responses:
+  200:
+    description: >
+      The requested interview operation completed successfully.
+      The response fields depend on the supplied mode.
+
+    schema:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: Returned by the feedback retrieval operation.
+          example: feedback
+
+        round_id:
+          type: integer
+          description: Interview round ID processed by the request.
+          example: 15
+
+        today_interview:
+          type: array
+          description: Today's interviews, returned by mode=feedback.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                example: Example Technologies
+              job_title:
+                type: string
+                example: Software Engineer
+              student_name:
+                type: string
+                example: Rahul Sharma
+              interview_round:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 15
+                  application_id:
+                    type: integer
+                    example: 42
+                  round_name:
+                    type: string
+                    example: Technical Interview
+                  date:
+                    type: string
+                    x-nullable: true
+                    example: "2026-10-31 10:00:00"
+                  feedback:
+                    type: string
+                    x-nullable: true
+                    example: Good technical performance
+                  result:
+                    type: string
+                    x-nullable: true
+                    example: Cleared
+                  company_name:
+                    type: string
+                    example: Example Technologies
+                  job_title:
+                    type: string
+                    example: Software Engineer
+                  student_name:
+                    type: string
+                    example: Rahul Sharma
+
+        upcoming_interview:
+          type: array
+          description: Upcoming interviews, returned by mode=feedback.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                example: Example Technologies
+              job_title:
+                type: string
+                example: Backend Developer
+              student_name:
+                type: string
+                example: Rahul Sharma
+              interview_round:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 16
+                  application_id:
+                    type: integer
+                    example: 42
+                  round_name:
+                    type: string
+                    example: HR Interview
+                  date:
+                    type: string
+                    x-nullable: true
+                    example: "2026-11-05 11:00:00"
+                  feedback:
+                    type: string
+                    x-nullable: true
+                    example: null
+                  result:
+                    type: string
+                    x-nullable: true
+                    example: null
+                  company_name:
+                    type: string
+                    example: Example Technologies
+                  job_title:
+                    type: string
+                    example: Backend Developer
+                  student_name:
+                    type: string
+                    example: Rahul Sharma
+
+        Today_pagination:
+          type: object
+          description: Today's interview pagination, returned by mode=feedback.
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 5
+            total:
+              type: integer
+              example: 8
+            pages:
+              type: integer
+              example: 2
+            has_next:
+              type: boolean
+              example: true
+            has_prev:
+              type: boolean
+              example: false
+
+        Upcoming_pagination:
+          type: object
+          description: Upcoming interview pagination, returned by mode=feedback.
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 5
+            total:
+              type: integer
+              example: 12
+            pages:
+              type: integer
+              example: 3
+            has_next:
+              type: boolean
+              example: true
+            has_prev:
+              type: boolean
+              example: false
+
+        message:
+          type: string
+          description: Confirmation message for feedback or result updates.
+          example: Feedback submitted successfully
+
+        feedback:
+          type: string
+          x-nullable: true
+          description: Saved feedback, returned by mode=submit_feedback.
+          example: Strong technical knowledge and good communication skills.
+
+        result:
+          type: string
+          x-nullable: true
+          description: Updated interview result.
+          example: Cleared
+
+  401:
+    description: Missing, invalid, or expired JWT access token.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a recruiter.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+  404:
+    description: The specified interview round does not exist.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Interview round not found

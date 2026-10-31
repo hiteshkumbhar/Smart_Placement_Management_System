@@ -1,0 +1,149 @@
+tags:
+  - Companies
+  - Placement Officer
+
+summary: Update company details
+
+description: >
+  Updates the details of a company created by the authenticated
+  placement officer.
+
+  The company is identified using the required id query parameter.
+  Only non-empty form fields are used to update the company.
+
+  An optional company logo can be uploaded in JPG, JPEG, or PNG format.
+  The uploaded file must be smaller than 5 MB.
+
+  Only authenticated users with the Placement_Officer role can
+  update companies they created.
+
+security:
+  - Bearer: []
+
+consumes:
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: >
+      ID of the company to update. The company must have been
+      created by the authenticated placement officer.
+    example: 5
+
+  - name: name
+    in: formData
+    type: string
+    required: false
+    description: Updated company name.
+    example: Example Technologies
+
+  - name: Industry
+    in: formData
+    type: string
+    required: false
+    description: Updated industry.
+    example: Information Technology
+
+  - name: website
+    in: formData
+    type: string
+    required: false
+    description: Updated company website URL.
+    example: https://example.com
+
+  - name: HR_Name
+    in: formData
+    type: string
+    required: false
+    description: Updated HR contact name.
+    example: Alex Johnson
+
+  - name: HR_Email
+    in: formData
+    type: string
+    required: false
+    description: Updated HR contact email address.
+    example: hr@example.com
+
+  - name: HR_number
+    in: formData
+    type: string
+    required: false
+    description: Updated HR contact phone number.
+    example: "9876543210"
+
+  - name: Address
+    in: formData
+    type: string
+    required: false
+    description: Updated company address.
+    example: Mumbai, Maharashtra, India
+
+  - name: Logo
+    in: formData
+    type: file
+    required: false
+    description: >
+      Optional company logo image. Accepted file extensions are
+      JPG, JPEG, and PNG. The file must be smaller than 5 MB.
+
+responses:
+  200:
+    description: Company information updated successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Update confirmation message.
+          example: Company updated successfully
+
+        company_id:
+          type: integer
+          description: ID of the updated company.
+          example: 5
+
+    examples:
+      application/json:
+        message: Company updated successfully
+        company_id: 5
+
+  400:
+    description: >
+      The uploaded logo has an unsupported file extension
+      or does not satisfy the file-size requirement.
+    schema:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+          example:
+            - Upload file in jpg or jpeg or png format
+
+  401:
+    description: Authentication is missing or invalid.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a placement officer,
+      or the company does not exist under that user's ownership.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

@@ -1,0 +1,229 @@
+tags:
+  - Placement Officer
+  - Students
+
+summary: View and manage individual student records
+
+description: >
+  Performs operations on an individual student's record.
+
+  Supported modes:
+
+  - view_details: Retrieves student profile details, certifications,
+    graduation years, branches, and associated applications.
+
+  - resume_status: Verifies or rejects the student's resume.
+    The action parameter must be verify or reject.
+
+  - give_remark: Saves a remark against the student's resume.
+    If no remark is supplied, the endpoint returns the remark-entry
+    response.
+
+  - placement_status: Updates the student's placement status to Placed.
+
+  Student_details identifies the student record.
+  Only authenticated placement officers can access this endpoint.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: Student_details
+    in: formData
+    type: integer
+    required: true
+    description: Unique student profile ID.
+    example: 25
+
+  - name: mode
+    in: formData
+    type: string
+    required: true
+    enum:
+      - view_details
+      - resume_status
+      - give_remark
+      - placement_status
+    description: Operation to perform on the selected student.
+    example: view_details
+
+  - name: action
+    in: formData
+    type: string
+    required: false
+    enum:
+      - verify
+      - reject
+    description: >
+      Resume action. Used when mode is resume_status.
+      Use verify to mark the resume Verified, or reject
+      to mark it Rejected.
+    example: verify
+
+  - name: remark
+    in: formData
+    type: string
+    required: false
+    description: >
+      Remark to save when mode is give_remark.
+      A non-empty value is required to save a remark.
+    example: Please upload a clearer copy of your resume.
+
+responses:
+  200:
+    description: >
+      Operation completed successfully. The response fields depend
+      on the selected mode.
+
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Confirmation message for a completed operation.
+          example: Resume status processed
+
+        mode:
+          type: string
+          description: Returned for the remark-entry response.
+          example: remark
+
+        student:
+          type: object
+          description: Student record returned by the operation.
+          properties:
+            id:
+              type: integer
+              example: 25
+            user_id:
+              type: integer
+              example: 108
+            name:
+              type: string
+              x-nullable: true
+              example: Rahul Sharma
+            University_Roll_Number:
+              type: string
+              x-nullable: true
+              example: UNI2025001
+            branch:
+              type: string
+              x-nullable: true
+              example: Computer Science
+            cgpa:
+              type: number
+              x-nullable: true
+              example: 8.5
+            graduation_year:
+              type: integer
+              x-nullable: true
+              example: 2027
+            resume_path:
+              type: string
+              x-nullable: true
+              example: static/Docs/student/resume.pdf
+            resume_status:
+              type: string
+              x-nullable: true
+              example: Verified
+            resume_remark:
+              type: string
+              x-nullable: true
+              example: Please upload a clearer copy.
+            Certification:
+              type: string
+              x-nullable: true
+              example: Python,SQL
+            job_drive:
+              type: string
+              x-nullable: true
+              example: "12,15"
+            placement_status:
+              type: string
+              x-nullable: true
+              example: Placed
+
+        certifications:
+          type: array
+          description: >
+            Certification names split from the student's
+            comma-separated Certification field.
+          items:
+            type: string
+          example:
+            - Python
+            - SQL
+
+        graduation_years:
+          type: array
+          items:
+            type: integer
+          example:
+            - 2026
+            - 2027
+            - 2028
+
+        branches:
+          type: array
+          items:
+            type: string
+          example:
+            - Computer Science
+            - Information Technology
+
+        applications:
+          type: array
+          description: >
+            Applications, recommendations, and opt-outs associated
+            with the student. Each entry is currently a positional
+            array. Application entries contain four values;
+            recommendation and opt-out entries contain three values.
+          items:
+            type: array
+            items:
+              type: string
+          example:
+            - - Acme Technologies
+              - Software Engineer
+              - Applied
+              - "101"
+            - - Example Solutions
+              - Backend Developer
+              - Recommended
+            - - Example Company
+              - Graduate Engineer
+              - Opted Out
+
+  401:
+    description: Missing, invalid, or expired JWT access token.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+  404:
+    description: The requested student record does not exist.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Student not found

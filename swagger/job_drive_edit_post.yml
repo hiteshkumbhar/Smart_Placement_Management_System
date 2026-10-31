@@ -1,0 +1,154 @@
+tags:
+  - Job Drives
+
+summary: Update a job drive
+
+description: >
+  Updates the details of a job drive created by the authenticated recruiter.
+  Only the fields supplied in the form data are updated.
+  Fields that are not supplied remain unchanged.
+  The recruiter can update only job drives that they created.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: >
+      Unique ID of the job drive to update.
+      This parameter must be supplied in the URL query string,
+      not in the form data.
+    example: 12
+
+  - name: company_id
+    in: formData
+    type: integer
+    required: false
+    description: ID of the company associated with the job drive.
+    example: 3
+
+  - name: Title
+    in: formData
+    type: string
+    required: false
+    description: Updated job title.
+    example: Software Engineer
+
+  - name: Package
+    in: formData
+    type: string
+    required: false
+    description: Updated salary package.
+    example: "12 LPA"
+
+  - name: Location
+    in: formData
+    type: string
+    required: false
+    description: Updated job location.
+    example: Mumbai
+
+  - name: CGPA
+    in: formData
+    type: number
+    required: false
+    description: Updated minimum CGPA requirement.
+    example: 7.5
+
+  - name: Branches
+    in: formData
+    type: array
+    items:
+      type: string
+    collectionFormat: multi
+    required: false
+    description: >
+      Updated list of eligible academic branches.
+      Submit this field multiple times to provide multiple branches.
+      The values are stored as a comma-separated string.
+    example: Computer Science
+
+  - name: Graduation_Year
+    in: formData
+    type: integer
+    required: false
+    description: Updated eligible graduation year.
+    example: 2027
+
+  - name: Vacancies
+    in: formData
+    type: integer
+    required: false
+    description: Updated number of available vacancies.
+    example: 5
+
+  - name: Deadline
+    in: formData
+    type: string
+    format: date
+    required: false
+    description: >
+      Updated application deadline in YYYY-MM-DD format.
+      A date earlier than today is rejected.
+    example: "2026-12-15"
+
+  - name: Description
+    in: formData
+    type: string
+    required: false
+    description: Updated job description.
+    example: Responsible for developing and maintaining software.
+
+responses:
+  200:
+    description: Job drive updated successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Job drive updated successfully
+
+        job_id:
+          type: integer
+          description: ID of the updated job drive.
+          example: 12
+
+  400:
+    description: The supplied deadline is earlier than the current date.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Deadline cannot be less than today
+
+  401:
+    description: Authentication is missing or the JWT token is invalid or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a recruiter, or the requested
+      job drive does not exist or does not belong to the recruiter.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

@@ -1,0 +1,76 @@
+tags:
+  - Companies
+  - Placement Officer
+
+summary: Delete a company
+
+description: >
+  Deletes a company created by the authenticated placement officer.
+  The authenticated user must have the Placement_Officer role.
+  The company must belong to that user.
+
+  Both GET and POST requests perform the same deletion operation.
+  The company ID must be supplied through the URL query parameter
+  named id. No request body is accepted or required.
+
+  The company record is permanently deleted from the database.
+  The behavior of related records depends on the database's
+  foreign-key constraints and relationship configuration.
+
+security:
+  - Bearer: []
+
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: >
+      ID of the company to delete. The company must have been
+      created by the authenticated placement officer.
+      This parameter must be supplied in the URL query string
+      for both GET and POST requests.
+    example: 5
+
+produces:
+  - application/json
+
+responses:
+  200:
+    description: Company deleted successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Confirmation message.
+          example: Company deleted successfully
+        company_id:
+          type: integer
+          description: ID of the deleted company.
+          example: 5
+
+  401:
+    description: >
+      Authentication failed. The JWT access token is missing,
+      invalid, or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Authentication error message.
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      Forbidden. The authenticated user is not a placement officer,
+      or the specified company does not exist under that user's
+      ownership. This response is also returned when the id
+      parameter is missing or cannot be converted to an integer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

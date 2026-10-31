@@ -1,0 +1,218 @@
+tags:
+  - Placement Officer
+  - Companies
+
+summary: Retrieve companies managed by a placement officer
+
+description: >
+  Retrieves companies created by the authenticated placement officer.
+  Supports listing all companies, searching companies by name, industry,
+  or HR name, and viewing a specific company.
+
+  Companies are ordered alphabetically by company name.
+  Results are paginated with ten companies per page.
+
+  Search results include the number of job drives excluding drives
+  whose status is Closed. Normal listing and view results include
+  all job drives in the count.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: mode
+    in: query
+    type: string
+    required: false
+    default: ViewAll
+    enum:
+      - ViewAll
+      - view
+    description: >
+      Response mode. Use ViewAll or omit this parameter to retrieve
+      the company list. Use view to retrieve a specific company.
+    example: view
+
+  - name: search
+    in: query
+    type: string
+    required: false
+    description: >
+      Case-insensitive partial search term matched against company
+      name, industry, or HR name. When supplied, the endpoint
+      returns matching companies and pagination metadata.
+    example: Technology
+
+  - name: page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for the company listing or search results.
+      Each page contains up to ten companies.
+    example: 1
+
+  - name: id
+    in: query
+    type: integer
+    required: false
+    description: >
+      Company ID to retrieve when mode is view.
+      The company must belong to the authenticated placement officer.
+    example: 5
+
+responses:
+  200:
+    description: >
+      Company information retrieved successfully.
+      The target_company property is included when the view
+      operation is executed successfully.
+    schema:
+      type: object
+      required:
+        - companies
+        - mode
+        - companies_pagination
+      properties:
+        companies:
+          type: array
+          description: Paginated list of companies.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 5
+              company_name:
+                type: string
+                example: Example Technologies
+              logo_path:
+                type: string
+                x-nullable: true
+                example: uploads/company_logos/logo.png
+              industry:
+                type: string
+                x-nullable: true
+                example: Information Technology
+              website:
+                type: string
+                x-nullable: true
+                example: https://example.com
+              hr_name:
+                type: string
+                x-nullable: true
+                example: Alex Johnson
+              phone:
+                type: string
+                x-nullable: true
+                example: "9876543210"
+              email:
+                type: string
+                x-nullable: true
+                example: hr@example.com
+              address:
+                type: string
+                x-nullable: true
+                example: Mumbai
+              job_drive_count:
+                type: integer
+                example: 3
+
+        mode:
+          type: string
+          enum:
+            - ViewAll
+            - view
+          example: ViewAll
+
+        target_company:
+          type: object
+          description: >
+            Details of the selected company. Returned only when
+            mode is view and the company is found.
+          properties:
+            id:
+              type: integer
+              example: 5
+            company_name:
+              type: string
+              example: Example Technologies
+            logo_path:
+              type: string
+              x-nullable: true
+              example: uploads/company_logos/logo.png
+            industry:
+              type: string
+              x-nullable: true
+              example: Information Technology
+            website:
+              type: string
+              x-nullable: true
+              example: https://example.com
+            hr_name:
+              type: string
+              x-nullable: true
+              example: Alex Johnson
+            phone:
+              type: string
+              x-nullable: true
+              example: "9876543210"
+            email:
+              type: string
+              x-nullable: true
+              example: hr@example.com
+            address:
+              type: string
+              x-nullable: true
+              example: Mumbai
+            job_drive_count:
+              type: integer
+              example: 3
+
+        companies_pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 10
+            total:
+              type: integer
+              example: 25
+            pages:
+              type: integer
+              example: 3
+            has_next:
+              type: boolean
+              example: true
+            has_prev:
+              type: boolean
+              example: false
+
+  401:
+    description: Missing, invalid, or expired JWT access token.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a placement officer,
+      or the requested company does not belong to the
+      authenticated placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

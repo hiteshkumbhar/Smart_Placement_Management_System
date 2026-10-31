@@ -1,0 +1,165 @@
+tags:
+  - Student Job Drives
+
+summary: Apply for or opt out of a job drive
+
+description: >
+  Allows an authenticated student to perform an action on a job drive
+  for which they are eligible.
+
+  Use the apply action to submit a job application. The student's
+  resume must have Verified status, the job drive must not be closed,
+  the deadline must not have passed, and the student must not already
+  have an application for that job drive.
+
+  Use the opt_out action to decline an eligible job drive without
+  submitting an application. This action is rejected if an application
+  already exists for the student and job drive.
+
+  Successful actions remove the job drive from the student's eligible
+  job-drive list. Application submissions and opt-outs trigger
+  placement-officer notifications. Application submissions may also
+  trigger recruiter notifications when the configured threshold
+  is reached.
+
+  Only authenticated users with the student role can access this endpoint.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+parameters:
+  - name: job_id
+    in: path
+    type: integer
+    required: true
+    description: Unique ID of the job drive.
+    example: 25
+
+  - name: body
+    in: body
+    required: true
+    description: Specifies the action the student wants to perform.
+    schema:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            - apply
+            - opt_out
+          description: >
+            Action to perform. Use apply to submit an application
+            or opt_out to decline the job opportunity.
+          example: apply
+
+responses:
+  201:
+    description: >
+      Application submitted successfully. This response is returned
+      when action is apply and the application is created.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Confirmation message.
+          example: Application submitted successfully.
+        application_id:
+          type: integer
+          description: ID of the newly created application.
+          example: 101
+        job_id:
+          type: integer
+          description: ID of the job drive.
+          example: 25
+        status:
+          type: string
+          description: Initial status of the application.
+          example: APPLIED
+
+  200:
+    description: >
+      The student successfully opted out of the job drive.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Confirmation message.
+          example: You have opted out of this job drive.
+        job_id:
+          type: integer
+          description: ID of the job drive.
+          example: 25
+
+  400:
+    description: >
+      The action is invalid, the job drive is closed, the application
+      deadline has passed, or the student's resume has not been verified.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Explanation of why the request cannot be completed.
+          example: Please wait until your resume is verified.
+
+  401:
+    description: >
+      Authentication failed, the JWT is missing or invalid, or the
+      authenticated user could not be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Authentication error returned by the JWT extension.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned when the user account cannot be found.
+          example: User not found
+
+  403:
+    description: >
+      The authenticated user is not a student or is not eligible
+      for the specified job drive.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Explanation of why access is forbidden.
+          example: You are not eligible for this job drive.
+
+  404:
+    description: >
+      The specified job drive does not exist or the authenticated
+      user does not have a student profile.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Explanation of which resource was not found.
+          example: Job drive not found
+
+  409:
+    description: >
+      An application already exists for this student and job drive.
+      The student cannot apply again or opt out after applying.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Explanation of the conflict.
+          example: You have already applied for this job.

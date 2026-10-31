@@ -1,0 +1,121 @@
+tags:
+  - Companies
+  - Placement Officer
+
+summary: Retrieve company details
+
+description: >
+  Retrieves the details of a company created by the authenticated
+  placement officer. The company is identified by its ID.
+  The placement officer can only retrieve companies they created.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: >
+      ID of the company to retrieve. The company must have been
+      created by the authenticated placement officer.
+    example: 5
+
+responses:
+  200:
+    description: Company details retrieved successfully.
+    schema:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: Operation mode.
+          example: edit
+
+        company:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Unique company ID.
+              example: 5
+
+            company_name:
+              type: string
+              description: Registered company name.
+              example: Example Technologies
+
+            industry:
+              type: string
+              description: Industry in which the company operates.
+              example: Information Technology
+
+            website:
+              type: string
+              description: Company website URL.
+              example: https://example.com
+
+            hr_name:
+              type: string
+              description: Name of the HR contact.
+              example: Alex Johnson
+
+            email:
+              type: string
+              format: email
+              description: HR contact email address.
+              example: hr@example.com
+
+            phone:
+              type: string
+              description: HR contact phone number.
+              example: "9876543210"
+
+            address:
+              type: string
+              description: Company address.
+              example: Mumbai, Maharashtra, India
+
+            logo_path:
+              type: string
+              x-nullable: true
+              description: Stored company logo filename.
+              example: logo.png
+
+    examples:
+      application/json:
+        mode: edit
+        company:
+          id: 5
+          company_name: Example Technologies
+          industry: Information Technology
+          website: https://example.com
+          hr_name: Alex Johnson
+          email: hr@example.com
+          phone: "9876543210"
+          address: Mumbai, Maharashtra, India
+          logo_path: logo.png
+
+  401:
+    description: Authentication is missing or invalid.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a placement officer,
+      or the company does not exist under that user's ownership.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

@@ -1,0 +1,275 @@
+tags:
+  - Placement Officer
+  - Interviews
+
+summary: Get placement officer interview lists
+
+description: >
+  Retrieves today's, upcoming, and past interview records
+  for the placement officer.
+
+  Interviews are divided into three categories based on their
+  scheduled date:
+  - Today's interviews
+  - Upcoming interviews
+  - Past interviews
+
+  Each category supports independent searching and pagination.
+
+  Search matches the company name, student name, or job title
+  using case-insensitive partial matching.
+
+  Each category is paginated independently with five records
+  per page.
+
+  Today's interviews are ordered by interview date in ascending
+  order. Upcoming interviews are ordered by date in ascending
+  order. Past interviews are ordered by date in descending order.
+
+  Only authenticated users with the Placement_Officer role
+  can access this endpoint.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+
+  - in: query
+    name: today_search
+    type: string
+    required: false
+    description: >
+      Search term for today's interviews.
+      Matches company name, student name, or job title.
+      Supports case-insensitive partial matching.
+    example: Rahul
+
+  - in: query
+    name: upcoming_search
+    type: string
+    required: false
+    description: >
+      Search term for upcoming interviews.
+      Matches company name, student name, or job title.
+      Supports case-insensitive partial matching.
+    example: Software Engineer
+
+  - in: query
+    name: past_search
+    type: string
+    required: false
+    description: >
+      Search term for past interviews.
+      Matches company name, student name, or job title.
+      Supports case-insensitive partial matching.
+    example: Example Technologies
+
+  - in: query
+    name: today_page
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for today's interviews.
+      Each page contains up to five records.
+    example: 1
+
+  - in: query
+    name: upcoming_page
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for upcoming interviews.
+      Each page contains up to five records.
+    example: 2
+
+  - in: query
+    name: past_page
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for past interviews.
+      Each page contains up to five records.
+    example: 1
+
+responses:
+
+  200:
+    description: >
+      Interview records retrieved successfully.
+      Returns today's, upcoming, and past interviews,
+      their pagination information, and the search terms used.
+
+    schema:
+      type: object
+
+      properties:
+
+        Todays_interview:
+          type: array
+          description: Today's interview records.
+          items:
+            $ref: '#/definitions/PlacementOfficerInterview'
+
+        upcoming_interviews:
+          type: array
+          description: Upcoming interview records.
+          items:
+            $ref: '#/definitions/PlacementOfficerInterview'
+
+        Past_interviews:
+          type: array
+          description: Past interview records.
+          items:
+            $ref: '#/definitions/PlacementOfficerInterview'
+
+        Today_pagination:
+          $ref: '#/definitions/InterviewPagination'
+
+        Upcoming_pagination:
+          $ref: '#/definitions/InterviewPagination'
+
+        Past_pagination:
+          $ref: '#/definitions/InterviewPagination'
+
+        today_search:
+          type: string
+          description: Search term applied to today's interviews.
+          example: Rahul
+
+        upcoming_search:
+          type: string
+          description: Search term applied to upcoming interviews.
+          example: Software Engineer
+
+        past_search:
+          type: string
+          description: Search term applied to past interviews.
+          example: Example Technologies
+
+  401:
+    description: >
+      Unauthorized. JWT access token is missing, invalid,
+      or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      Forbidden. The authenticated user is not a placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+definitions:
+
+  PlacementOfficerInterview:
+    type: object
+    properties:
+
+      interview_id:
+        type: integer
+        description: Unique interview round ID.
+        example: 15
+
+      company_name:
+        type: string
+        description: Name of the company.
+        example: Example Technologies
+
+      job_title:
+        type: string
+        description: Job title associated with the interview.
+        example: Software Engineer
+
+      student_name:
+        type: string
+        description: Name of the student attending the interview.
+        example: Rahul Sharma
+
+      round_name:
+        type: string
+        description: Name of the interview round.
+        example: Technical Interview
+
+      date:
+        type: string
+        format: date-time
+        x-nullable: true
+        description: >
+          Scheduled interview date and time in ISO 8601 format,
+          or null if no date is available.
+        example: "2026-11-15T10:30:00"
+
+      link:
+        type: string
+        x-nullable: true
+        description: Interview meeting link, or null if unavailable.
+        example: "https://meet.example.com/interview"
+
+      result:
+        type: string
+        x-nullable: true
+        description: Interview result, or null if not recorded.
+        example: Pending
+
+      feedback:
+        type: string
+        x-nullable: true
+        description: Interview feedback, or null if unavailable.
+        example: Good technical knowledge
+
+      company_logo:
+        type: string
+        x-nullable: true
+        description: Company logo path, or null if unavailable.
+        example: "static/Docs/company/logo.png"
+
+  InterviewPagination:
+    type: object
+    properties:
+
+      page:
+        type: integer
+        description: Current page number.
+        example: 1
+
+      per_page:
+        type: integer
+        description: Number of records per page.
+        example: 5
+
+      total:
+        type: integer
+        description: Total number of matching interview records.
+        example: 8
+
+      pages:
+        type: integer
+        description: Total number of available pages.
+        example: 2
+
+      has_next:
+        type: boolean
+        description: Whether another page is available.
+        example: true
+
+      has_prev:
+        type: boolean
+        description: Whether a previous page is available.
+        example: false

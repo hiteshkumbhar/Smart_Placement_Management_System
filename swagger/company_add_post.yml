@@ -1,0 +1,155 @@
+tags:
+  - Companies
+  - Placement Officer
+
+summary: Add a new company
+
+description: >
+  Registers a new company in the placement management system.
+  The authenticated placement officer submits company details
+  using form data and may optionally upload a company logo.
+
+  The HR email address and phone number are checked against
+  existing company records. If either is already registered,
+  the request returns HTTP 409.
+
+  The optional company logo must have a JPG, JPEG, or PNG
+  extension and must be smaller than 5 MB.
+
+  The company record stores the authenticated placement
+  officer's user ID and the creation timestamp.
+
+security:
+  - Bearer: []
+
+consumes:
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - in: formData
+    name: name
+    type: string
+    required: false
+    description: Name of the company.
+    example: Example Technologies
+
+  - in: formData
+    name: Industry
+    type: string
+    required: false
+    description: Industry in which the company operates.
+    example: Information Technology
+
+  - in: formData
+    name: website
+    type: string
+    required: false
+    description: Company's website address.
+    example: https://example.com
+
+  - in: formData
+    name: HR_Name
+    type: string
+    required: false
+    description: Name of the company's HR contact.
+    example: Alex Johnson
+
+  - in: formData
+    name: HR_Email
+    type: string
+    required: false
+    description: Email address of the HR contact.
+    example: hr@example.com
+
+  - in: formData
+    name: HR_number
+    type: string
+    required: false
+    description: Phone number of the HR contact.
+    example: "9876543210"
+
+  - in: formData
+    name: Address
+    type: string
+    required: false
+    description: Company's address.
+    example: Mumbai, Maharashtra, India
+
+  - in: formData
+    name: Logo
+    type: file
+    required: false
+    description: >
+      Optional company logo. Accepted file extensions are
+      jpg, jpeg, and png. The file must be smaller than 5 MB.
+
+responses:
+  201:
+    description: Company created successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Company added successfully
+        company_id:
+          type: integer
+          description: ID assigned to the newly created company.
+          example: 5
+
+  400:
+    description: >
+      The uploaded company logo has an unsupported file extension
+      or exceeds the permitted file size.
+    schema:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+          example:
+            - Upload file in jpg or jpeg or png format
+            - Logo size must be less than 5 MB
+
+  401:
+    description: Authentication is missing, invalid, or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+  409:
+    description: >
+      The HR email address or phone number is already registered.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Returned when one duplicate is found.
+          example: Email is already taken
+        errors:
+          type: array
+          description: >
+            Returned when both the HR email address and phone
+            number are already registered.
+          items:
+            type: string
+          example:
+            - Email is already taken
+            - Mobile number is already taken

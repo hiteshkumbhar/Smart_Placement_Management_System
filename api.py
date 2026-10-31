@@ -9,12 +9,10 @@ from auth import get_current_user
 from utils.notifications import notifications
 import os
 from werkzeug.utils import secure_filename
-
-
-
+from datetime import timedelta
+from flasgger import swag_from
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
-
 
 def current_user():
     try:
@@ -60,6 +58,7 @@ def application_json(a):
 
 
 @api_bp.post("/login")
+@swag_from("swagger/login.yml", methods=["POST"])
 def api_login():
     data = request.get_json(silent=True) or {}
     email, password = data.get("email"), data.get("password")
@@ -75,6 +74,7 @@ def api_login():
 
 @api_bp.get("/student/dashboard")
 @jwt_required()
+@swag_from("swagger/student_dashboard.yml")
 def student_dashboard():
     user = current_user()
 
@@ -275,6 +275,7 @@ def student_dashboard():
 
 @api_bp.get("/student/applications")
 @jwt_required()
+@swag_from("swagger/student_applications.yml")
 def student_applications():
     user = current_user()
     if not user:
@@ -383,6 +384,7 @@ def student_applications():
 
 @api_bp.route("/student/application-details", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/student_application_details.yml")
 def student_application_details():
     user = current_user()
 
@@ -451,8 +453,8 @@ def student_application_details():
 
 @api_bp.route("/student/interviews", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/student_interviews.yml")
 def student_interviews():
-
     user = get_current_user()
 
     if not user:
@@ -466,7 +468,7 @@ def student_interviews():
     if not student:
         return jsonify({"error": "Student profile not found"}), 404
 
-    today_start = datetime.datetime.combine(datetime.date.today(),datetime.time.min)
+    today_start = datetime.combine(datetime.date.today(),datetime.time.min)
     tomorrow_start = today_start + datetime.timedelta(days=1)
 
     PER_PAGE = 5
@@ -654,6 +656,7 @@ def get_eligible_drive_ids(student):
 
 @api_bp.route("/student/job-drives", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/student_job_drives.yml")
 def student_job_drives():
     user = get_current_user()
 
@@ -724,8 +727,8 @@ def student_job_drives():
 
 @api_bp.route("/student/job-drives/<int:job_id>/action",methods=["POST"])
 @jwt_required()
+@swag_from("swagger/student_job_drive_action.yml")
 def student_job_drive_action(job_id):
-
     user = get_current_user()
 
     if not user:
@@ -915,352 +918,390 @@ def student_job_drive_action(job_id):
         }), 200
 
 
-@api_bp.route("/student/profile", methods=["GET", "POST", "PATCH"])
-@jwt_required()
-def student_profile_api():
-
+def _student_profile_context():
+    """Resolve the JWT user and student profile or return an HTTP error."""
     user = get_current_user()
-
     if not user:
-        return jsonify({"error": "User not found"}), 401
-
+        return None, None, (jsonify({"error": "User not found"}), 401)
     if user.role != "student":
-        return jsonify({"error": "Forbidden: students only"}), 403
-
+        return None, None, (jsonify({"error": "Forbidden: students only"}), 403)
     student = Students.query.filter_by(user_id=user.user_id).first()
-
     if not student:
-        return jsonify({"error": "Student profile not found"}), 404
+        return None, None, (jsonify({"error": "Student profile not found"}), 404)
+    return user, student, None
 
-    # ---------------- GET: View profile or download resume ----------------
-    if request.method == "GET":
 
-        if request.args.get("Download") == "download_resume":
+@api_bp.route("/student/profile", methods=['GET'])
+@jwt_required()
+@swag_from("swagger/student_profile_get.yml")
+def student_profile_get_api():
+    """Student profile operation."""
+    user, student, failure = _student_profile_context()
+    if failure is not None:
+        return failure
 
-            if not student.resume_path:
-                return jsonify({"error": "No resume uploaded"}), 404
-
-            resume_folder = os.path.join(
-                current_app.root_path,
-                "static", "Docs", "student", "resumes"
-            )
-
-            filename = secure_filename(student.resume_path)
-            filepath = os.path.join(resume_folder, filename)
-
-            if not os.path.isfile(filepath):
-                return jsonify({"error": "Resume file not found"}), 404
-
-            return send_from_directory(
-                directory=resume_folder,
-                path=filename,
-                as_attachment=True,
-                download_name=filename
-            )
-
-        return jsonify({
-            "profile": {
-                "user_id": user.user_id,
-                "name": user.name,
-                "branch": student.branch,
-                "cgpa": student.cgpa,
-                "skills": student.skills,
-                "graduation_year": student.graduation_year,
-                "mobile_number": student.mobile_number,
-                "Gender": student.Gender,
-                "DOB": student.DOB.isoformat() if student.DOB else None,
-                "Address": student.Address,
-                "City": student.City,
-                "State": student.State,
-                "pin_code": student.pin_code,
-                "University_Roll_Number": student.University_Roll_Number,
-                "Semester": student.Semester,
-                "tenth_Percentage": student.tenth_Percentage,
-                "twelth_Percentage": student.twelth_Percentage,
-                "Diploma_Percentage": student.Diploma_Percentage,
-                "Total_Backlogs": student.Total_Backlogs,
-                "Active_Backlogs": student.Active_Backlogs,
-                "LinkedIn": student.LinkedIn,
-                "GitHub": student.GitHub,
-                "Portfolio_Website": student.Portfolio_Website,
-                "LeetCode": student.LeetCode,
-                "HackerRank": student.HackerRank,
-                "Certification": student.Certification,
-                "profile_pic": student.profile_pic,
-                "resume_path": student.resume_path,
-                "resume_status": student.resume_status,
-                "updated_at": (
-                    student.updated_at.isoformat()
-                    if student.updated_at else None
-                )
-            }
-        }), 200
-
-    # ---------------- POST/PATCH: Update profile or upload files ----------------
-
-    action = request.args.get("action", "update")
-
-    MAX_FILE_SIZE = 5 * 1024 * 1024
-
-    # Upload profile photo
-    if action == "change_photo":
-
-        photo = request.files.get("profile_photo")
-
-        if not photo or not photo.filename:
-            return jsonify({"error": "Profile photo is required"}), 400
-
-        photo.seek(0, os.SEEK_END)
-        file_size = photo.tell()
-        photo.seek(0)
-
-        if file_size > MAX_FILE_SIZE:
-            return jsonify({"error": "Photo must not exceed 5 MB"}), 413
-
-        original_name = secure_filename(photo.filename)
-
-        if "." not in original_name:
-            return jsonify({"error": "Only JPG, JPEG, and PNG files are allowed"}), 400
-
-        extension = original_name.rsplit(".", 1)[1].lower()
-
-        if extension not in ("jpg", "jpeg", "png"):
-            return jsonify({"error": "Only JPG, JPEG, and PNG files are allowed"}), 400
-
-        folder = os.path.join(
-            current_app.root_path,
-            "static", "Images", "student", "profile_photo"
-        )
-        os.makedirs(folder, exist_ok=True)
-
-        safe_name = secure_filename(user.name or "student")
-        filename = f"User_{user.user_id}_{safe_name}.{extension}"
-
-        try:
-            photo.save(os.path.join(folder, filename))
-            student.profile_pic = filename
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            current_app.logger.exception("Profile photo upload failed")
-            return jsonify({"error": "Unable to save profile photo"}), 500
-
-        return jsonify({
-            "message": "Profile photo updated successfully",
-            "profile_pic": filename
-        }), 200
-
-    # Upload resume
-    if action == "upload_resume":
-
-        resume = request.files.get("resume_file")
-
-        if not resume or not resume.filename:
-            return jsonify({"error": "Resume file is required"}), 400
-
-        resume.seek(0, os.SEEK_END)
-        file_size = resume.tell()
-        resume.seek(0)
-
-        if file_size >= MAX_FILE_SIZE:
-            return jsonify({"error": "Resume must be smaller than 5 MB"}), 413
-
-        original_name = secure_filename(resume.filename)
-
-        if "." not in original_name or original_name.rsplit(".", 1)[1].lower() != "pdf":
-            return jsonify({"error": "Resume must be a PDF"}), 400
-
-        folder = os.path.join(
-            current_app.root_path,
-            "static", "Docs", "student", "resumes"
-        )
-        os.makedirs(folder, exist_ok=True)
-
-        safe_name = secure_filename(user.name or "student")
-        filename = f"Resume_{user.user_id}_{safe_name}.pdf"
-        is_reupload = bool(student.resume_path)
-
-        try:
-            resume.save(os.path.join(folder, filename))
-            student.resume_path = filename
-
-            if is_reupload:
-                student.resume_status = "Reuploaded"
-
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            current_app.logger.exception("Resume upload failed")
-            return jsonify({"error": "Unable to save resume"}), 500
-
-        if is_reupload:
-            try:
-                officer_emails = [
-                    officer.email
-                    for officer in Users.query.filter_by(
-                        role="Placement_Officer"
-                    ).all()
-                ]
-                notifications([
-                    "Student_resume_reuploaded",
-                    officer_emails,
-                    student.user.name
-                ])
-            except Exception:
-                current_app.logger.exception("Resume notification failed")
-
-        return jsonify({
-            "message": "Resume uploaded successfully",
+    return jsonify({"profile": {
+            "user_id": user.user_id,
+            "name": user.name,
+            "branch": student.branch,
+            "cgpa": student.cgpa,
+            "skills": student.skills,
+            "graduation_year": student.graduation_year,
+            "mobile_number": student.mobile_number,
+            "Gender": student.Gender,
+            "DOB": student.DOB.isoformat() if student.DOB else None,
+            "Address": student.Address,
+            "City": student.City,
+            "State": student.State,
+            "pin_code": student.pin_code,
+            "University_Roll_Number": student.University_Roll_Number,
+            "Semester": student.Semester,
+            "tenth_Percentage": student.tenth_Percentage,
+            "twelth_Percentage": student.twelth_Percentage,
+            "Diploma_Percentage": student.Diploma_Percentage,
+            "Total_Backlogs": student.Total_Backlogs,
+            "Active_Backlogs": student.Active_Backlogs,
+            "LinkedIn": student.LinkedIn,
+            "GitHub": student.GitHub,
+            "Portfolio_Website": student.Portfolio_Website,
+            "LeetCode": student.LeetCode,
+            "HackerRank": student.HackerRank,
+            "Certification": student.Certification,
+            "profile_pic": student.profile_pic,
             "resume_path": student.resume_path,
-            "resume_status": student.resume_status
-        }), 200
+            "resume_status": student.resume_status,
+            "updated_at": (
+                student.updated_at.isoformat()
+                if student.updated_at else None
+            )
+        }
+    }), 200
 
-    # Upload certification
-    if action == "upload_certification":
 
-        certification = request.files.get("Certification")
+@api_bp.route("/student/profile", methods=['POST', 'PATCH'])
+@jwt_required()
+@swag_from("swagger/student_profile_update.yml")
+def student_profile_update_api():
+    """Student profile operation."""
+    user, student, failure = _student_profile_context()
+    if failure is not None:
+        return failure
 
-        if not certification or not certification.filename:
-            return jsonify({"error": "Certification PDF is required"}), 400
+    data = request.get_json(silent=True)
 
-        certification.seek(0, os.SEEK_END)
-        file_size = certification.tell()
-        certification.seek(0)
-
-        if file_size >= MAX_FILE_SIZE:
-            return jsonify({"error": "Certification must be smaller than 5 MB"}), 413
-
-        original_name = secure_filename(certification.filename)
-
-        if "." not in original_name or original_name.rsplit(".", 1)[1].lower() != "pdf":
-            return jsonify({"error": "Certification must be a PDF"}), 400
-
-        folder = os.path.join(
-            current_app.root_path,
-            "static", "Docs", "student", "certifications"
-        )
-        os.makedirs(folder, exist_ok=True)
-
-        safe_name = secure_filename(user.name or "student")
-        filename = f"Cert_{user.user_id}_{safe_name}_{original_name}"
-
-        try:
-            certification.save(os.path.join(folder, filename))
-
-            existing = (student.Certification or "").strip()
-            existing_names = [
-                name.strip() for name in existing.split(",") if name.strip()
-            ]
-
-            if filename not in existing_names:
-                existing_names.append(filename)
-
-            student.Certification = ", ".join(existing_names)
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            current_app.logger.exception("Certification upload failed")
-            return jsonify({"error": "Unable to save certification"}), 500
-
+    if not isinstance(data, dict):
         return jsonify({
-            "message": "Certification uploaded successfully",
-            "certifications": existing_names
-        }), 201
+            "error": "Send profile updates as a JSON object"
+        }), 400
 
-    # Update profile fields using JSON
-    if request.method in ("POST", "PATCH"):
+    allowed_fields = [
+        "branch", "cgpa", "skills", "graduation_year",
+        "mobile_number", "Gender", "DOB", "Address",
+        "City", "State", "pin_code", "University_Roll_Number",
+        "Semester", "tenth_Percentage", "twelth_Percentage",
+        "Diploma_Percentage", "Total_Backlogs", "Active_Backlogs",
+        "LinkedIn", "GitHub", "Portfolio_Website",
+        "LeetCode", "HackerRank"
+    ]
 
-        data = request.get_json(silent=True)
+    unique_fields = [
+        "mobile_number", "University_Roll_Number",
+        "LinkedIn", "GitHub", "Portfolio_Website",
+        "LeetCode", "HackerRank"
+    ]
 
-        if not isinstance(data, dict):
+    for field in unique_fields:
+        if field not in data or data[field] is None:
+            continue
+
+        value = data[field]
+
+        if isinstance(value, str):
+            value = value.strip()
+
+        if not value:
+            continue
+
+        existing = db.session.query(
+            getattr(Students, field)
+        ).filter(
+            getattr(Students, field) == value,
+            Students.user_id != user.user_id
+        ).first()
+
+        if existing:
             return jsonify({
-                "error": "Send profile updates as a JSON object"
-            }), 400
+                "error": f"This {field} is already taken",
+                "field": field
+            }), 409
 
-        allowed_fields = [
-            "branch", "cgpa", "skills", "graduation_year",
-            "mobile_number", "Gender", "DOB", "Address",
-            "City", "State", "pin_code", "University_Roll_Number",
-            "Semester", "tenth_Percentage", "twelth_Percentage",
-            "Diploma_Percentage", "Total_Backlogs", "Active_Backlogs",
-            "LinkedIn", "GitHub", "Portfolio_Website",
-            "LeetCode", "HackerRank"
-        ]
+    if "name" in data:
+        if not isinstance(data["name"], str) or not data["name"].strip():
+            return jsonify({"error": "Name must not be empty"}), 400
 
-        unique_fields = [
-            "mobile_number", "University_Roll_Number",
-            "LinkedIn", "GitHub", "Portfolio_Website",
-            "LeetCode", "HackerRank"
-        ]
+        user.name = data["name"].strip()
 
-        for field in unique_fields:
-            if field not in data or data[field] is None:
-                continue
-
+    for field in allowed_fields:
+        if field in data:
             value = data[field]
 
             if isinstance(value, str):
                 value = value.strip()
 
-            if not value:
-                continue
+            if field == "DOB" and value:
+                try:
+                    value = datetime.date.fromisoformat(value)
+                except (ValueError, TypeError):
+                    return jsonify({
+                        "error": "DOB must use YYYY-MM-DD format"
+                    }), 400
 
-            existing = db.session.query(
-                getattr(Students, field)
-            ).filter(
-                getattr(Students, field) == value,
-                Students.user_id != user.user_id
-            ).first()
+            setattr(student, field, value)
 
-            if existing:
-                return jsonify({
-                    "error": f"This {field} is already taken",
-                    "field": field
-                }), 409
+    student.updated_at = datetime.now(
+        ZoneInfo("Asia/Kolkata")
+    )
 
-        if "name" in data:
-            if not isinstance(data["name"], str) or not data["name"].strip():
-                return jsonify({"error": "Name must not be empty"}), 400
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Profile update failed")
+        return jsonify({"error": "Unable to update profile"}), 500
 
-            user.name = data["name"].strip()
+    return jsonify({
+        "message": "Profile updated successfully"
+    }), 200
 
-        for field in allowed_fields:
-            if field in data:
-                value = data[field]
 
-                if isinstance(value, str):
-                    value = value.strip()
+@api_bp.route("/student/profile/resume/download", methods=['GET'])
+@jwt_required()
+@swag_from("swagger/student_resume_download.yml")
+def student_resume_download_api():
+    """Student profile operation."""
+    user, student, failure = _student_profile_context()
+    if failure is not None:
+        return failure
 
-                if field == "DOB" and value:
-                    try:
-                        value = datetime.date.fromisoformat(value)
-                    except (ValueError, TypeError):
-                        return jsonify({
-                            "error": "DOB must use YYYY-MM-DD format"
-                        }), 400
+    if not student.resume_path:
+        return jsonify({"error": "No resume uploaded"}), 404
 
-                setattr(student, field, value)
+    resume_folder = os.path.join(
+        current_app.root_path,
+        "static", "Docs", "student", "resumes"
+    )
 
-        student.updated_at = datetime.datetime.now(
-            ZoneInfo("Asia/Kolkata")
-        )
+    filename = secure_filename(student.resume_path)
+    filepath = os.path.join(resume_folder, filename)
 
+    if not os.path.isfile(filepath):
+        return jsonify({"error": "Resume file not found"}), 404
+
+    return send_from_directory(
+        directory=resume_folder,
+        path=filename,
+        as_attachment=True,
+        download_name=filename
+    )
+
+
+@api_bp.route("/student/profile/photo", methods=['POST'])
+@jwt_required()
+@swag_from("swagger/student_profile_photo.yml")
+def student_profile_photo_api():
+    """Student profile operation."""
+
+    user, student, failure = _student_profile_context()
+
+    if failure is not None:
+        return failure
+
+    photo = request.files.get("profile_photo")
+
+    if not photo or not photo.filename:
+        return jsonify({"error": "Profile photo is required"}), 400
+
+    photo.seek(0, os.SEEK_END)
+    file_size = photo.tell()
+    photo.seek(0)
+    MAX_FILE_SIZE = 5 * 1024 * 1024
+
+    if file_size > MAX_FILE_SIZE:
+        return jsonify({"error": "Photo must not exceed 5 MB"}), 413
+
+    original_name = secure_filename(photo.filename)
+
+    if "." not in original_name:
+        return jsonify({"error": "Only JPG, JPEG, and PNG files are allowed"}), 400
+
+    extension = original_name.rsplit(".", 1)[1].lower()
+
+    if extension not in ("jpg", "jpeg", "png"):
+        return jsonify({"error": "Only JPG, JPEG, and PNG files are allowed"}), 400
+
+    folder = os.path.join(
+        current_app.root_path,
+        "static", "Images", "student", "profile_photo"
+    )
+    os.makedirs(folder, exist_ok=True)
+
+    safe_name = secure_filename(user.name or "student")
+    filename = f"User_{user.user_id}_{safe_name}.{extension}"
+
+    try:
+        photo.save(os.path.join(folder, filename))
+        student.profile_pic = filename
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Profile photo upload failed")
+        return jsonify({"error": "Unable to save profile photo"}), 500
+
+    return jsonify({
+        "message": "Profile photo updated successfully",
+        "profile_pic": filename
+    }), 200
+
+
+@api_bp.route("/student/profile/resume", methods=['POST'])
+@jwt_required()
+@swag_from("swagger/student_resume_upload.yml")
+def student_resume_upload_api():
+    """Student profile operation."""
+    user, student, failure = _student_profile_context()
+    if failure is not None:
+        return failure
+
+    resume = request.files.get("resume_file")
+
+    if not resume or not resume.filename:
+        return jsonify({"error": "Resume file is required"}), 400
+
+    resume.seek(0, os.SEEK_END)
+    file_size = resume.tell()
+    resume.seek(0)
+    MAX_FILE_SIZE = 5 * 1024 * 1024
+
+    if file_size >= MAX_FILE_SIZE:
+        return jsonify({"error": "Resume must be smaller than 5 MB"}), 413
+
+    original_name = secure_filename(resume.filename)
+
+    if "." not in original_name or original_name.rsplit(".", 1)[1].lower() != "pdf":
+        return jsonify({"error": "Resume must be a PDF"}), 400
+
+    folder = os.path.join(
+        current_app.root_path,
+        "static", "Docs", "student", "resumes"
+    )
+    os.makedirs(folder, exist_ok=True)
+
+    safe_name = secure_filename(user.name or "student")
+    filename = f"Resume_{user.user_id}_{safe_name}.pdf"
+    is_reupload = bool(student.resume_path)
+
+    try:
+        resume.save(os.path.join(folder, filename))
+        student.resume_path = filename
+
+        if is_reupload:
+            student.resume_status = "Reuploaded"
+
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Resume upload failed")
+        return jsonify({"error": "Unable to save resume"}), 500
+
+    if is_reupload:
         try:
-            db.session.commit()
+            officer_emails = [
+                officer.email
+                for officer in Users.query.filter_by(
+                    role="Placement_Officer"
+                ).all()
+            ]
+            notifications([
+                "Student_resume_reuploaded",
+                officer_emails,
+                student.user.name
+            ])
         except Exception:
-            db.session.rollback()
-            current_app.logger.exception("Profile update failed")
-            return jsonify({"error": "Unable to update profile"}), 500
+            current_app.logger.exception("Resume notification failed")
 
-        return jsonify({
-            "message": "Profile updated successfully"
-        }), 200
+    return jsonify({
+        "message": "Resume uploaded successfully",
+        "resume_path": student.resume_path,
+        "resume_status": student.resume_status
+    }), 200
 
-    return jsonify({"error": "Unsupported action"}), 400
+
+@api_bp.route("/student/profile/certification", methods=['POST'])
+@jwt_required()
+@swag_from("swagger/student_certification_upload.yml")
+def student_certification_upload_api():
+    """Student profile operation."""
+    user, student, failure = _student_profile_context()
+    if failure is not None:
+        return failure
+
+    certification = request.files.get("Certification")
+
+    if not certification or not certification.filename:
+        return jsonify({"error": "Certification PDF is required"}), 400
+
+    certification.seek(0, os.SEEK_END)
+    file_size = certification.tell()
+    certification.seek(0)
+    MAX_FILE_SIZE = 5 * 1024 * 1024
+
+    if file_size >= MAX_FILE_SIZE:
+        return jsonify({"error": "Certification must be smaller than 5 MB"}), 413
+
+    original_name = secure_filename(certification.filename)
+
+    if "." not in original_name or original_name.rsplit(".", 1)[1].lower() != "pdf":
+        return jsonify({"error": "Certification must be a PDF"}), 400
+
+    folder = os.path.join(
+        current_app.root_path,
+        "static", "Docs", "student", "certifications"
+    )
+    os.makedirs(folder, exist_ok=True)
+
+    safe_name = secure_filename(user.name or "student")
+    filename = f"Cert_{user.user_id}_{safe_name}_{original_name}"
+
+    try:
+        certification.save(os.path.join(folder, filename))
+
+        existing = (student.Certification or "").strip()
+        existing_names = [
+            name.strip() for name in existing.split(",") if name.strip()
+        ]
+
+        if filename not in existing_names:
+            existing_names.append(filename)
+
+        student.Certification = ", ".join(existing_names)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Certification upload failed")
+        return jsonify({"error": "Unable to save certification"}), 500
+
+    return jsonify({
+        "message": "Certification uploaded successfully",
+        "certifications": existing_names
+    }), 201
+
 
 @api_bp.route("/student/certification/download", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/student_certification_download.yml")
 def student_download_certifications_api():
+    """Download a certification document belonging to the authenticated student."""
+
     user = get_current_user()
 
     if not user:
@@ -1315,7 +1356,10 @@ def student_download_certifications_api():
 ########################################### Recruiter #################################################
 @api_bp.route("/recruiter/dashboard", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/recruiter_dashboard.yml")
 def recruiter_dashboard_api():
+    """Retrieve dashboard statistics and interview information for the authenticated recruiter."""
+
     user = get_current_user()
 
     if not user:
@@ -1403,8 +1447,9 @@ def recruiter_dashboard_api():
 
 @api_bp.route("/recruiter/job-drives", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/recruiter_job_drives.yml")
 def recruiter_job_drives_api():
-
+    """Retrieve job drives created by the authenticated recruiter."""
     user = get_current_user()
 
     if not user:
@@ -1413,7 +1458,7 @@ def recruiter_job_drives_api():
     if user.role != "Recruiter":
         return jsonify({"error": "Forbidden: recruiters only"}), 403
 
-    job_drives = Job_Drives.query.filter(Job_Drives.status != "Closed").all()
+    job_drives = Job_Drives.query.filter(Job_Drives.status != "Closed",Job_Drives.creater_id == user.user_id).all()
 
     for job in job_drives:
         if job.deadline.date() < datetime.date.today():
@@ -1570,7 +1615,14 @@ def recruiter_job_drives_api():
 
 @api_bp.route("/recruiter/schedule-interview", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/schedule_interview_get.yml", methods=["GET"])
+@swag_from("swagger/schedule_interview_post.yml", methods=["POST"])
 def schedule_interview_api():
+    """
+    Validate interview scheduling details for a student application.
+    Supports GET requests with query parameters and POST requests with a JSON request body.
+    """
+
     user = get_current_user()
 
     if not user:
@@ -1599,8 +1651,12 @@ def schedule_interview_api():
 
     try:
         drive_id = int(drive_id)
+        student_id = int(student_id)
+        application_id = int(application_id)
     except (ValueError, TypeError):
-        return jsonify({"error": "Invalid drive_id"}), 400
+        return jsonify({
+            "error": "student_id, drive_id, and application_id must be valid integers"
+        }), 400
 
     recruiter_drive_ids = [
         row[0]
@@ -1633,7 +1689,10 @@ def schedule_interview_api():
 
 @api_bp.route("/recruiter/applications", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/recruiter_applications_get.yml", methods=["GET"])
+@swag_from("swagger/recruiter_applications_post.yml", methods=["POST"])
 def recruiter_applications_api():
+
     user = get_current_user()
 
     if not user:
@@ -1938,9 +1997,9 @@ def recruiter_applications_api():
 
 @api_bp.route("/recruiter/certification/download", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/recruiter_certification_download_get.yml",methods=["GET"])
+@swag_from("swagger/recruiter_certification_download_post.yml",methods=["POST"])
 def download_certifications_api():
-
-    # Check authorization
     user = get_current_user()
 
     if not user:
@@ -2004,10 +2063,66 @@ def download_certifications_api():
     )
 
 
+@api_bp.route("/student/resume/download", methods=["GET", "POST"])
+@jwt_required()
+@swag_from("swagger/student_resume_download_get.yml",methods=["GET"])
+@swag_from("swagger/student_resume_download_post.yml",methods=["POST"])
+def download_resume_api():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "User not found"}), 401
+
+    if user.role not in ["Recruiter", "Placement_Officer"]:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if request.method == "GET":
+        student_id = request.args.get("id")
+    else:
+        student_id = request.form.get("id")
+
+    if not student_id:
+        return jsonify({"error": "Student ID is required"}), 400
+
+    student = Students.query.filter_by(id=student_id).first()
+
+    if not student:
+        return jsonify({"error": "Student not found"}), 404
+
+    if not student.resume_path:
+        return jsonify({"error": "Resume not found"}), 404
+
+    RESUME_FOLDER = os.path.join(
+        current_app.root_path,
+        "static",
+        "Docs",
+        "student",
+        "resumes"
+    )
+
+    filename = secure_filename(student.resume_path)
+
+    filepath = os.path.join(RESUME_FOLDER, filename)
+
+    if not os.path.isfile(filepath):
+        return jsonify({
+            "error": "Resume file not found"
+        }), 404
+
+    return send_from_directory(
+        directory=RESUME_FOLDER,
+        path=filename,
+        as_attachment=True,
+        download_name=student.resume_path
+    )
+
+
 
 @api_bp.route("/Job_drive/edit", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/job_drive_edit_get.yml", methods=["GET"])
+@swag_from("swagger/job_drive_edit_post.yml", methods=["POST"])
 def edit_Job_drive_api():
+
     user = get_current_user()
 
     if user.role != "Recruiter":
@@ -2051,13 +2166,13 @@ def edit_Job_drive_api():
             job.Vacancies = request.form.get("Vacancies")
 
         if request.form.get("Deadline"):
-            if datetime.datetime.strptime(
-                request.form.get("Deadline"), "%Y-%m-%d"
-            ).date() < datetime.date.today():
+            try:
+                deadline = datetime.datetime.strptime(request.form.get("Deadline"), "%Y-%m-%d").date()
+            except ValueError:
+                return jsonify({"error": "Invalid deadline format. Use YYYY-MM-DD."}), 400
 
-                return jsonify({
-                    "error": "Deadline cannot be less than today"
-                }), 400
+            if deadline < datetime.date.today():
+                return jsonify({"error": "Deadline cannot be less than today"}), 400
 
             job.deadline = request.form.get("Deadline")
 
@@ -2096,8 +2211,11 @@ def edit_Job_drive_api():
         "companies": list1
     }), 200
 
+
 @api_bp.route("/Job_drive/add", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/job_drive_add_get.yml", methods=["GET"])
+@swag_from("swagger/job_drive_add_post.yml", methods=["POST"])
 def add_Job_drive_api():
     user = get_current_user()
 
@@ -2115,12 +2233,12 @@ def add_Job_drive_api():
         Vacancies = request.form.get("Vacancies")
         Deadline = request.form.get("Deadline")
 
-        if datetime.datetime.strptime(
-            request.form.get("Deadline"), "%Y-%m-%d"
-        ).date() < datetime.date.today():
-            return jsonify({
-                "error": "Deadline cannot be less than today"
-            }), 400
+        try:
+            deadline_date = datetime.datetime.strptime(request.form.get("Deadline"), "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"error": "Invalid deadline format. Use YYYY-MM-DD."}), 400
+        if deadline_date < datetime.date.today():
+            return jsonify({"error": "Deadline cannot be less than today"}), 400
 
         Job_Description = request.form.get("Description")
 
@@ -2177,7 +2295,13 @@ def add_Job_drive_api():
 
 @api_bp.route("/Job_drive/delete", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/job_drive_delete.yml")
 def delete_Job_drive_api():
+    """
+    Close a job drive created by the authenticated recruiter.
+    Both GET and POST requests use the job drive ID from the
+    query string and change its status to Closed.
+    """
     user = get_current_user()
 
     if user.role != "Recruiter":
@@ -2203,10 +2327,12 @@ def delete_Job_drive_api():
     }), 200
 
 
-
 @api_bp.route("/Student_Profile_Recruiter", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/student_profile_recruiter_get.yml",methods=["GET"])
+@swag_from("swagger/student_profile_recruiter_post.yml",methods=["POST"])
 def Student_Profile_Recruiter_api():
+
     user_role = get_current_user().role
 
     if user_role not in ["Recruiter", "Placement_Officer"]:
@@ -2293,13 +2419,15 @@ def Student_Profile_Recruiter_api():
 
 @api_bp.route("/Recruiter_Interview", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/recruiter_interview_get.yml",methods=["GET"])
+@swag_from("swagger/recruiter_interview_post.yml",methods=["POST"])
 def Recruiter_Interview_api():
     current_user = get_current_user()
 
     if current_user.role != "Recruiter":
         return jsonify({"error": "Forbidden"}), 403
 
-    today_start = datetime.datetime.combine(
+    today_start = datetime.combine(
         datetime.date.today(), datetime.time.min
     )
     tomorrow_start = today_start + datetime.timedelta(days=1)
@@ -2718,15 +2846,19 @@ def Recruiter_Interview_api():
 
 @api_bp.route("/Placement_officer_dashboard", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/placement_officer_dashboard.yml")
 def Placement_officer_dashboard_api():
-    if get_current_user().role != "Placement_Officer":
+    """Retrieve dashboard statistics and job drive summaries for placement officers."""
+
+    user = get_current_user()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 401
+
+    if user.role != "Placement_Officer":
         return jsonify({"error": "Forbidden"}), 403
 
-    total_students = Students.query.filter_by(
-        graduation_year=datetime.datetime.now(
-            ZoneInfo("Asia/Kolkata")
-        ).year
-    ).count()
+    total_students = Students.query.filter_by(graduation_year=datetime.datetime.now(ZoneInfo("Asia/Kolkata")).year).count()
 
     placed_students = db.session.query(
         Applications.student_id
@@ -2847,7 +2979,9 @@ def Placement_officer_dashboard_api():
 
 @api_bp.route("/Placement_officer_Recruiter_Job_drive", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/placement_officer_recruiter_job_drive.yml")
 def Placement_officer_Recruiter_Job_drive_api():
+    """Retrieve unposted job drives created by the placement officer."""
     user = get_current_user()
 
     if user.role != "Placement_Officer":
@@ -2858,7 +2992,7 @@ def Placement_officer_Recruiter_Job_drive_api():
     ).all()
 
     for job in job_drives:
-        if job.deadline.date() < datetime.date.today():
+        if job.deadline and job.deadline.date() < datetime.date.today():
             job.status = "Expired"
             db.session.commit()
         else:
@@ -2973,7 +3107,10 @@ def Placement_officer_Recruiter_Job_drive_api():
 
 @api_bp.route("/Placement_officer_Job_drive", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/placement_officer_job_drive_get.yml",methods=["GET"])
+@swag_from("swagger/placement_officer_job_drive_post.yml",methods=["POST"])
 def Placement_officer_Job_drive_api():
+
     user = get_current_user()
 
     if user.role != "Placement_Officer":
@@ -3147,9 +3284,11 @@ def Placement_officer_Job_drive_api():
     }), 200
 
 
-@api_bp.route("/Placement_Officer_Interview", methods=["GET", "POST"])
+@api_bp.route("/Placement_Officer_Interview", methods=["GET"])
 @jwt_required()
+@swag_from("swagger/placement_officer_interview.yml")
 def Placement_Officer_Interview_api():
+    """Retrieve today's, upcoming, and past interviews for placement officers."""
     if get_current_user().role != "Placement_Officer":
         return jsonify({"error": "Forbidden"}), 403
 
@@ -3166,7 +3305,7 @@ def Placement_Officer_Interview_api():
 
     today = datetime.date.today()
 
-    today_start = datetime.datetime.combine(
+    today_start = datetime.combine(
         today, datetime.time.min
     )
 
@@ -3250,18 +3389,18 @@ def Placement_Officer_Interview_api():
 
     def format_interviews(interviews):
         return [
-            [
-                r.Application.Job_Drive.company.company_name,
-                r.Application.Job_Drive.title,
-                r.Application.student.user.name,
-                r.round_name,
-                r.date.isoformat() if r.date else None,
-                r.link,
-                r.result,
-                r.feedback,
-                r.Application.Job_Drive.company.logo_path,
-                r.id
-            ]
+            {
+                "interview_id": r.id,
+                "company_name": r.Application.Job_Drive.company.company_name,
+                "job_title": r.Application.Job_Drive.title,
+                "student_name": r.Application.student.user.name,
+                "round_name": r.round_name,
+                "date": r.date.isoformat() if r.date else None,
+                "link": r.link,
+                "result": r.result,
+                "feedback": r.feedback,
+                "company_logo": r.Application.Job_Drive.company.logo_path
+            }
             for r in interviews
         ]
 
@@ -3317,8 +3456,14 @@ def Placement_Officer_Interview_api():
 
 @api_bp.route("/students", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/students_get.yml", methods=["GET"])
+@swag_from("swagger/students_post.yml", methods=["POST"])
 def Placement_officer_student_api():
+    """Retrieve, search, filter, and manage student records."""
     user = get_current_user()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 401
 
     if user.role != "Placement_Officer":
         return jsonify({"error": "Forbidden"}), 403
@@ -3472,12 +3617,12 @@ def Placement_officer_student_api():
 
         if applications:
             for app in applications:
-                apps.append([
-                    app.Job_Drive.company.company_name,
-                    app.Job_Drive.title,
-                    app.status.value,
-                    app.id
-                ])
+                apps.append({
+                    "company": app.Job_Drive.company.company_name,
+                    "job_title": app.Job_Drive.title,
+                    "status": app.status.value,
+                    "application_id": app.id
+                })
 
         if student_drives:
             for drive in student_drives:
@@ -3485,19 +3630,21 @@ def Placement_officer_student_api():
                     Job_Drives.id == int(drive.strip())
                 ).first()
 
-                apps.append([
-                    student_job_drive.company.company_name,
-                    student_job_drive.title,
-                    "Recommended"
-                ])
+                apps.append({
+                    "company": student_job_drive.company.company_name,
+                    "job_title": student_job_drive.title,
+                    "status": "Recommended",
+                    "application_id": None
+                })
 
         if len(opted_outs) > 0:
             for job in opted_outs:
-                apps.append([
-                    job.company.company_name,
-                    job.title,
-                    "Opted Out"
-                ])
+                apps.append({
+                    "company": job.company.company_name,
+                    "job_title": job.title,
+                    "status": "Opted Out",
+                    "application_id": None
+                })
 
         mode = request.form.get("mode")
 
@@ -3583,7 +3730,7 @@ def Placement_officer_student_api():
                 and student.Certification.strip()
             ) else None
 
-            if request.form.get("remark") != "":
+            if request.form.get("remark", "").strip() != "":
                 student.resume_remark = request.form.get("remark")
                 db.session.commit()
 
@@ -3656,9 +3803,11 @@ def Placement_officer_student_api():
     }), 200
 
 
-@api_bp.route("/Companies_info", methods=["GET", "POST"])
+@api_bp.get("/Companies_info")
 @jwt_required()
+@swag_from("swagger/companies_info.yml")
 def Companies_info_api():
+
     user = get_current_user()
 
     if user.role != "Placement_Officer":
@@ -3680,18 +3829,18 @@ def Companies_info_api():
                 Job_Drives.status != "Closed"
             ).count()
 
-        return [
-            company.company_name,
-            company.logo_path,
-            company.industry,
-            company.website,
-            company.hr_name,
-            company.phone,
-            company.email,
-            company.address,
-            job_drive_count,
-            company.id
-        ]
+        return {
+            "id": company.id,
+            "company_name": company.company_name,
+            "logo_path": company.logo_path,
+            "industry": company.industry,
+            "website": company.website,
+            "hr_name": company.hr_name,
+            "phone": company.phone,
+            "email": company.email,
+            "address": company.address,
+            "job_drive_count": job_drive_count
+        }
 
     # Search companies
     if search:
@@ -3795,7 +3944,10 @@ def Companies_info_api():
 
 @api_bp.route("/Company/edit", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/company_edit_get.yml", methods=["GET"])
+@swag_from("swagger/company_edit_post.yml", methods=["POST"])
 def edit_company_api():
+    """Retrieve or update a company managed by the placement officer."""
     user = get_current_user()
 
     if user.role != "Placement_Officer":
@@ -3884,7 +4036,7 @@ def edit_company_api():
                         "Upload file in jpg or jpeg or png format"
                     )
 
-                if file_size > MAX_FILE_SIZE_BYTES:
+                if file_size >= MAX_FILE_SIZE_BYTES:
                     errors.append("Logo size must be less than 5 MB")
 
                 return jsonify({"errors": errors}), 400
@@ -3914,7 +4066,11 @@ def edit_company_api():
 
 @api_bp.route("/Company/delete", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/company_delete.yml", methods=["GET"])
+@swag_from("swagger/company_delete.yml", methods=["POST"])
 def delete_company_api():
+    """Delete a company belonging to the authenticated placement officer."""
+
     user = get_current_user()
 
     if user.role != "Placement_Officer":
@@ -3941,7 +4097,11 @@ def delete_company_api():
 
 @api_bp.route("/Company/add", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/company_add_get.yml", methods=["GET"])
+@swag_from("swagger/company_add_post.yml", methods=["POST"])
 def add_company_api():
+    """Add a company or return company creation instructions."""
+
     user = get_current_user()
 
     if user.role != "Placement_Officer":
@@ -4020,7 +4180,7 @@ def add_company_api():
                         "Upload file in jpg or jpeg or png format"
                     )
 
-                if file_size > MAX_FILE_SIZE_BYTES:
+                if file_size >= MAX_FILE_SIZE_BYTES:
                     errors.append(
                         "Logo size must be less than 5 MB"
                     )
@@ -4057,7 +4217,11 @@ def add_company_api():
 
 @api_bp.route("/Post_Job_Drive", methods=["GET", "POST"])
 @jwt_required()
+@swag_from("swagger/post_job_drive_get.yml", methods=["GET"])
+@swag_from("swagger/post_job_drive_post.yml", methods=["POST"])
 def Post_Job_Drive_api():
+    """ Retrieve job drive details, recommend students, and publish a job drive. """
+
     user = get_current_user()
 
     if user.role != "Placement_Officer":

@@ -1,0 +1,111 @@
+tags:
+  - Student Certifications
+
+summary: Download a student certification
+
+description: >
+  Downloads a certification document belonging to the authenticated student.
+
+  The student must provide the exact certification filename recorded
+  in their profile. Leading and trailing whitespace is removed before
+  the filename is checked.
+
+  The endpoint verifies the authenticated user's identity and student
+  role, checks that the student profile exists, verifies that the
+  certification is listed in the student's profile, and checks that
+  the corresponding file exists on the server.
+
+  The certification is returned as a downloadable attachment.
+  Students can download only their own certifications.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/pdf
+  - application/json
+
+parameters:
+  - name: name
+    in: query
+    type: string
+    required: true
+    description: >
+      Exact filename of the certification recorded in the authenticated
+      student's Certification field. Leading and trailing whitespace
+      is removed before validation.
+    example: Python_Certification.pdf
+
+responses:
+
+  200:
+    description: >
+      Certification file retrieved successfully and returned
+      as a downloadable attachment.
+    schema:
+      type: file
+    headers:
+      Content-Disposition:
+        type: string
+        description: >
+          Indicates that the file is returned as an attachment
+          with the requested certification filename.
+        example: attachment; filename="Python_Certification.pdf"
+
+      Content-Type:
+        type: string
+        description: MIME type of the downloaded file.
+        example: application/pdf
+
+  400:
+    description: >
+      The required certification filename is missing or contains
+      only whitespace.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Certification name is required
+
+  401:
+    description: >
+      Authentication failed. This can happen if the JWT is missing,
+      invalid, or expired, or if the authenticated user cannot be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error returned by Flask-JWT-Extended.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned by the route.
+          example: User not found
+
+  403:
+    description: >
+      The authenticated user does not have the student role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: >
+      The student profile does not exist, the requested certification
+      is not listed in the student's profile, or the certification
+      file does not exist on the server.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - Student profile not found
+            - Certification not found in your profile
+            - Certification file not found
+          example: Certification file not found

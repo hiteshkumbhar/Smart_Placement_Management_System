@@ -1,0 +1,107 @@
+tags:
+  - Recruiter Interviews
+
+summary: Validate interview scheduling details
+
+description: >
+  Validates the student ID, job drive ID, and application ID
+  supplied in a JSON request body. The endpoint checks the
+  authenticated recruiter's role and validates the supplied
+  identifiers.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+parameters:
+  - in: body
+    name: body
+    required: true
+    description: >
+      JSON object containing the student, job drive, and
+      application identifiers.
+    schema:
+      type: object
+      required:
+        - student_id
+        - drive_id
+        - application_id
+      properties:
+        student_id:
+          type: integer
+          description: ID of the student profile.
+          example: 7
+
+        drive_id:
+          type: integer
+          description: ID of the job drive.
+          example: 25
+
+        application_id:
+          type: integer
+          description: ID of the application.
+          example: 101
+
+responses:
+  200:
+    description: >
+      The supplied identifiers passed the endpoint's validation
+      and authorization checks.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Interview scheduling details retrieved successfully
+        student_id:
+          type: integer
+          example: 7
+        drive_id:
+          type: integer
+          example: 25
+        application_id:
+          type: integer
+          example: 101
+
+  400:
+    description: >
+      One or more required identifiers are missing, or drive_id
+      cannot be converted to an integer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "student_id, drive_id, and application_id are required"
+
+  401:
+    description: >
+      Authentication failed, or the authenticated user could not
+      be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error returned by JWT authentication.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned when the user account is not found.
+          example: User not found
+
+  403:
+    description: >
+      The authenticated user is not a recruiter, or the supplied
+      drive and application do not satisfy the authorization check.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: recruiters only"

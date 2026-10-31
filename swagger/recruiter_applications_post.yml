@@ -1,0 +1,232 @@
+tags:
+  - Recruiter Applications
+
+summary: Update application status or schedule an interview
+
+description: >
+  Allows an authenticated recruiter to update an applicant's
+  application status or schedule an interview round for an
+  application associated with one of the recruiter's job drives.
+
+  The operation is selected using the mode query parameter.
+
+  For mode=update, the application may be shortlisted,
+  selected, or rejected according to its current status.
+
+  For mode=schedule_interview, an interview round is created
+  with the supplied round name, interview date, and optional
+  meeting link.
+
+operationId: manageRecruiterApplications
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+parameters:
+  - name: mode
+    in: query
+    type: string
+    required: true
+    enum:
+      - update
+      - schedule_interview
+    description: >
+      Selects the POST operation. Use update to update an
+      application's status or schedule_interview to create
+      an interview round.
+    example: schedule_interview
+
+  - name: body
+    in: body
+    required: true
+    description: >
+      JSON request body containing the student ID and job
+      drive ID, along with the fields required by the
+      selected operation.
+    schema:
+      type: object
+      required:
+        - student_id
+        - drive_id
+      properties:
+        student_id:
+          type: integer
+          description: Student profile ID associated with the application.
+          example: 7
+
+        drive_id:
+          type: integer
+          description: ID of the job drive.
+          example: 12
+
+        result:
+          type: string
+          enum:
+            - Select
+            - Reject
+          description: >
+            Result used with mode=update when the application
+            has Interview Scheduled status. Select marks the
+            application as selected, while Reject marks it
+            as rejected.
+          example: Select
+
+        Round_Name:
+          type: string
+          description: >
+            Name of the interview round. Required when
+            mode=schedule_interview.
+          example: Technical Interview
+
+        Interview_Date:
+          type: string
+          description: >
+            Date or date-time value for the interview round.
+            Required when mode=schedule_interview.
+          example: "2026-11-15 10:00:00"
+
+        link:
+          type: string
+          description: Optional interview meeting link.
+          example: "https://meet.example.com/interview"
+
+responses:
+  200:
+    description: >
+      Operation completed successfully. Returns the job
+      details and applicant list after processing the
+      requested operation.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Operation completed successfully
+
+        job:
+          type: object
+          description: Job drive associated with the operation.
+          properties:
+            id:
+              type: integer
+              example: 12
+
+            title:
+              type: string
+              example: Software Engineer
+
+            company_name:
+              type: string
+              example: Example Technologies
+
+        applicants:
+          type: array
+          description: >
+            Applicants associated with the job drive.
+            Each item includes student details, application
+            status, and eligibility.
+          items:
+            type: object
+            properties:
+              application_id:
+                type: integer
+                example: 101
+
+              student_id:
+                type: integer
+                example: 7
+
+              student_name:
+                type: string
+                x-nullable: true
+                example: Rahul Sharma
+
+              branch:
+                type: string
+                x-nullable: true
+                example: Computer Science
+
+              cgpa:
+                type: number
+                x-nullable: true
+                example: 8.5
+
+              graduation_year:
+                type: integer
+                x-nullable: true
+                example: 2027
+
+              status:
+                type: string
+                example: INTERVIEW
+
+              eligibility:
+                type: string
+                enum:
+                  - Eligible
+                  - Not Eligible
+                example: Eligible
+
+        total_applicants:
+          type: integer
+          description: Total number of applicants returned.
+          example: 5
+
+  400:
+    description: >
+      Bad request. Required fields are missing, interview
+      round name or date is missing, or an invalid mode
+      has been supplied.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: >
+            Error message describing the missing fields or invalid mode.
+          example: student_id and drive_id are required
+
+  401:
+    description: >
+      Unauthorized. The JWT is missing, invalid, or expired,
+      or the authenticated user's account cannot be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+        error:
+          type: string
+          example: User not found
+
+  403:
+    description: >
+      Forbidden. The authenticated user does not have
+      the Recruiter role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: recruiters only"
+
+  404:
+    description: >
+      Not found. The job drive is not found or does not
+      belong to the recruiter, the application does not
+      exist, or the student record cannot be found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          description: >
+            Error message identifying the missing or inaccessible resource.
+          example: Application not found

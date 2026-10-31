@@ -1,0 +1,90 @@
+tags:
+  - Student Profile
+
+summary: Upload student certification
+
+description: >
+  Uploads a certification PDF for the currently authenticated student.
+  Only PDF files smaller than 5 MB are accepted.
+  The uploaded certification filename is added to the student's
+  existing Certification field.
+
+security:
+  - Bearer: []
+
+consumes:
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - in: formData
+    name: Certification
+    type: file
+    required: true
+    description: >
+      Student certification document in PDF format.
+      The file size must be smaller than 5 MB.
+
+responses:
+  201:
+    description: Certification uploaded successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Certification uploaded successfully
+        certifications:
+          type: array
+          items:
+            type: string
+          example:
+            - Cert_12_Rahul_Sharma_Python.pdf
+            - Cert_12_Rahul_Sharma_SQL.pdf
+
+  400:
+    description: Missing certification or invalid file format.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Certification PDF is required
+
+  401:
+    description: User not found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found
+
+  403:
+    description: Only students can access this endpoint.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  413:
+    description: Certification file is 5 MB or larger.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Certification must be smaller than 5 MB
+
+  500:
+    description: Unable to save certification.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unable to save certification

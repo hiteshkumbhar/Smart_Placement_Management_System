@@ -1,0 +1,218 @@
+tags:
+  - Recruiter Interviews
+
+summary: Get today's and upcoming interviews
+
+description: >
+  Retrieves today's and upcoming interview rounds belonging to job drives
+  created by the authenticated recruiter.
+
+  Results are paginated separately. Each page contains up to five records.
+  The optional search parameters filter by student name or job title.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: today_page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    description: Page number for today's interviews. Each page contains up to five records.
+    example: 1
+
+  - name: upcoming_page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    description: Page number for upcoming interviews. Each page contains up to five records.
+    example: 1
+
+  - name: today_search
+    in: query
+    type: string
+    required: false
+    description: >
+      Searches today's interviews by student name or job title.
+      Matching is case-insensitive and supports partial matches.
+    example: Rahul
+
+  - name: upcoming_search
+    in: query
+    type: string
+    required: false
+    description: >
+      Searches upcoming interviews by student name or job title.
+      Matching is case-insensitive and supports partial matches.
+    example: Software Engineer
+
+responses:
+  200:
+    description: Today's and upcoming interviews retrieved successfully.
+    schema:
+      type: object
+      properties:
+        today_interview:
+          type: array
+          description: Today's interview records.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                example: Example Technologies
+              job_title:
+                type: string
+                example: Software Engineer
+              student_name:
+                type: string
+                example: Rahul Sharma
+              interview_round:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 15
+                  application_id:
+                    type: integer
+                    example: 42
+                  round_name:
+                    type: string
+                    example: Technical Interview
+                  date:
+                    type: string
+                    x-nullable: true
+                    example: "2026-10-31 10:00:00"
+                  feedback:
+                    type: string
+                    x-nullable: true
+                    example: Good technical performance
+                  result:
+                    type: string
+                    x-nullable: true
+                    example: Cleared
+                  company_name:
+                    type: string
+                    example: Example Technologies
+                  job_title:
+                    type: string
+                    example: Software Engineer
+                  student_name:
+                    type: string
+                    example: Rahul Sharma
+
+        upcoming_interview:
+          type: array
+          description: Upcoming interview records.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                example: Example Technologies
+              job_title:
+                type: string
+                example: Backend Developer
+              student_name:
+                type: string
+                example: Rahul Sharma
+              interview_round:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 16
+                  application_id:
+                    type: integer
+                    example: 42
+                  round_name:
+                    type: string
+                    example: HR Interview
+                  date:
+                    type: string
+                    x-nullable: true
+                    example: "2026-11-05 11:00:00"
+                  feedback:
+                    type: string
+                    x-nullable: true
+                    example: null
+                  result:
+                    type: string
+                    x-nullable: true
+                    example: null
+                  company_name:
+                    type: string
+                    example: Example Technologies
+                  job_title:
+                    type: string
+                    example: Backend Developer
+                  student_name:
+                    type: string
+                    example: Rahul Sharma
+
+        Today_pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 5
+            total:
+              type: integer
+              example: 8
+            pages:
+              type: integer
+              example: 2
+            has_next:
+              type: boolean
+              example: true
+            has_prev:
+              type: boolean
+              example: false
+
+        Upcoming_pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            per_page:
+              type: integer
+              example: 5
+            total:
+              type: integer
+              example: 12
+            pages:
+              type: integer
+              example: 3
+            has_next:
+              type: boolean
+              example: true
+            has_prev:
+              type: boolean
+              example: false
+
+  401:
+    description: Missing, invalid, or expired JWT access token.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a recruiter.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

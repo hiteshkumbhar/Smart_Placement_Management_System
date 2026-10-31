@@ -1,0 +1,298 @@
+tags:
+  - Placement Officer Dashboard
+
+summary: Get placement officer dashboard
+
+description: >
+  Retrieves dashboard statistics and job drive summaries for the
+  authenticated placement officer.
+
+  The dashboard includes:
+  - Placement percentage for students graduating in the current year.
+  - Count of students with unverified resumes.
+  - Count of interview rounds scheduled for today.
+  - Total count of posted job drives that are not Closed.
+  - Up to five posted job drives.
+  - Up to five unposted job drives.
+
+  The current year and today's date are determined using the
+  Asia/Kolkata timezone.
+
+  Placement percentage is calculated as the number of distinct
+  students graduating in the current year who have at least one
+  SELECTED application, divided by the total number of students
+  graduating in that year, multiplied by 100.
+
+  If there are no students graduating in the current year,
+  placement percentage is returned as 0.0.
+
+  Unverified resumes include students graduating in the current
+  year whose resume has been uploaded and whose resume status
+  is Pending, Reuploaded, or Rejected.
+
+  Posted job drives exclude drives whose status is Closed.
+  Both posted and unposted job drives are ordered by application
+  deadline in ascending order and limited to five records.
+
+  Access is restricted to authenticated users with the
+  Placement_Officer role.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+responses:
+  200:
+    description: Dashboard statistics and job drive summaries retrieved successfully.
+    schema:
+      type: object
+      properties:
+
+        placement_percentage:
+          type: number
+          format: float
+          description: >
+            Percentage of students graduating in the current year
+            who have at least one application with SELECTED status.
+            Returns 0.0 if no students graduate in the current year.
+          example: 65.5
+
+        unverified_resumes_count:
+          type: integer
+          description: >
+            Number of students graduating in the current year
+            who have an uploaded resume with status Pending,
+            Reuploaded, or Rejected.
+          example: 12
+
+        today_interview_count:
+          type: integer
+          description: >
+            Number of interview rounds scheduled for the current
+            day, calculated using the Asia/Kolkata timezone.
+          example: 8
+
+        Posted_job_drive_count:
+          type: integer
+          description: >
+            Total number of job drives where posted is Y and
+            status is not Closed.
+          example: 20
+
+        Posted_job_drive:
+          type: array
+          description: >
+            Up to five posted job drives whose status is not Closed,
+            ordered by application deadline in ascending order.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                description: Name of the company offering the job.
+                example: Example Technologies
+
+              job_drive:
+                type: object
+                description: Details of the posted job drive.
+                properties:
+                  id:
+                    type: integer
+                    example: 12
+
+                  company_id:
+                    type: integer
+                    example: 3
+
+                  title:
+                    type: string
+                    example: Software Engineer
+
+                  package:
+                    type: string
+                    example: "12 LPA"
+
+                  location:
+                    type: string
+                    example: Mumbai
+
+                  CGPA:
+                    type: number
+                    example: 7.5
+
+                  Eligible_Branches:
+                    type: string
+                    example: "Computer Science,Information Technology"
+
+                  Graduation_Year:
+                    type: integer
+                    example: 2027
+
+                  Vacancies:
+                    type: integer
+                    example: 5
+
+                  deadline:
+                    type: string
+                    x-nullable: true
+                    description: >
+                      Job application deadline, returned as a string,
+                      or null if no deadline is configured.
+                    example: "2026-12-15"
+
+                  description:
+                    type: string
+                    example: Software development role.
+
+                  status:
+                    type: string
+                    example: Active
+
+                  posted:
+                    type: string
+                    example: "Y"
+
+              application_count:
+                type: integer
+                description: >
+                  Total number of applications associated with
+                  this job drive.
+                example: 25
+
+        New_job_drive:
+          type: array
+          description: >
+            Up to five job drives where posted is N,
+            ordered by application deadline in ascending order.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 15
+
+              company_id:
+                type: integer
+                example: 4
+
+              company_name:
+                type: string
+                example: Sample Solutions
+
+              title:
+                type: string
+                example: Data Analyst
+
+              package:
+                type: string
+                example: "8 LPA"
+
+              location:
+                type: string
+                example: Pune
+
+              CGPA:
+                type: number
+                example: 7.0
+
+              Eligible_Branches:
+                type: string
+                example: "Computer Science,Information Technology"
+
+              Graduation_Year:
+                type: integer
+                example: 2027
+
+              Vacancies:
+                type: integer
+                example: 3
+
+              deadline:
+                type: string
+                x-nullable: true
+                description: >
+                  Job application deadline, returned as a string,
+                  or null if no deadline is configured.
+                example: "2026-12-20"
+
+              description:
+                type: string
+                example: Analyze data and prepare business reports.
+
+              status:
+                type: string
+                example: Active
+
+              posted:
+                type: string
+                example: "N"
+
+    examples:
+      application/json:
+        placement_percentage: 65.5
+        unverified_resumes_count: 12
+        today_interview_count: 8
+        Posted_job_drive_count: 20
+        Posted_job_drive:
+          - company_name: Example Technologies
+            job_drive:
+              id: 12
+              company_id: 3
+              title: Software Engineer
+              package: "12 LPA"
+              location: Mumbai
+              CGPA: 7.5
+              Eligible_Branches: "Computer Science,Information Technology"
+              Graduation_Year: 2027
+              Vacancies: 5
+              deadline: "2026-12-15"
+              description: Software development role.
+              status: Active
+              posted: "Y"
+            application_count: 25
+
+        New_job_drive:
+          - id: 15
+            company_id: 4
+            company_name: Sample Solutions
+            title: Data Analyst
+            package: "8 LPA"
+            location: Pune
+            CGPA: 7.0
+            Eligible_Branches: "Computer Science,Information Technology"
+            Graduation_Year: 2027
+            Vacancies: 3
+            deadline: "2026-12-20"
+            description: Analyze data and prepare business reports.
+            status: Active
+            posted: "N"
+
+  401:
+    description: >
+      Unauthorized. This response is returned when the JWT access token
+      is missing, invalid, or expired, or when the authenticated
+      user's account cannot be found.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: JWT authentication error message.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned when the user account is not found.
+          example: User not found
+
+  403:
+    description: >
+      Forbidden. The authenticated user does not have
+      the Placement_Officer role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

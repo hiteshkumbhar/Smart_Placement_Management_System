@@ -1,0 +1,202 @@
+tags:
+  - Placement Officer
+  - Job Drives
+
+summary: View a job drive and its applicants
+
+description: >
+  Allows an authenticated placement officer to retrieve a
+  specific job drive and its associated applicants.
+
+  The operation is selected using the mode form field.
+  Set mode to 'view' and supply the drive_id form field.
+
+  The job drive must belong to a company created by the
+  authenticated placement officer.
+
+  The Applicants response contains applicant information in
+  positional array format. The values are returned in this order:
+  university roll number, student name, branch, CGPA,
+  application date or application state, application status,
+  student profile ID, and application ID.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: mode
+    in: formData
+    type: string
+    required: true
+    enum:
+      - view
+    description: >
+      Set to view to retrieve a specific job drive and its applicants.
+    example: view
+
+  - name: drive_id
+    in: formData
+    type: integer
+    required: true
+    description: >
+      ID of the job drive to retrieve. The drive must belong
+      to a company created by the authenticated placement officer.
+    example: 12
+
+responses:
+  200:
+    description: >
+      Job drive details and associated applicants retrieved successfully.
+    schema:
+      type: object
+      properties:
+        jobs:
+          type: object
+          properties:
+            company_name:
+              type: string
+              example: Example Technologies
+
+            job_drive:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 12
+
+                company_id:
+                  type: integer
+                  example: 3
+
+                title:
+                  type: string
+                  example: Software Engineer
+
+                package:
+                  type: string
+                  x-nullable: true
+                  example: "12 LPA"
+
+                location:
+                  type: string
+                  x-nullable: true
+                  example: Mumbai
+
+                CGPA:
+                  type: number
+                  x-nullable: true
+                  example: 7.5
+
+                Eligible_Branches:
+                  type: string
+                  x-nullable: true
+                  example: Computer Science
+
+                Graduation_Year:
+                  type: integer
+                  x-nullable: true
+                  example: 2027
+
+                Vacancies:
+                  type: integer
+                  x-nullable: true
+                  example: 5
+
+                deadline:
+                  type: string
+                  x-nullable: true
+                  example: "2026-12-15"
+
+                description:
+                  type: string
+                  x-nullable: true
+                  example: Software development role.
+
+                status:
+                  type: string
+                  example: Active
+
+                posted:
+                  type: string
+                  example: "Y"
+
+                opt_out:
+                  type: string
+                  x-nullable: true
+                  example: "15,18"
+
+            logo_path:
+              type: string
+              x-nullable: true
+              example: static/Docs/company/logo.png
+
+        Applicants:
+          type: array
+          description: >
+            Applicant records represented as positional arrays.
+            The order of values is:
+            university roll number, student name, branch, CGPA,
+            application date or application state, status,
+            student profile ID, application ID.
+          items:
+            type: array
+            items: {}
+          example:
+            - - "UNI2025001"
+              - "Rahul Sharma"
+              - "Computer Science"
+              - 8.5
+              - "25-10-2026 10:30"
+              - "Applied"
+              - 25
+              - 42
+            - - "UNI2025002"
+              - "Priya Patel"
+              - "Information Technology"
+              - 8.2
+              - "Not applied Yet"
+              - "Recommended"
+              - 26
+              - "0"
+
+        mode:
+          type: string
+          example: view
+
+  401:
+    description: >
+      Authentication is missing, invalid, or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user does not have the Placement_Officer role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+  404:
+    description: >
+      The job drive was not found among drives belonging
+      to companies created by the authenticated placement officer.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Job drive not found

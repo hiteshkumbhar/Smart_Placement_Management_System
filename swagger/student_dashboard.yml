@@ -1,0 +1,199 @@
+tags:
+  - Student Dashboard
+
+summary: Get student dashboard
+
+description: >
+  Retrieves dashboard information for the authenticated student.
+  The response includes profile completion, resume status,
+  application statistics, upcoming interviews, recent applications,
+  and eligible active job drives.
+
+  A valid JWT access token is required. Only users with the
+  student role can access this endpoint. The student is identified
+  from the JWT; no query parameters or request body are required.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+responses:
+  200:
+    description: Student dashboard retrieved successfully.
+    schema:
+      type: object
+      properties:
+        profile_percentage:
+          type: integer
+          description: >
+            Profile completion percentage, rounded to the nearest
+            whole number.
+          example: 85
+
+        resume_status:
+          type: string
+          x-nullable: true
+          description: Current resume status of the student.
+          example: Approved
+
+        total_applications:
+          type: integer
+          description: >
+            Number of applications for job drives that are not closed,
+            excluding applications with REJECTED or SELECTED status.
+          example: 8
+
+        upcoming_interview_count:
+          type: integer
+          description: >
+            Number of future interview rounds that have no recorded
+            result. Interview dates are evaluated using Asia/Kolkata
+            time.
+          example: 2
+
+        selections:
+          type: integer
+          description: >
+            Number of applications with SELECTED status.
+          example: 1
+
+        upcoming_interviews:
+          type: array
+          description: >
+            Up to three future interview rounds without a recorded
+            result, ordered by interview date in ascending order.
+          items:
+            type: object
+            properties:
+              company:
+                type: string
+                x-nullable: true
+                description: Company name associated with the job.
+                example: Acme Technologies
+
+              job_title:
+                type: string
+                description: Job title associated with the interview.
+                example: Software Engineer
+
+              round_name:
+                type: string
+                description: Name of the interview round.
+                example: Technical Interview
+
+              date:
+                type: string
+                format: date-time
+                x-nullable: true
+                description: >
+                  Interview date and time in ISO 8601 format,
+                  or null if no date is available.
+                example: "2026-11-15T10:30:00"
+
+              link:
+                type: string
+                x-nullable: true
+                description: Interview meeting link, if available.
+                example: "https://example.com/interview"
+
+        applications:
+          type: array
+          description: >
+            Up to three recent applications for job drives that
+            are not closed, ordered by application submission time
+            in descending order.
+          items:
+            type: object
+            properties:
+              company:
+                type: string
+                x-nullable: true
+                description: Company name associated with the job.
+                example: Acme Technologies
+
+              job_title:
+                type: string
+                description: Title of the applied-for job.
+                example: Backend Developer
+
+              status:
+                type: string
+                description: Current application status.
+                example: Shortlisted
+
+        eligible_jobs:
+          type: array
+          description: >
+            Up to three active job drives whose IDs are listed in
+            the student's job_drive field.
+          items:
+            type: object
+            properties:
+              company:
+                type: string
+                x-nullable: true
+                description: Company offering the job.
+                example: Acme Technologies
+
+              title:
+                type: string
+                description: Job title.
+                example: Graduate Engineer Trainee
+
+              package:
+                type: number
+                x-nullable: true
+                description: Package offered for the job.
+                example: 8.5
+
+              location:
+                type: string
+                x-nullable: true
+                description: Job location.
+                example: Bengaluru
+
+              deadline:
+                type: string
+                format: date
+                x-nullable: true
+                description: >
+                  Application deadline in ISO 8601 date format,
+                  or null if no deadline is configured.
+                example: "2026-12-31"
+
+  401:
+    description: >
+      Authentication failed, or the authenticated user's account
+      could not be found. JWT authentication errors may use the
+      msg field; the route's user lookup error uses the error field.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: JWT authentication error, when supplied.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error generated by the route, when supplied.
+          example: User not found
+
+  403:
+    description: The authenticated user does not have the student role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: Student profile not found for the authenticated user.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Student profile not found

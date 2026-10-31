@@ -1,0 +1,80 @@
+tags:
+  - Student Resume
+
+summary: Download a student's resume
+
+description: >
+  Downloads the uploaded resume belonging to the specified student.
+  The student ID must be submitted as form data.
+  Only authenticated recruiters and placement officers can access
+  this endpoint.
+
+security:
+  - Bearer: []
+
+consumes:
+  - multipart/form-data
+  - application/x-www-form-urlencoded
+
+produces:
+  - application/pdf
+  - application/octet-stream
+  - application/json
+
+parameters:
+  - name: id
+    in: formData
+    type: integer
+    required: true
+    description: >
+      Unique ID of the student whose resume is to be downloaded.
+    example: 25
+
+responses:
+  200:
+    description: >
+      Resume successfully retrieved and returned as a downloadable
+      file attachment.
+    schema:
+      type: file
+
+  400:
+    description: Student ID was not supplied.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Student ID is required
+
+  401:
+    description: >
+      Unauthorized. A valid JWT access token is required.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user does not have the Recruiter or
+      Placement_Officer role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+  404:
+    description: >
+      The specified student does not exist or the student
+      does not have an uploaded resume.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Resume not found

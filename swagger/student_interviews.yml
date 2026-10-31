@@ -1,0 +1,259 @@
+tags:
+  - Student Interviews
+
+summary: Get student interviews
+
+description: >
+  Retrieves the authenticated student's past, today's, and upcoming
+  interview rounds. Each group supports independent pagination and
+  company-name search. Each interview includes its ID, company name,
+  job title, interview round, scheduled date, meeting link, result,
+  feedback, and company logo path.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for past interviews. Values below 1 or invalid
+      integer values are normalized to page 1.
+    example: 1
+
+  - name: today_page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for today's interviews. Values below 1 or invalid
+      integer values are normalized to page 1.
+    example: 1
+
+  - name: upcoming_page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number for upcoming interviews. Values below 1 or invalid
+      integer values are normalized to page 1.
+    example: 1
+
+  - name: past_search
+    in: query
+    type: string
+    required: false
+    description: >
+      Filters past interviews by a partial company-name match.
+      Matching is case-insensitive. Leading and trailing whitespace
+      is removed.
+    example: Acme
+
+  - name: today_search
+    in: query
+    type: string
+    required: false
+    description: >
+      Filters today's interviews by a partial company-name match.
+      Matching is case-insensitive. Leading and trailing whitespace
+      is removed.
+    example: Technologies
+
+  - name: upcoming_search
+    in: query
+    type: string
+    required: false
+    description: >
+      Filters upcoming interviews by a partial company-name match.
+      Matching is case-insensitive. Leading and trailing whitespace
+      is removed.
+    example: Solutions
+
+responses:
+  200:
+    description: >
+      Interview schedule retrieved successfully. Returns the student
+      identifiers and three independently paginated interview groups.
+    schema:
+      type: object
+      properties:
+        student:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              description: ID of the authenticated user's account.
+              example: 12
+            student_id:
+              type: integer
+              description: ID of the authenticated student's profile.
+              example: 7
+
+        past_interviews:
+          type: object
+          description: Past interviews, ordered by date descending.
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/definitions/Interview"
+            pagination:
+              $ref: "#/definitions/Pagination"
+
+        todays_interviews:
+          type: object
+          description: Today's interviews, ordered by date ascending.
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/definitions/Interview"
+            pagination:
+              $ref: "#/definitions/Pagination"
+
+        upcoming_interviews:
+          type: object
+          description: Upcoming interviews, ordered by date ascending.
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/definitions/Interview"
+            pagination:
+              $ref: "#/definitions/Pagination"
+
+  401:
+    description: >
+      Authentication failed, the JWT is missing or invalid, or the
+      authenticated user's account could not be found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user does not have the student role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: >
+      No student profile exists for the authenticated user.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Student profile not found
+
+definitions:
+  Interview:
+    type: object
+    properties:
+      interview_id:
+        type: integer
+        description: Unique ID of the interview round.
+        example: 101
+
+      company_name:
+        type: string
+        description: Name of the company conducting the interview.
+        example: Acme Technologies
+
+      job_title:
+        type: string
+        description: Title of the job associated with the interview.
+        example: Software Engineer
+
+      round_name:
+        type: string
+        description: Name of the interview round.
+        example: Technical Interview
+
+      date:
+        type: string
+        format: date-time
+        x-nullable: true
+        description: >
+          Scheduled interview date and time in ISO 8601 format,
+          or null if no date has been scheduled.
+        example: "2026-11-15T10:30:00"
+
+      link:
+        type: string
+        x-nullable: true
+        description: Interview meeting URL, or null if unavailable.
+        example: "https://example.com/interview"
+
+      result:
+        type: string
+        x-nullable: true
+        description: Interview result, or null if not recorded.
+        example: Pending
+
+      feedback:
+        type: string
+        x-nullable: true
+        description: Interview feedback, or null if unavailable.
+        example: Good technical knowledge
+
+      company_logo:
+        type: string
+        x-nullable: true
+        description: Stored company logo path, or null if unavailable.
+        example: uploads/company_logos/acme.png
+
+  Pagination:
+    type: object
+    description: Pagination metadata for an interview group.
+    properties:
+      page:
+        type: integer
+        description: Current page number.
+        example: 1
+
+      per_page:
+        type: integer
+        description: Maximum number of interviews per page.
+        example: 5
+
+      total_items:
+        type: integer
+        description: Total matching interviews before pagination.
+        example: 12
+
+      total_pages:
+        type: integer
+        description: Total number of pages.
+        example: 3
+
+      has_next:
+        type: boolean
+        description: Whether another page is available.
+        example: true
+
+      has_prev:
+        type: boolean
+        description: Whether a previous page is available.
+        example: false

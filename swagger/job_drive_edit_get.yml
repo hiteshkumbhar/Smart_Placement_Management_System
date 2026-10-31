@@ -1,0 +1,120 @@
+tags:
+  - Job Drives
+
+summary: Retrieve a job drive for editing
+
+description: >
+  Retrieves the details of a job drive created by the authenticated
+  recruiter, along with a list of all available companies.
+  The recruiter can retrieve only job drives that they created.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: >
+      Unique ID of the job drive to retrieve.
+      The job drive must belong to the authenticated recruiter.
+    example: 12
+
+responses:
+  200:
+    description: Job drive details and available companies retrieved successfully.
+    schema:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: Indicates that the job drive is being retrieved for editing.
+          example: edit
+
+        job_drive:
+          type: object
+          description: Details of the requested job drive.
+          properties:
+            id:
+              type: integer
+              example: 12
+
+            company_id:
+              type: integer
+              example: 3
+
+            title:
+              type: string
+              example: Software Engineer
+
+            package:
+              type: string
+              example: "12 LPA"
+
+            location:
+              type: string
+              example: Mumbai
+
+            CGPA:
+              type: number
+              format: float
+              example: 7.5
+
+            Eligible_Branches:
+              type: string
+              description: Comma-separated list of eligible branches.
+              example: "Computer Science,Information Technology"
+
+            Graduation_Year:
+              type: integer
+              example: 2027
+
+            Vacancies:
+              type: integer
+              example: 5
+
+            deadline:
+              type: string
+              x-nullable: true
+              description: Job application deadline, or null if not configured.
+              example: "2026-12-15"
+
+            description:
+              type: string
+              x-nullable: true
+              example: Software development role.
+
+        companies:
+          type: array
+          description: List of available companies, represented as ID-name pairs.
+          items:
+            type: array
+            items:
+              type: string
+          example:
+            - [3, "Acme Technologies"]
+            - [4, "Example Solutions"]
+
+  401:
+    description: Authentication is missing or the JWT token is invalid or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user is not a recruiter, or the requested
+      job drive does not exist or does not belong to the recruiter.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

@@ -1,0 +1,88 @@
+tags:
+  - Job Drives
+  - Recruiter
+
+summary: Close a job drive
+
+description: >
+  Closes a job drive created by the authenticated recruiter.
+  The endpoint does not permanently delete the job drive.
+  Instead, it changes the job drive status to 'Closed' and
+  saves the change to the database.
+
+  Both GET and POST requests perform the same operation.
+  The job drive ID must be supplied as a URL query parameter
+  for either method.
+
+  The authenticated user must have the Recruiter role and
+  must be the creator of the specified job drive.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: >
+      ID of the job drive to close. This parameter must be
+      supplied in the URL query string for both GET and POST
+      requests.
+    example: 12
+
+responses:
+  200:
+    description: Job drive closed successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Confirmation message.
+          example: Job drive closed successfully
+
+        job_id:
+          type: integer
+          description: ID of the job drive that was closed.
+          example: 12
+
+        status:
+          type: string
+          description: Updated status of the job drive.
+          example: Closed
+  400:
+    description: Required job drive ID is missing or invalid.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Job drive ID is required
+  401:
+    description: >
+      Unauthorized. The JWT access token is missing, invalid,
+      or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: JWT authentication error message.
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      Forbidden. The authenticated user is not a recruiter,
+      or the specified job drive does not exist or was not
+      created by the authenticated recruiter. This response
+      is also returned when the id parameter is missing.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

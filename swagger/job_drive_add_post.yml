@@ -1,0 +1,144 @@
+tags:
+  - Job Drives
+
+summary: Create a new job drive
+
+description: >
+  Creates a new job drive for a company using the submitted form data.
+  The authenticated recruiter is recorded as the creator of the job drive.
+  After the job drive is saved successfully, placement officers are notified.
+
+  The application deadline must not be earlier than the current date.
+  Eligible branches are submitted as multiple form values and stored
+  as a comma-separated string.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - in: formData
+    name: company_id
+    type: integer
+    required: false
+    description: ID of the company associated with the job drive.
+    example: 3
+
+  - in: formData
+    name: Title
+    type: string
+    required: false
+    description: Title of the job position.
+    example: Software Engineer
+
+  - in: formData
+    name: Package
+    type: string
+    required: false
+    description: Salary package offered for the position.
+    example: "12 LPA"
+
+  - in: formData
+    name: Location
+    type: string
+    required: false
+    description: Location of the job.
+    example: Mumbai
+
+  - in: formData
+    name: CGPA
+    type: number
+    required: false
+    description: Minimum CGPA required to apply.
+    example: 7.5
+
+  - in: formData
+    name: Branches
+    type: array
+    items:
+      type: string
+    collectionFormat: multi
+    required: false
+    description: >
+      Eligible academic branches. Submit this parameter multiple
+      times to specify multiple branches. The submitted values
+      are joined and stored as a comma-separated string.
+    example: Computer Science
+
+  - in: formData
+    name: Graduation_Year
+    type: integer
+    required: false
+    description: Eligible graduation year.
+    example: 2027
+
+  - in: formData
+    name: Vacancies
+    type: integer
+    required: false
+    description: Number of vacancies available for the position.
+    example: 5
+
+  - in: formData
+    name: Deadline
+    type: string
+    format: date
+    required: false
+    description: >
+      Application deadline in YYYY-MM-DD format.
+      A date earlier than the current date returns HTTP 400.
+    example: "2026-12-15"
+
+  - in: formData
+    name: Description
+    type: string
+    required: false
+    description: Description of the job and its responsibilities.
+    example: Develop and maintain software applications.
+
+responses:
+  201:
+    description: Job drive created successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Job drive created successfully
+        job_drive_id:
+          type: integer
+          description: ID assigned to the newly created job drive.
+          example: 12
+
+  400:
+    description: The application deadline is earlier than today.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Deadline cannot be less than today
+
+  401:
+    description: Authentication failed or JWT is missing, invalid, or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: The authenticated user is not a recruiter.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

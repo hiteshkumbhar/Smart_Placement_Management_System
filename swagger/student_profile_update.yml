@@ -1,0 +1,169 @@
+tags:
+  - Student Profile
+
+summary: Update student profile
+
+description: >
+  Updates the authenticated student's profile information.
+  The request body must contain a JSON object.
+  Only the fields supported by the API can be updated.
+  The name field updates the associated user record.
+  Date of birth must use YYYY-MM-DD format.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+parameters:
+  - in: body
+    name: profile
+    required: true
+    description: Student profile fields to update.
+    schema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Rahul Sharma
+        branch:
+          type: string
+          example: Computer Science
+        cgpa:
+          type: number
+          example: 8.5
+        skills:
+          type: string
+          example: Python, Flask, SQL
+        graduation_year:
+          type: integer
+          example: 2027
+        mobile_number:
+          type: string
+          example: "9876543210"
+        Gender:
+          type: string
+          example: Male
+        DOB:
+          type: string
+          format: date
+          example: "2003-05-15"
+        Address:
+          type: string
+          example: Mumbai, Maharashtra
+        City:
+          type: string
+          example: Mumbai
+        State:
+          type: string
+          example: Maharashtra
+        pin_code:
+          type: string
+          example: "400001"
+        University_Roll_Number:
+          type: string
+          example: "CS2023001"
+        Semester:
+          type: integer
+          example: 7
+        tenth_Percentage:
+          type: number
+          example: 85.5
+        twelth_Percentage:
+          type: number
+          example: 82.5
+        Diploma_Percentage:
+          type: number
+          example: 80.0
+        Total_Backlogs:
+          type: integer
+          example: 2
+        Active_Backlogs:
+          type: integer
+          example: 0
+        LinkedIn:
+          type: string
+          example: https://linkedin.com/in/rahul
+        GitHub:
+          type: string
+          example: https://github.com/rahul
+        Portfolio_Website:
+          type: string
+          example: https://rahulportfolio.com
+        LeetCode:
+          type: string
+          example: https://leetcode.com/rahul
+        HackerRank:
+          type: string
+          example: https://hackerrank.com/rahul
+
+responses:
+  200:
+    description: Profile updated successfully.
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Profile updated successfully
+
+  400:
+    description: Invalid request data or invalid date format.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: DOB must use YYYY-MM-DD format
+
+  401:
+    description: User not found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found
+
+  403:
+    description: Only students can access this endpoint.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: Student profile not found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Student profile not found
+
+  409:
+    description: A unique field value is already used by another student.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: This mobile_number is already taken
+        field:
+          type: string
+          example: mobile_number
+
+  500:
+    description: Unable to update profile.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unable to update profile

@@ -1,0 +1,166 @@
+tags:
+  - Student Profile
+  - Recruiter
+
+summary: Retrieve a student's profile and interview details
+
+description: >
+  Retrieves a student's basic profile information, certification
+  details, resume path, and interview rounds associated with the
+  supplied application ID.
+
+  Only authenticated Recruiters and Placement Officers can access
+  this endpoint.
+
+security:
+  - Bearer: []
+
+consumes:
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+
+produces:
+  - application/json
+
+parameters:
+  - name: id
+    in: formData
+    type: integer
+    required: true
+    description: >
+      ID of the student whose profile is to be retrieved.
+      Submit this value as form data.
+    example: 25
+
+  - name: application_id
+    in: formData
+    type: integer
+    required: true
+    description: >
+      ID of the application whose interview rounds are to be retrieved.
+      Submit this value as form data.
+    example: 42
+
+responses:
+  200:
+    description: >
+      Student profile, certification information, application ID,
+      and associated interview rounds retrieved successfully.
+    schema:
+      type: object
+      properties:
+        student:
+          type: array
+          description: >
+            Two-element array. The first element is the student's name.
+            The second element is an object containing the student's
+            profile ID, user ID, certification string, and resume path.
+          items: {}
+          example:
+            - Alex Smith
+            - id: 25
+              user_id: 108
+              Certification: "Python,SQL"
+              resume_path: "static/Docs/student/resume.pdf"
+
+        certifications:
+          type: array
+          x-nullable: true
+          description: >
+            Certification names obtained by splitting the student's
+            comma-separated Certification field. Null if the student
+            has no certifications.
+          items:
+            type: string
+          example:
+            - Python
+            - SQL
+
+        application_id:
+          type: string
+          x-nullable: true
+          description: >
+            Application ID supplied in the request. Returned as the
+            supplied value, or null if it was not provided.
+          example: "42"
+
+        interview_rounds:
+          type: array
+          description: >
+            Interview rounds associated with the supplied application ID.
+            An empty array is returned if no matching interview rounds exist.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: Unique interview-round ID.
+                example: 7
+
+              application_id:
+                type: integer
+                description: ID of the associated application.
+                example: 42
+
+              round_name:
+                type: string
+                x-nullable: true
+                description: Name of the interview round.
+                example: Technical Interview
+
+              date:
+                type: string
+                description: >
+                  String representation of the interview date.
+                  The Python implementation converts this value using str().
+                example: "2026-11-15 10:00:00"
+
+    examples:
+      application/json:
+        student:
+          - Alex Smith
+          - id: 25
+            user_id: 108
+            Certification: "Python,SQL"
+            resume_path: "static/Docs/student/resume.pdf"
+        certifications:
+          - Python
+          - SQL
+        application_id: "42"
+        interview_rounds:
+          - id: 7
+            application_id: 42
+            round_name: Technical Interview
+            date: "2026-11-15 10:00:00"
+
+  401:
+    description: >
+      Unauthorized. The JWT access token is missing, invalid,
+      or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      The authenticated user does not have the Recruiter
+      or Placement_Officer role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden
+
+  404:
+    description: >
+      No student record was found for the supplied student ID.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Student not found

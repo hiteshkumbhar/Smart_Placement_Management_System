@@ -1,0 +1,192 @@
+tags:
+  - Student Applications
+
+summary: Get application details
+
+description: >
+  Retrieves the details of a job drive and the authenticated student's
+  application for that job drive, including associated interview rounds.
+  Access is restricted to authenticated users with the student role.
+  The student is identified using the identity associated with the JWT
+  access token.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: job_id
+    in: query
+    type: integer
+    required: true
+    description: >
+      Unique ID of the job drive for which application details are
+      requested. The student must have an application associated
+      with this job drive.
+    example: 25
+
+responses:
+  200:
+    description: >
+      Application details retrieved successfully. Returns the job drive,
+      the authenticated student's application, and associated interview
+      rounds.
+    schema:
+      type: object
+      required:
+        - job
+        - application
+        - interview_rounds
+      properties:
+        job:
+          type: object
+          description: Details of the requested job drive.
+          required:
+            - id
+            - title
+            - company_name
+          properties:
+            id:
+              type: integer
+              description: Unique ID of the job drive.
+              example: 25
+            title:
+              type: string
+              description: Title of the job.
+              example: Software Engineer
+            company_name:
+              type: string
+              description: Name of the company offering the job.
+              example: Acme Technologies
+
+        application:
+          type: object
+          description: >
+            Application submitted by the authenticated student
+            for the specified job drive.
+          required:
+            - id
+            - drive_id
+            - student_id
+            - status
+          properties:
+            id:
+              type: integer
+              description: Unique ID of the application.
+              example: 101
+            drive_id:
+              type: integer
+              description: ID of the associated job drive.
+              example: 25
+            student_id:
+              type: integer
+              description: ID of the student's profile.
+              example: 7
+            status:
+              type: string
+              x-nullable: true
+              description: >
+                Current application status. Returns the enum value
+                when the status object provides one, otherwise returns
+                the underlying status value. May be null.
+              example: SHORTLISTED
+
+        interview_rounds:
+          type: array
+          description: >
+            Interview rounds associated with this application.
+            An empty array is returned when there are no interview rounds.
+          items:
+            type: object
+            required:
+              - round_name
+              - date
+              - result
+            properties:
+              round_name:
+                type: string
+                description: Name of the interview round.
+                example: Technical Interview
+              date:
+                type: string
+                format: date-time
+                x-nullable: true
+                description: >
+                  Scheduled interview date and time in ISO 8601 format,
+                  or null if no date is available.
+                example: "2026-11-15T10:30:00"
+              result:
+                type: string
+                x-nullable: true
+                description: >
+                  Recorded result of the interview round, or null
+                  if no result is available.
+                example: Pending
+
+    examples:
+      application/json:
+        job:
+          id: 25
+          title: Software Engineer
+          company_name: Acme Technologies
+        application:
+          id: 101
+          drive_id: 25
+          student_id: 7
+          status: SHORTLISTED
+        interview_rounds:
+          - round_name: Technical Interview
+            date: "2026-11-15T10:30:00"
+            result: Pending
+          - round_name: HR Interview
+            date: null
+            result: null
+
+  400:
+    description: >
+      The required job_id query parameter is missing or evaluates to zero.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: job_id is required
+
+  401:
+    description: >
+      Authentication failed, or the authenticated user's account
+      could not be found. JWT authentication errors may use the msg
+      field, while route-generated errors use the error field.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error message returned by JWT authentication.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error message returned by the route.
+          example: User not found
+
+  403:
+    description: >
+      The authenticated user does not have the student role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: >
+      The job drive, student profile, or application was not found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Job drive not found

@@ -1,0 +1,316 @@
+tags:
+  - Student Applications
+
+summary: Get student applications
+
+description: >
+  Retrieves job applications belonging to the authenticated student.
+  Applications associated with job drives whose status is Closed are
+  excluded. Results can be filtered by application status, searched
+  by company name, and paginated.
+
+  Application counts are calculated before applying the status filter
+  and company-name search. Results are ordered by application submission
+  date in descending order, with five applications per page.
+
+  Requires a valid JWT access token and the student role.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: page
+    in: query
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    description: >
+      Page number to retrieve. Defaults to 1. Each page contains
+      up to five applications. Values below 1 return HTTP 400.
+      A non-integer value is treated as the default value of 1
+      by the current implementation.
+    example: 1
+
+  - name: filter
+    in: query
+    type: string
+    required: false
+    default: All
+    enum:
+      - All
+      - all
+      - shortlisted
+      - interview
+      - inteview
+      - selected
+      - rejected
+    description: >
+      Filters applications by status. Matching is case-insensitive.
+      Use All or all to return applications with any status.
+      Supported status filters are shortlisted, interview, selected,
+      and rejected. The legacy misspelling inteview is also accepted
+      and treated as interview. Unsupported values return HTTP 400.
+    example: shortlisted
+
+  - name: search
+    in: query
+    type: string
+    required: false
+    description: >
+      Optional company-name search term. Matching is case-insensitive
+      and supports partial matches. Leading and trailing whitespace
+      is removed. An empty search term does not apply a search filter.
+    example: Technologies
+
+responses:
+  200:
+    description: >
+      Applications retrieved successfully. Returns student identifiers,
+      application counts, the applications matching the requested filters,
+      and pagination information.
+    schema:
+      type: object
+      required:
+        - student
+        - counts
+        - applications
+        - pagination
+      properties:
+        student:
+          type: object
+          description: Identifiers for the authenticated student.
+          required:
+            - user_id
+            - student_id
+          properties:
+            user_id:
+              type: integer
+              description: ID of the associated user account.
+              example: 12
+            student_id:
+              type: integer
+              description: Unique ID of the student's profile.
+              example: 7
+
+        counts:
+          type: object
+          description: >
+            Counts of applications associated with job drives that are
+            not closed. These counts are calculated before applying
+            the requested status filter or company-name search.
+          required:
+            - total_applications
+            - shortlisted
+            - interview
+            - selected
+            - rejected
+          properties:
+            total_applications:
+              type: integer
+              description: >
+                Total applications for job drives that are not closed,
+                regardless of the requested filter and search term.
+              example: 12
+            shortlisted:
+              type: integer
+              description: Number of shortlisted applications.
+              example: 4
+            interview:
+              type: integer
+              description: Number of applications with INTERVIEW status.
+              example: 3
+            selected:
+              type: integer
+              description: Number of applications with SELECTED status.
+              example: 2
+            rejected:
+              type: integer
+              description: Number of applications with REJECTED status.
+              example: 3
+
+        applications:
+          type: array
+          description: >
+            Applications matching the requested status filter and
+            company-name search, ordered by application submission
+            date in descending order. Contains at most five items
+            per page.
+          items:
+            type: object
+            required:
+              - company
+              - job_title
+              - applied_at
+              - status
+              - drive_id
+              - company_logo
+            properties:
+              company:
+                type: string
+                x-nullable: true
+                description: >
+                  Name of the company associated with the job.
+                  Null if the company record is unavailable.
+                example: Acme Technologies
+              job_title:
+                type: string
+                description: Title of the job applied for.
+                example: Software Engineer
+              applied_at:
+                type: string
+                format: date-time
+                x-nullable: true
+                description: >
+                  Application submission timestamp in ISO 8601 format,
+                  or null if no timestamp is available.
+                example: "2026-10-20T14:30:00"
+              status:
+                type: string
+                description: Current application status.
+                enum:
+                  - SHORTLISTED
+                  - INTERVIEW
+                  - SELECTED
+                  - REJECTED
+                example: SHORTLISTED
+              drive_id:
+                type: integer
+                description: ID of the associated job drive.
+                example: 25
+              company_logo:
+                type: string
+                x-nullable: true
+                description: >
+                  Stored company logo path, or null if the company
+                  record or logo path is unavailable.
+                example: uploads/company_logos/acme.png
+
+        pagination:
+          type: object
+          description: Pagination metadata for the filtered results.
+          required:
+            - page
+            - per_page
+            - total_items
+            - total_pages
+            - has_next
+            - has_prev
+          properties:
+            page:
+              type: integer
+              description: Current page number.
+              example: 1
+            per_page:
+              type: integer
+              description: Maximum number of applications per page.
+              example: 5
+            total_items:
+              type: integer
+              description: >
+                Total number of applications matching the active
+                status and company-name filters, before pagination.
+              example: 8
+            total_pages:
+              type: integer
+              description: Total number of pages for the filtered results.
+              example: 2
+            has_next:
+              type: boolean
+              description: Whether another page is available.
+              example: true
+            has_prev:
+              type: boolean
+              description: Whether a previous page is available.
+              example: false
+
+    examples:
+      application/json:
+        student:
+          user_id: 12
+          student_id: 7
+        counts:
+          total_applications: 12
+          shortlisted: 4
+          interview: 3
+          selected: 2
+          rejected: 3
+        applications:
+          - company: Acme Technologies
+            job_title: Software Engineer
+            applied_at: "2026-10-20T14:30:00"
+            status: SHORTLISTED
+            drive_id: 25
+            company_logo: uploads/company_logos/acme.png
+          - company: Example Solutions
+            job_title: Backend Developer
+            applied_at: "2026-10-18T11:00:00"
+            status: INTERVIEW
+            drive_id: 31
+            company_logo: uploads/company_logos/example.png
+        pagination:
+          page: 1
+          per_page: 5
+          total_items: 8
+          total_pages: 2
+          has_next: true
+          has_prev: false
+
+  400:
+    description: >
+      Invalid request. The page number is less than 1, or the
+      supplied application-status filter is unsupported.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: >
+            Invalid filter. Use All, shortlisted, interview,
+            selected, or rejected.
+
+  401:
+    description: >
+      Unauthorized. The JWT is missing, invalid, or expired, or the
+      authenticated user account cannot be found. JWT extension
+      errors may use msg, while the route's own error uses error.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Error returned by the JWT extension.
+          example: Missing Authorization Header
+        error:
+          type: string
+          description: Error returned by the route.
+          example: User not found
+
+  403:
+    description: >
+      The authenticated user does not have the student role.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: >
+      No student profile exists for the authenticated user.
+    schema:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Student profile not found

@@ -1,0 +1,193 @@
+tags:
+  - Placement Officer
+  - Job Drives
+
+summary: Get unposted job drives created by the placement officer
+
+description: >
+  Retrieves unposted job drives associated with companies created by
+  the authenticated placement officer.
+
+  Before retrieving the results, the endpoint updates the status of
+  all non-closed job drives based on their application deadlines.
+  A job drive is marked Expired if its deadline is before the current
+  date; otherwise, it is marked Active.
+
+  Only job drives with posted='N' and associated with companies
+  created by the authenticated placement officer are returned.
+
+  By default, only Active job drives are returned. Supplying
+  filter='Expired' returns Expired job drives instead.
+
+  The optional search parameter performs a case-insensitive partial
+  match against the company name or job title.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/json
+
+parameters:
+  - name: search
+    in: query
+    type: string
+    required: false
+    description: >
+      Optional search term used to find job drives by company name
+      or job title. Matching is case-insensitive and checks whether
+      the company name or job title contains the supplied text.
+    example: Software Engineer
+
+  - name: filter
+    in: query
+    type: string
+    required: false
+    enum:
+      - Expired
+    description: >
+      Set to Expired to retrieve expired, unposted job drives.
+      If omitted or set to a value other than Expired, the endpoint
+      returns active, unposted job drives.
+    example: Expired
+
+responses:
+  200:
+    description: >
+      Job drives retrieved successfully. Returns a list of matching
+      unposted job drives. The Jobs array is empty if no records match.
+    schema:
+      type: object
+      properties:
+        Jobs:
+          type: array
+          description: List of matching job drives.
+          items:
+            type: object
+            properties:
+              company_name:
+                type: string
+                description: Name of the company associated with the job drive.
+                example: Example Technologies
+
+              job_drive:
+                type: object
+                description: Details of the job drive.
+                properties:
+                  id:
+                    type: integer
+                    description: Unique ID of the job drive.
+                    example: 12
+
+                  company_id:
+                    type: integer
+                    description: ID of the company associated with the job drive.
+                    example: 3
+
+                  title:
+                    type: string
+                    description: Job title.
+                    example: Software Engineer
+
+                  package:
+                    type: string
+                    description: Salary package offered for the job.
+                    example: "12 LPA"
+
+                  location:
+                    type: string
+                    description: Job location.
+                    example: Mumbai
+
+                  CGPA:
+                    type: number
+                    description: Minimum CGPA requirement.
+                    example: 7.5
+
+                  Eligible_Branches:
+                    type: string
+                    description: Branches eligible for the job drive.
+                    example: "Computer Science,Information Technology"
+
+                  Graduation_Year:
+                    type: integer
+                    description: Eligible graduation year.
+                    example: 2027
+
+                  Vacancies:
+                    type: integer
+                    description: Number of available vacancies.
+                    example: 5
+
+                  deadline:
+                    type: string
+                    x-nullable: true
+                    description: Job application deadline, or null if not configured.
+                    example: "2026-12-15"
+
+                  description:
+                    type: string
+                    x-nullable: true
+                    description: Description of the job opportunity.
+                    example: Software development role.
+
+                  status:
+                    type: string
+                    description: Current status of the job drive.
+                    enum:
+                      - Active
+                      - Expired
+                    example: Active
+
+                  posted:
+                    type: string
+                    description: Indicates whether the job drive has been posted.
+                    example: "N"
+
+              logo_path:
+                type: string
+                x-nullable: true
+                description: Company's logo file path, or null if unavailable.
+                example: static/Docs/company/logo.png
+
+    examples:
+      application/json:
+        Jobs:
+          - company_name: Example Technologies
+            job_drive:
+              id: 12
+              company_id: 3
+              title: Software Engineer
+              package: "12 LPA"
+              location: Mumbai
+              CGPA: 7.5
+              Eligible_Branches: "Computer Science,Information Technology"
+              Graduation_Year: 2027
+              Vacancies: 5
+              deadline: "2026-12-15"
+              description: Software development role.
+              status: Active
+              posted: "N"
+            logo_path: static/Docs/company/logo.png
+
+  401:
+    description: >
+      Unauthorized. The JWT access token is missing, invalid,
+      or expired.
+    schema:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Missing Authorization Header
+
+  403:
+    description: >
+      Forbidden. The authenticated user does not have the
+      Placement_Officer role.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Forbidden

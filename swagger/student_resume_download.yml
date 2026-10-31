@@ -1,0 +1,50 @@
+tags:
+  - Student Profile
+
+summary: Download student resume
+
+description: >
+  Downloads the resume uploaded by the currently authenticated student.
+  The resume is returned as a file attachment.
+  If the student has not uploaded a resume, or the file cannot
+  be found on the server, an error response is returned.
+
+security:
+  - Bearer: []
+
+produces:
+  - application/pdf
+  - application/json
+
+responses:
+  200:
+    description: Resume downloaded successfully.
+    schema:
+      type: file
+
+  401:
+    description: User not found.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found
+
+  403:
+    description: Only students can access this endpoint.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Forbidden: students only"
+
+  404:
+    description: Resume is not uploaded or the file is missing.
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: No resume uploaded
