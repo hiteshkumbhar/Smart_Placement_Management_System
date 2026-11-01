@@ -59,7 +59,7 @@ swagger_template = {
         "version": "1.0.0",
     },
     "basePath": "/",
-    "schemes": ["http", "https"],
+    "schemes": ["https"],
 
     # JWT authentication for protected API endpoints
     "securityDefinitions": {
